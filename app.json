@@ -33,7 +33,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-sqlite",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true
