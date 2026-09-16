@@ -60,7 +60,7 @@ export default function RegisterScreen() {
   return (
     <AuthScreen>
       <Stack.Screen options={{ title: 'Criar conta' }} />
-      <Pressable accessibilityRole="button" onPress={() => (step === 2 ? setStep(1) : router.back())} style={styles.back}>
+      <Pressable accessibilityRole="button" onPress={() => (step === 2 ? setStep(1) : router.replace('/(auth)/login' as Href))} style={styles.back}>
         <ArrowLeft color={colors.text} size={25} strokeWidth={2.2} />
       </Pressable>
       <View style={styles.topRow}>

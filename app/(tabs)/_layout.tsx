@@ -60,6 +60,8 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="account-new" options={{ href: null }} />
+      <Tabs.Screen name="expense-new" options={{ href: null }} />
     </Tabs>
   );
 }

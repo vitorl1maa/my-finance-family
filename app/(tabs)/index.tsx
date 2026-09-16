@@ -1,4 +1,5 @@
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { useDashboardViewModel } from '@/src/features/dashboard/view-model/use-dashboard-view-model';
 import { colors } from '@/src/shared/theme/colors';
@@ -6,6 +7,7 @@ import { spacing } from '@/src/shared/theme/spacing';
 
 export default function HomeScreen() {
   const viewModel = useDashboardViewModel();
+  const router = useRouter();
 
   return (
     <ScrollView
@@ -17,6 +19,11 @@ export default function HomeScreen() {
         <Text style={{ color: colors.text, fontSize: 18, fontWeight: '800' }}>
           Vitor e familia
         </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <Pressable onPress={() => router.push('/account-new')} style={{ alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 16, borderWidth: 1, flex: 1, gap: spacing.xs, justifyContent: 'center', minHeight: 64 }}><Text style={{ fontSize: 22 }}>＋</Text><Text style={{ color: colors.text, fontSize: 13, fontWeight: '900' }}>Nova conta</Text></Pressable>
+        <Pressable onPress={() => router.push('/expense-new')} style={{ alignItems: 'center', backgroundColor: colors.accent, borderRadius: 16, flex: 1, gap: spacing.xs, justifyContent: 'center', minHeight: 64 }}><Text style={{ color: colors.text, fontSize: 22 }}>−</Text><Text style={{ color: colors.text, fontSize: 13, fontWeight: '900' }}>Nova despesa</Text></Pressable>
       </View>
 
       <View style={{ gap: spacing.sm }}>
