@@ -1,15 +1,15 @@
-import { useAuthStore } from '@/src/features/auth/store/auth-store';
-import type { AuthFormError, RegisterProfile } from '@/src/features/auth/model/auth';
-import { supabase } from '@/src/shared/supabase/supabase-client';
-import type { AuthError } from '@supabase/supabase-js';
+import type { AuthError } from "@supabase/supabase-js";
+import type { AuthFormError, RegisterProfile } from "@/src/features/auth/model/auth";
+import { useAuthStore } from "@/src/features/auth/store/auth-store";
+import { supabase } from "@/src/shared/supabase/supabase-client";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateLogin(email: string, password: string): AuthFormError {
   const errors: AuthFormError = {};
 
-  if (!emailPattern.test(email.trim())) errors.email = 'Informe um e-mail valido.';
-  if (password.length < 6) errors.password = 'A senha deve ter pelo menos 6 caracteres.';
+  if (!emailPattern.test(email.trim())) errors.email = "Informe um e-mail valido.";
+  if (password.length < 6) errors.password = "A senha deve ter pelo menos 6 caracteres.";
 
   return errors;
 }
@@ -17,9 +17,9 @@ export function validateLogin(email: string, password: string): AuthFormError {
 export function validateProfile(profile: RegisterProfile): AuthFormError {
   const errors: AuthFormError = {};
 
-  if (!profile.firstName.trim()) errors.firstName = 'Informe seu nome.';
-  if (!profile.lastName.trim()) errors.lastName = 'Informe seu sobrenome.';
-  if (profile.phone.replace(/\D/g, '').length < 10) errors.phone = 'Informe um telefone valido.';
+  if (!profile.firstName.trim()) errors.firstName = "Informe seu nome.";
+  if (!profile.lastName.trim()) errors.lastName = "Informe seu sobrenome.";
+  if (profile.phone.replace(/\D/g, "").length < 10) errors.phone = "Informe um telefone valido.";
 
   return errors;
 }
@@ -68,7 +68,7 @@ export function useAuthViewModel() {
     }
 
     if (!data.session) {
-      setError('Conta criada. Confirme seu e-mail para continuar.');
+      setError("Conta criada. Confirme seu e-mail para continuar.");
       return false;
     }
 
@@ -95,16 +95,23 @@ export function useAuthViewModel() {
 
 function getAuthErrorMessage(error: AuthError) {
   const message = error.message.toLowerCase();
-  const code = error.code?.toLowerCase() ?? '';
+  const code = error.code?.toLowerCase() ?? "";
 
-  if (message.includes('invalid login credentials')) return 'E-mail ou senha incorretos.';
-  if (message.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
-  if (code === 'weak_password' || message.includes('password should be at least')) return 'A senha deve ter pelo menos 8 caracteres, com uma letra minúscula e um caractere especial.';
-  if (code === 'email_address_invalid' || message.includes('invalid email')) return 'Informe um e-mail válido.';
-  if (message.includes('already registered') || message.includes('user already exists')) return 'Este e-mail já possui uma conta.';
-  if (message.includes('rate limit') || message.includes('too many requests')) return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
-  if (message.includes('signups not allowed')) return 'O cadastro está desativado no projeto Supabase.';
-  if (message.includes('missing-anon-key')) return 'Configure a anon key do Supabase no arquivo .env.';
-  if (message.includes('fetch') || message.includes('network')) return 'Sem conexão com o Supabase. Verifique sua internet.';
-  return 'Não foi possível concluir a autenticação. Tente novamente.';
+  if (message.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
+  if (message.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (code === "weak_password" || message.includes("password should be at least"))
+    return "A senha deve ter pelo menos 8 caracteres, com uma letra minúscula e um caractere especial.";
+  if (code === "email_address_invalid" || message.includes("invalid email"))
+    return "Informe um e-mail válido.";
+  if (message.includes("already registered") || message.includes("user already exists"))
+    return "Este e-mail já possui uma conta.";
+  if (message.includes("rate limit") || message.includes("too many requests"))
+    return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
+  if (message.includes("signups not allowed"))
+    return "O cadastro está desativado no projeto Supabase.";
+  if (message.includes("missing-anon-key"))
+    return "Configure a anon key do Supabase no arquivo .env.";
+  if (message.includes("fetch") || message.includes("network"))
+    return "Sem conexão com o Supabase. Verifique sua internet.";
+  return "Não foi possível concluir a autenticação. Tente novamente.";
 }

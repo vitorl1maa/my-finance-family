@@ -12,9 +12,7 @@ type TransactionRow = {
   sync_status: Transaction["syncStatus"];
 };
 
-export async function listTransactions(
-  db: SQLiteDatabase,
-): Promise<Transaction[]> {
+export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[]> {
   const rows = await db.getAllAsync<TransactionRow>(
     `SELECT id, account_id, title, category, amount_cents, occurred_at, sync_status
      FROM transactions

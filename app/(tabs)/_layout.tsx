@@ -1,7 +1,9 @@
-import { Tabs } from 'expo-router';
-import { ChartNoAxesColumn, Home, ReceiptText, Settings, Target } from 'lucide-react-native';
+import { Tabs } from "expo-router";
+import { ChartNoAxesColumn, Home, ReceiptText, Settings, Target } from "lucide-react-native";
+import type { ComponentProps } from "react";
 
-import { colors } from '@/src/shared/theme/colors';
+import { CurvedBottomTabs } from "@/src/shared/components/base/curved-bottom-tabs";
+import { colors } from "@/src/shared/theme/colors";
 
 export default function TabLayout() {
   return (
@@ -14,29 +16,34 @@ export default function TabLayout() {
           backgroundColor: colors.background,
           borderTopColor: colors.border,
         },
-      }}>
+      }}
+      tabBar={(props) => {
+        const curvedTabsProps = {
+          ...props,
+          gradients: [colors.text, colors.text],
+        } as unknown as ComponentProps<typeof CurvedBottomTabs>;
+
+        return <CurvedBottomTabs {...curvedTabsProps} />;
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
-          tabBarIcon: ({ color }) => (
-            <Home color={color} size={22} strokeWidth={2.4} />
-          ),
+          title: "Inicio",
+          tabBarIcon: ({ color }) => <Home color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Transacoes',
-          tabBarIcon: ({ color }) => (
-            <ReceiptText color={color} size={22} strokeWidth={2.4} />
-          ),
+          title: "Transacoes",
+          tabBarIcon: ({ color }) => <ReceiptText color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
         name="accounts"
         options={{
-          title: 'Contas',
+          title: "Contas",
           tabBarIcon: ({ color }) => (
             <ChartNoAxesColumn color={color} size={22} strokeWidth={2.4} />
           ),
@@ -45,19 +52,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="goals"
         options={{
-          title: 'Metas',
-          tabBarIcon: ({ color }) => (
-            <Target color={color} size={22} strokeWidth={2.4} />
-          ),
+          title: "Metas",
+          tabBarIcon: ({ color }) => <Target color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Mais',
-          tabBarIcon: ({ color }) => (
-            <Settings color={color} size={22} strokeWidth={2.4} />
-          ),
+          title: "Mais",
+          tabBarIcon: ({ color }) => <Settings color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen name="account-new" options={{ href: null }} />

@@ -5,9 +5,7 @@ export const databaseName = "my-finance-family.db";
 const databaseVersion = 1;
 
 export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
-  const result = await db.getFirstAsync<{ user_version: number }>(
-    "PRAGMA user_version",
-  );
+  const result = await db.getFirstAsync<{ user_version: number }>("PRAGMA user_version");
   const currentVersion = result?.user_version ?? 0;
 
   if (currentVersion >= databaseVersion) {

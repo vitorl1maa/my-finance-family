@@ -80,6 +80,13 @@ Referências de estilo: [Strategy Pattern](https://medium.com/mulheres-de-produt
 
 ## Forma de trabalho do agente
 
+### Leitura obrigatória deste arquivo
+
+- Ler este `AGENTS.md` integralmente antes de implementar, corrigir, refatorar ou revisar qualquer código do projeto.
+- Considerar as regras deste arquivo durante o planejamento, a implementação e a validação; não consultar apenas após concluir a alteração.
+- Confirmar no início da execução que o arquivo foi lido e, na entrega, informar qualquer regra relevante que tenha influenciado a solução.
+- Se uma regra deste arquivo estiver desatualizada, conflitante ou impedir uma implementação segura, interromper a alteração e sinalizar o conflito antes de prosseguir.
+
 1. Entender o pedido e verificar o estado atual do projeto antes de alterar arquivos.
 2. Para mudanças de produto ou comportamento, esclarecer a intenção e registrar uma decisão curta quando houver ambiguidade relevante.
 3. Consultar a documentação oficial da versão das dependências que influenciam a implementação.

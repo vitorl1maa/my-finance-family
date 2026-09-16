@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SQLiteProvider } from "expo-sqlite";
-import { useEffect, type PropsWithChildren } from "react";
+import { type PropsWithChildren, useEffect } from "react";
 
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { databaseName, migrateDatabase } from "@/src/shared/database/database";
@@ -24,7 +24,8 @@ function AuthSessionSync({ children }: PropsWithChildren) {
   useEffect(() => {
     let mounted = true;
 
-    void supabase.auth.getSession()
+    void supabase.auth
+      .getSession()
       .then(({ data }) => {
         if (!mounted) return;
         setSession(data.session);
