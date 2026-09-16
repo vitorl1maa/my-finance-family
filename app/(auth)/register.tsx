@@ -1,51 +1,135 @@
-import { Stack, type Href, useRouter } from 'expo-router';
+import { Stack, useRouter, type Href } from 'expo-router';
+import { ArrowLeft, ArrowRight, Eye, EyeClosed, LockKeyhole, Mail, UserRound, UserRoundPlus } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AuthFooter, AuthScreen, AuthHeader, Field, FormError, InlineLink, LoadingLabel, PrimaryButton } from '@/src/features/auth/components/auth-ui';
+import { AuthScreen, Field, FormError, LoadingLabel, PrimaryButton } from '@/src/features/auth/components/auth-ui';
 import type { RegisterProfile } from '@/src/features/auth/model/auth';
-import { useAuthViewModel, validateProfile } from '@/src/features/auth/view-model/use-auth-view-model';
+import { useAuthViewModel } from '@/src/features/auth/view-model/use-auth-view-model';
 import { colors } from '@/src/shared/theme/colors';
+
+type RegisterForm = RegisterProfile & { email: string; password: string; confirmPassword: string };
+
+const requiredMessage = 'Este campo é obrigatório.';
+const passwordRequirements = [
+  { label: '8 caracteres', test: (value: string) => value.length >= 8 },
+  { label: '1 letra minúscula', test: (value: string) => /[a-z]/.test(value) },
+  { label: '1 caractere especial', test: (value: string) => /[^A-Za-z0-9]/.test(value) },
+];
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { errorMessage, setError } = useAuthViewModel();
-  const [profile, setProfile] = useState<RegisterProfile>({ firstName: '', lastName: '', phone: '' });
+  const { errorMessage, isLoading, signUpWithEmail } = useAuthViewModel();
   const [step, setStep] = useState<1 | 2>(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState(validateProfile(profile));
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const { control, formState: { errors }, handleSubmit, trigger, watch } = useForm<RegisterForm>({
+    defaultValues: { firstName: '', lastName: '', phone: '', email: '', password: '', confirmPassword: '' },
+    mode: 'onSubmit',
+  });
+  const password = watch('password');
+  const togglePassword = () => setPasswordVisible((visible) => !visible);
+  const toggleConfirmPassword = () => setConfirmPasswordVisible((visible) => !visible);
 
-  const updateProfile = (key: keyof RegisterProfile, value: string) => setProfile((current) => ({ ...current, [key]: value }));
-  const handleContinue = () => {
-    const nextErrors = validateProfile(profile);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
-    setStep(2);
+  const goToNextStep = async () => {
+    const isValid = await trigger(['firstName', 'lastName']);
+    if (isValid) setStep(2);
   };
-  const handleSubmit = async () => {
-    if (!email.includes('@') || password.length < 6) {
-      setError('Informe um e-mail valido e uma senha com pelo menos 6 caracteres.');
-      return;
-    }
-    setError('O cadastro será conectado ao Supabase na próxima etapa.');
+
+  const submitForm = async (values: RegisterForm) => {
+    const signedUp = await signUpWithEmail(values.email, values.password, {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phone: '',
+    });
+    if (signedUp) router.replace('/');
   };
+
+  const renderField = (name: keyof RegisterForm, props: { label: string; placeholder: string; icon: React.ReactNode; keyboardType?: 'default' | 'email-address' | 'phone-pad'; secureTextEntry?: boolean; action?: React.ReactNode }) => (
+    <Controller
+      control={control}
+      name={name}
+      rules={fieldRules[name]}
+      render={({ field: { onChange, onBlur, value } }) => (
+        <Field {...props} error={messageFor(errors[name]?.message)} onBlur={onBlur} onChangeText={onChange} value={value} />
+      )}
+    />
+  );
 
   return (
     <AuthScreen>
       <Stack.Screen options={{ title: 'Criar conta' }} />
-      <Pressable accessibilityRole="button" onPress={() => (step === 2 ? setStep(1) : router.back())} style={styles.back}><Text style={styles.backText}>‹</Text><Text style={styles.backLabel}>Voltar</Text></Pressable>
-      <Text style={styles.step}>Etapa {step} de 2</Text>
-      {step === 1 ? <><AuthHeader eyebrow="Comece sua jornada" title="Crie sua conta" description="Vamos criar seu perfil principal da família." /><Field error={errors.firstName} label="Nome" onChangeText={(value) => updateProfile('firstName', value)} placeholder="Vitor" value={profile.firstName} /><Field error={errors.lastName} label="Sobrenome" onChangeText={(value) => updateProfile('lastName', value)} placeholder="Lima" value={profile.lastName} /><Field error={errors.phone} keyboardType="phone-pad" label="Telefone" onChangeText={(value) => updateProfile('phone', value)} placeholder="(11) 99999-9999" value={profile.phone} /><PrimaryButton onPress={handleContinue}>Continuar →</PrimaryButton></> : <><AuthHeader eyebrow="Quase lá" title="Proteja sua conta" description="Use seus dados de acesso para entrar no My Finance Family." /><Field keyboardType="email-address" label="E-mail" onChangeText={setEmail} placeholder="voce@exemplo.com" value={email} /><Field label="Senha" onChangeText={setPassword} placeholder="Pelo menos 6 caracteres" secureTextEntry value={password} /><FormError message={errorMessage} /><PrimaryButton onPress={handleSubmit}><LoadingLabel isLoading={false} label="Criar conta" /></PrimaryButton></>}
-      <AuthFooter><Text style={styles.footerText}>Já tem uma conta?</Text><InlineLink href={"/(auth)/login" as Href}>Entrar</InlineLink></AuthFooter>
+      <Pressable accessibilityRole="button" onPress={() => (step === 2 ? setStep(1) : router.back())} style={styles.back}>
+        <ArrowLeft color={colors.text} size={25} strokeWidth={2.2} />
+      </Pressable>
+      <View style={styles.topRow}>
+        <View style={styles.brandMark}><UserRoundPlus color={colors.text} size={26} strokeWidth={2.1} /></View>
+        <View style={styles.badge}><Text style={styles.badgeText}>Cadastro · {step}/2</Text></View>
+      </View>
+      <Text style={styles.title}>Crie sua conta</Text>
+      <Text style={styles.description}>Informe seus dados para criar seu perfil e acessar o My Finance Family.</Text>
+      <View style={styles.form}>
+        {step === 1 ? (
+          <>
+            {renderField('firstName', { icon: <UserRound color={colors.muted} size={21} />, label: 'Nome', placeholder: 'Seu nome' })}
+            {renderField('lastName', { icon: <UserRound color={colors.muted} size={21} />, label: 'Sobrenome', placeholder: 'Seu sobrenome' })}
+          </>
+        ) : (
+          <>
+            {renderField('email', { icon: <Mail color={colors.muted} size={21} />, keyboardType: 'email-address', label: 'E-mail', placeholder: 'voce@exemplo.com' })}
+            {renderField('password', { action: (<PasswordToggle visible={passwordVisible} onPress={togglePassword} />), icon: (<LockKeyhole color={colors.muted} size={21} />), label: 'Senha', placeholder: '••••••••', secureTextEntry: !passwordVisible })}
+            <PasswordRequirements value={password} />
+            {renderField('confirmPassword', { action: (<PasswordToggle visible={confirmPasswordVisible} onPress={toggleConfirmPassword} />), icon: (<LockKeyhole color={colors.muted} size={21} />), label: 'Confirmar senha', placeholder: '••••••••', secureTextEntry: !confirmPasswordVisible })}
+          </>
+        )}
+      </View>
+      <FormError message={errorMessage} />
+      <PrimaryButton disabled={isLoading} onPress={step === 1 ? goToNextStep : handleSubmit(submitForm)}>
+        <View style={styles.buttonContent}><LoadingLabel isLoading={isLoading} label={step === 1 ? 'Continuar' : 'Criar conta'} />{!isLoading ? <ArrowRight color={colors.text} size={20} strokeWidth={2.4} /> : null}</View>
+      </PrimaryButton>
+      <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login' as Href)} style={styles.secondaryButton}>
+        <Text style={styles.secondaryText}>Já tenho conta</Text>
+      </Pressable>
     </AuthScreen>
   );
 }
 
+function PasswordToggle({ visible, onPress }: { visible: boolean; onPress: () => void }) {
+  const Icon = visible ? EyeClosed : Eye;
+  return <Pressable accessibilityLabel={visible ? 'Ocultar senha' : 'Visualizar senha'} accessibilityRole="button" hitSlop={8} onPress={onPress}><Icon color={colors.muted} size={21} /></Pressable>;
+}
+
+function PasswordRequirements({ value }: { value: string }) {
+  return <View style={styles.requirements}>{passwordRequirements.map(({ label, test }) => <Text key={label} style={[styles.requirement, test(value) && styles.requirementMet]}>{test(value) ? '✓' : '○'} {label}</Text>)}</View>;
+}
+
+const fieldRules = {
+  firstName: { required: requiredMessage },
+  lastName: { required: requiredMessage },
+  phone: { required: requiredMessage, minLength: { value: 10, message: 'Informe um telefone válido.' } },
+  email: { required: requiredMessage, pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Informe um e-mail válido.' } },
+  password: { required: requiredMessage, validate: { minLength: (value: string) => value.length >= 8 || 'A senha deve ter pelo menos 8 caracteres.', lowercase: (value: string) => /[a-z]/.test(value) || 'A senha deve conter uma letra minúscula.', special: (value: string) => /[^A-Za-z0-9]/.test(value) || 'A senha deve conter um caractere especial.' } },
+  confirmPassword: { required: requiredMessage, validate: (value: string, formValues: RegisterForm) => value === formValues.password || 'As senhas precisam ser iguais.' },
+} satisfies Record<keyof RegisterForm, object>;
+
+function messageFor(message: unknown) {
+  return typeof message === 'string' ? message : undefined;
+}
+
 const styles = StyleSheet.create({
-  back: { alignItems: 'center', flexDirection: 'row', gap: 6, paddingVertical: 8 },
-  backText: { color: colors.text, fontSize: 30, lineHeight: 30 },
-  backLabel: { color: colors.text, fontSize: 14, fontWeight: '800' },
-  step: { color: colors.muted, fontSize: 13, fontWeight: '800', marginTop: 18 },
-  footerText: { color: colors.muted, fontSize: 14 },
+  back: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: 22, height: 42, justifyContent: 'center', marginVertical: 40, width: 42 },
+  topRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginBottom: 18 },
+  brandMark: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 18, height: 54, justifyContent: 'center', width: 54 },
+  badge: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: 18, justifyContent: 'center', minHeight: 34, paddingHorizontal: 24 },
+  badgeText: { color: colors.muted, fontSize: 12, fontWeight: '800' },
+  title: { color: colors.text, fontSize: 36, fontWeight: '900', letterSpacing: -1, marginBottom: 34 },
+  description: { color: colors.muted, fontSize: 16, lineHeight: 21 },
+  form: { gap: 4, marginTop: 80 },
+  buttonContent: { alignItems: 'center', flexDirection: 'row', gap: 16, justifyContent: 'center' },
+  requirements: { gap: 3, marginBottom: 10, marginTop: -5, paddingLeft: 4 },
+  requirement: { color: colors.muted, fontSize: 12, fontWeight: '700' },
+  requirementMet: { color: colors.positive },
+  secondaryButton: { alignItems: 'center', borderColor: colors.border, borderRadius: 14, borderWidth: 1, justifyContent: 'center', marginTop: 14, minHeight: 54 },
+  secondaryText: { color: colors.text, fontSize: 15, fontWeight: '900' },
 });

@@ -1,10 +1,12 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { AppProviders } from '@/src/providers/app-providers';
+import { useAuthStore } from '@/src/features/auth/store/auth-store';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -44,10 +46,26 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <AppProviders>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack>
+      <StatusBar style="dark" />
+      <AuthGate />
     </AppProviders>
+  );
+}
+
+function AuthGate() {
+  const session = useAuthStore((state) => state.session);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
+
+  if (!isInitialized) return null;
+
+  return (
+    <Stack>
+      <Stack.Protected guard={Boolean(session)}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
   );
 }

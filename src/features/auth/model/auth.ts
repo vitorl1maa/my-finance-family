@@ -4,4 +4,4 @@ export type RegisterProfile = {
   phone: string;
 };
 
-export type AuthFormError = Partial<Record<'email' | 'password' | keyof RegisterProfile, string>>;
+export type AuthFormError = Partial<Record<'email' | 'password' | 'confirmPassword' | keyof RegisterProfile, string>>;

@@ -19,13 +19,20 @@ export function AppProviders({ children }: PropsWithChildren) {
 
 function AuthSessionSync({ children }: PropsWithChildren) {
   const setSession = useAuthStore((state) => state.setSession);
+  const setInitialized = useAuthStore((state) => state.setInitialized);
 
   useEffect(() => {
     let mounted = true;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (mounted) setSession(data.session);
-    });
+    void supabase.auth.getSession()
+      .then(({ data }) => {
+        if (!mounted) return;
+        setSession(data.session);
+        setInitialized(true);
+      })
+      .catch(() => {
+        if (mounted) setInitialized(true);
+      });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -35,7 +42,7 @@ function AuthSessionSync({ children }: PropsWithChildren) {
       mounted = false;
       subscription.subscription.unsubscribe();
     };
-  }, [setSession]);
+  }, [setInitialized, setSession]);
 
   return children;
 }

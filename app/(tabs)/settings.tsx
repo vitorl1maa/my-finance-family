@@ -1,9 +1,13 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { FormError } from '@/src/features/auth/components/auth-ui';
+import { useAuthViewModel } from '@/src/features/auth/view-model/use-auth-view-model';
 import { colors } from '@/src/shared/theme/colors';
 import { spacing } from '@/src/shared/theme/spacing';
 
 export default function SettingsScreen() {
+  const { errorMessage, isLoading, signOut } = useAuthViewModel();
+
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
@@ -29,6 +33,24 @@ export default function SettingsScreen() {
           com Supabase.
         </Text>
       </View>
+
+      <FormError message={errorMessage} />
+      <Pressable accessibilityRole="button" disabled={isLoading} onPress={signOut} style={[styles.logoutButton, isLoading && styles.disabled]}>
+        {isLoading ? <ActivityIndicator color={colors.negative} /> : <Text style={styles.logoutText}>Sair da conta</Text>}
+      </Pressable>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  logoutButton: {
+    alignItems: 'center',
+    borderColor: colors.negative,
+    borderRadius: 14,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 54,
+  },
+  disabled: { opacity: 0.55 },
+  logoutText: { color: colors.negative, fontSize: 15, fontWeight: '900' },
+});

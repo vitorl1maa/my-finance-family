@@ -19,24 +19,31 @@ export function AuthHeader({ eyebrow, title, description }: { eyebrow: string; t
   );
 }
 
-export function Field({ label, value, onChangeText, placeholder, keyboardType, secureTextEntry, error }: {
+export function Field({ label, value, onChangeText, placeholder, keyboardType, secureTextEntry, error, icon, action, onBlur }: {
   label: string; value: string; onChangeText: (value: string) => void; placeholder: string;
-  keyboardType?: 'default' | 'email-address' | 'phone-pad'; secureTextEntry?: boolean; error?: string;
+  keyboardType?: 'default' | 'email-address' | 'phone-pad'; secureTextEntry?: boolean; error?: string; icon?: ReactNode; action?: ReactNode; onBlur?: () => void;
 }) {
   return (
     <View style={styles.fieldGroup}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
-        autoCorrect={false}
-        keyboardType={keyboardType}
-        placeholder={placeholder}
-        placeholderTextColor={colors.mutedLight}
-        secureTextEntry={secureTextEntry}
-        style={[styles.input, error && styles.inputError]}
-        value={value}
-        onChangeText={onChangeText}
-      />
+      <View style={[styles.inputShell, error && styles.inputError]}>
+        {icon}
+        <View style={styles.inputContent}>
+          <Text style={styles.label}>{label}</Text>
+          <TextInput
+            autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
+            autoCorrect={false}
+            keyboardType={keyboardType}
+            placeholder={placeholder}
+            placeholderTextColor={colors.mutedLight}
+            secureTextEntry={secureTextEntry}
+            style={styles.input}
+            value={value}
+            onBlur={onBlur}
+            onChangeText={onChangeText}
+          />
+        </View>
+        {action}
+      </View>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
@@ -67,7 +74,7 @@ export function LoadingLabel({ isLoading, label }: { isLoading: boolean; label: 
 }
 
 const styles = StyleSheet.create({
-  screen: { flexGrow: 1, backgroundColor: colors.background, padding: 24, paddingBottom: 36 },
+  screen: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingBottom: 24 },
   header: { gap: 12, paddingTop: 12, paddingBottom: 28 },
   logo: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 18, height: 52, justifyContent: 'center', width: 52 },
   logoText: { color: colors.text, fontSize: 26, fontWeight: '900' },
@@ -76,7 +83,9 @@ const styles = StyleSheet.create({
   description: { color: colors.muted, fontSize: 16, lineHeight: 23, maxWidth: 330 },
   fieldGroup: { gap: 8, marginBottom: 16 },
   label: { color: colors.text, fontSize: 14, fontWeight: '800' },
-  input: { backgroundColor: colors.surfaceMuted, borderColor: colors.border, borderRadius: 14, borderWidth: 1, color: colors.text, fontSize: 16, paddingHorizontal: 16, paddingVertical: 15 },
+  inputShell: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 14, borderWidth: 1, flexDirection: 'row', gap: 12, minHeight: 58, paddingHorizontal: 14 },
+  inputContent: { flex: 1, gap: 2 },
+  input: { color: colors.text, fontSize: 16, fontWeight: '700', padding: 0 },
   inputError: { borderColor: colors.negative },
   errorText: { color: colors.negative, fontSize: 12, fontWeight: '700' },
   primaryButton: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 14, justifyContent: 'center', minHeight: 54, paddingHorizontal: 20 },
