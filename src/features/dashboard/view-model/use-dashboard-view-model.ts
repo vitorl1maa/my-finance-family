@@ -4,10 +4,11 @@ import {
   getDashboardGreeting,
   getUserDisplayName,
 } from "@/src/features/dashboard/model/dashboard-greeting";
+import { buildDashboardInsights } from "@/src/features/dashboard/model/dashboard-insights";
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 
-export function useDashboardViewModel() {
+export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const session = useAuthStore((state) => state.session);
   const accounts = useAccountsViewModel();
   const transactions = useTransactionsViewModel();
@@ -17,7 +18,8 @@ export function useDashboardViewModel() {
     accounts: accounts.accounts,
     goals: goals.goals,
     greeting: getDashboardGreeting(),
-    recentTransactions: transactions.transactions.slice(0, 2),
+    insights: buildDashboardInsights(transactions.transactions, selectedDate),
+    recentTransactions: transactions.transactions.slice(0, 3),
     totalBalance: accounts.totalBalance,
     userName: getUserDisplayName(session?.user.user_metadata),
   };
