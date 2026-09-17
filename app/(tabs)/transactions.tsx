@@ -2,6 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 import { spacing } from "@/src/shared/theme/spacing";
 
 export default function TransactionsScreen() {
@@ -13,7 +14,11 @@ export default function TransactionsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ gap: spacing.lg, padding: spacing.xl }}
     >
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>Movimentacoes</Text>
+      <Text
+        style={{ color: colors.text, fontFamily: fonts.extraBold, fontSize: 28, fontWeight: "900" }}
+      >
+        Movimentacoes
+      </Text>
 
       {viewModel.transactions.map((transaction) => (
         <View
@@ -28,15 +33,25 @@ export default function TransactionsScreen() {
           }}
         >
           <View style={{ gap: spacing.xs }}>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "800" }}>
+            <Text
+              style={{
+                color: colors.text,
+                fontFamily: fonts.bold,
+                fontSize: 16,
+                fontWeight: "800",
+              }}
+            >
               {transaction.title}
             </Text>
-            <Text style={{ color: colors.muted, fontSize: 12 }}>{transaction.category}</Text>
+            <Text style={{ color: colors.muted, fontFamily: fonts.regular, fontSize: 12 }}>
+              {transaction.category}
+            </Text>
           </View>
           <Text
             selectable
             style={{
               color: transaction.isExpense ? colors.negative : colors.positive,
+              fontFamily: fonts.extraBold,
               fontSize: 15,
               fontVariant: ["tabular-nums"],
               fontWeight: "900",

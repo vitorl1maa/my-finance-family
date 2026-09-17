@@ -2,6 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 import { spacing } from "@/src/shared/theme/spacing";
 
 export default function GoalsScreen() {
@@ -13,7 +14,11 @@ export default function GoalsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ gap: spacing.lg, padding: spacing.xl }}
     >
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>Metas</Text>
+      <Text
+        style={{ color: colors.text, fontFamily: fonts.extraBold, fontSize: 28, fontWeight: "900" }}
+      >
+        Metas
+      </Text>
 
       {viewModel.goals.map((goal) => (
         <View
@@ -28,8 +33,17 @@ export default function GoalsScreen() {
             padding: spacing.lg,
           }}
         >
-          <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900" }}>{goal.title}</Text>
-          <Text selectable style={{ color: colors.muted, fontSize: 13 }}>
+          <Text
+            style={{
+              color: colors.text,
+              fontFamily: fonts.extraBold,
+              fontSize: 17,
+              fontWeight: "900",
+            }}
+          >
+            {goal.title}
+          </Text>
+          <Text selectable style={{ color: colors.muted, fontFamily: fonts.regular, fontSize: 13 }}>
             {goal.formattedSaved} de {goal.formattedTarget}
           </Text>
           <View

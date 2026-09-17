@@ -83,7 +83,7 @@ const FloatingButtonComponent: React.FC<FloatingButtonComponentProps> =
               <Text
                 style={{
                   color: "white",
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: "bold",
                 }}
               >
@@ -369,7 +369,7 @@ const createStyles = <T extends StyleConfig>({ barHeight, textSize, fontFamily, 
     },
     badgeLabel: {
       color: "white",
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: "bold",
     },
   });

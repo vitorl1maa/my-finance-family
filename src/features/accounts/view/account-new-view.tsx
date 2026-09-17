@@ -12,6 +12,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 
 import { useAccountsViewModel } from "@/src/features/accounts/view-model/use-accounts-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 
 type AccountForm = {
   name: string;
@@ -251,6 +252,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 34,
     fontWeight: "900",
     letterSpacing: -1.2,
@@ -278,12 +280,18 @@ const styles = StyleSheet.create({
   },
   fieldError: { borderColor: colors.negative },
   fieldContent: { flex: 1, gap: 1 },
-  label: { color: colors.mutedLight, fontSize: 11, fontWeight: "800" },
-  input: { color: colors.text, fontSize: 14, fontWeight: "800", padding: 0 },
-  error: { color: colors.negative, fontSize: 11, marginTop: 3 },
+  label: { color: colors.mutedLight, fontSize: 12, fontWeight: "800" },
+  input: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    fontWeight: "800",
+    padding: 0,
+  },
+  error: { color: colors.negative, fontSize: 12, marginTop: 3 },
   sectionLabel: {
     color: colors.mutedLight,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "800",
     marginBottom: 6,
     marginTop: 8,
@@ -300,7 +308,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   typeSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  typeText: { color: colors.text, fontSize: 11, fontWeight: "800" },
+  typeText: { color: colors.text, fontSize: 12, fontWeight: "800" },
   primary: {
     alignItems: "center",
     backgroundColor: colors.accent,
@@ -311,7 +319,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     minHeight: 58,
   },
-  primaryText: { color: colors.text, fontSize: 15, fontWeight: "900" },
+  primaryText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15, fontWeight: "900" },
   cancel: {
     alignItems: "center",
     borderColor: colors.border,

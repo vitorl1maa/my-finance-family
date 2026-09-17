@@ -14,6 +14,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 
 type ExpenseForm = {
   title: string;
@@ -252,6 +253,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 34,
     fontWeight: "900",
     letterSpacing: -1.2,
@@ -280,8 +282,14 @@ const styles = StyleSheet.create({
   },
   fieldError: { borderColor: colors.negative },
   fieldContent: { flex: 1, gap: 1 },
-  label: { color: colors.mutedLight, fontSize: 11, fontWeight: "800" },
-  input: { color: colors.text, fontSize: 14, fontWeight: "800", padding: 0 },
+  label: { color: colors.mutedLight, fontSize: 12, fontWeight: "800" },
+  input: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    fontWeight: "800",
+    padding: 0,
+  },
   amountCard: {
     borderColor: colors.border,
     borderRadius: 16,
@@ -292,10 +300,17 @@ const styles = StyleSheet.create({
   },
   amountError: { borderColor: colors.negative },
   amountHeader: { alignItems: "center", flexDirection: "row", gap: 10 },
-  amountLabel: { color: colors.mutedLight, fontSize: 11, fontWeight: "800" },
-  amountInput: { color: colors.text, fontSize: 19, fontWeight: "900", marginTop: 4, padding: 0 },
-  amountHint: { color: colors.mutedLight, fontSize: 10, position: "absolute", right: 13, top: 36 },
-  error: { color: colors.negative, fontSize: 11, marginTop: 3 },
+  amountLabel: { color: colors.mutedLight, fontSize: 12, fontWeight: "800" },
+  amountInput: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 19,
+    fontWeight: "900",
+    marginTop: 4,
+    padding: 0,
+  },
+  amountHint: { color: colors.mutedLight, fontSize: 12, position: "absolute", right: 13, top: 36 },
+  error: { color: colors.negative, fontSize: 12, marginTop: 3 },
   primary: {
     alignItems: "center",
     backgroundColor: colors.accent,
@@ -306,7 +321,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     minHeight: 58,
   },
-  primaryText: { color: colors.text, fontSize: 15, fontWeight: "900" },
+  primaryText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15, fontWeight: "900" },
   cancel: {
     alignItems: "center",
     borderColor: colors.border,

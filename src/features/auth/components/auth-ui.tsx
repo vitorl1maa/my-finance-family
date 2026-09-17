@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 
 export function AuthScreen({ children }: PropsWithChildren) {
   return (
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 52,
   },
-  logoText: { color: colors.text, fontSize: 26, fontWeight: "900" },
+  logoText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 26, fontWeight: "900" },
   eyebrow: {
     color: colors.muted,
     fontSize: 13,
@@ -175,10 +176,16 @@ const styles = StyleSheet.create({
     letterSpacing: 1.1,
     textTransform: "uppercase",
   },
-  title: { color: colors.text, fontSize: 34, fontWeight: "900", letterSpacing: -1 },
+  title: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 34,
+    fontWeight: "900",
+    letterSpacing: -1,
+  },
   description: { color: colors.muted, fontSize: 16, lineHeight: 23, maxWidth: 330 },
   fieldGroup: { gap: 8, marginBottom: 16 },
-  label: { color: colors.text, fontSize: 14, fontWeight: "800" },
+  label: { color: colors.text, fontFamily: fonts.bold, fontSize: 14, fontWeight: "800" },
   inputShell: {
     alignItems: "center",
     backgroundColor: colors.surface,
@@ -191,7 +198,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputContent: { flex: 1, gap: 2 },
-  input: { color: colors.text, fontSize: 16, fontWeight: "700", padding: 0 },
+  input: {
+    color: colors.text,
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    fontWeight: "700",
+    padding: 0,
+  },
   inputError: { borderColor: colors.negative },
   errorText: { color: colors.negative, fontSize: 12, fontWeight: "700" },
   primaryButton: {
@@ -202,7 +215,7 @@ const styles = StyleSheet.create({
     minHeight: 54,
     paddingHorizontal: 20,
   },
-  primaryText: { color: colors.text, fontSize: 16, fontWeight: "900" },
+  primaryText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 16, fontWeight: "900" },
   disabled: { opacity: 0.55 },
   socialButton: {
     alignItems: "center",
@@ -215,7 +228,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   socialIcon: { color: colors.text, fontSize: 18, fontWeight: "900" },
-  socialText: { color: colors.text, fontSize: 15, fontWeight: "800" },
+  socialText: { color: colors.text, fontFamily: fonts.bold, fontSize: 15, fontWeight: "800" },
   footer: { alignItems: "center", gap: 14, paddingTop: 24 },
   link: { color: colors.text, fontSize: 14, fontWeight: "900", textDecorationLine: "underline" },
   formError: { backgroundColor: "#FFF1F1", borderRadius: 12, marginBottom: 16, padding: 12 },

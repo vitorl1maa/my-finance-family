@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   selectedDay: { backgroundColor: colors.accent },
-  weekday: { color: colors.muted, fontFamily: fonts.bold, fontSize: 9 },
-  date: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 11 },
+  weekday: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
+  date: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 12 },
   selectedText: { color: colors.text },
 });

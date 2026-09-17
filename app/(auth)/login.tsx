@@ -13,6 +13,7 @@ import {
 } from "@/src/features/auth/components/auth-ui";
 import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -168,15 +169,23 @@ const styles = StyleSheet.create({
     width: 54,
   },
   brandCopy: { gap: 3 },
-  brandName: { color: colors.text, fontSize: 18, fontWeight: "900" },
+  brandName: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18, fontWeight: "900" },
   brandSubtitle: { color: colors.muted, fontSize: 13 },
-  title: { color: colors.text, fontSize: 36, fontWeight: "900", letterSpacing: -1, marginTop: 44 },
+  title: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 36,
+    fontWeight: "900",
+    letterSpacing: -1,
+    marginTop: 44,
+  },
   description: { color: colors.muted, fontSize: 16, lineHeight: 21, marginTop: 15 },
   form: { gap: 4, marginTop: 80 },
   forgot: {
     alignSelf: "flex-end",
     color: colors.text,
     fontSize: 13,
+    fontFamily: fonts.extraBold,
     fontWeight: "900",
     marginBottom: 16,
     marginTop: 10,
@@ -192,7 +201,12 @@ const styles = StyleSheet.create({
     marginTop: 14,
     minHeight: 54,
   },
-  secondaryText: { color: colors.text, fontSize: 15, fontWeight: "900" },
+  secondaryText: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 15,
+    fontWeight: "900",
+  },
   divider: { alignItems: "center", flexDirection: "row", gap: 20, paddingVertical: 26 },
   line: { backgroundColor: colors.border, flex: 1, height: 1 },
   or: { color: colors.muted, fontSize: 12, fontWeight: "700" },
@@ -217,10 +231,10 @@ const styles = StyleSheet.create({
     width: 28,
   },
   socialIconText: { color: colors.text, fontSize: 13, fontWeight: "900" },
-  socialLabel: { color: colors.text, fontSize: 15, fontWeight: "900" },
+  socialLabel: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15, fontWeight: "900" },
   terms: {
     color: colors.mutedLight,
-    fontSize: 11,
+    fontSize: 12,
     lineHeight: 16,
     marginTop: 18,
     textAlign: "center",

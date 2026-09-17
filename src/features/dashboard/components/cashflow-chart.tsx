@@ -59,10 +59,10 @@ const styles = StyleSheet.create({
   },
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15 },
-  subtitle: { color: colors.muted, fontSize: 10, marginTop: 2 },
+  subtitle: { color: colors.muted, fontSize: 12, marginTop: 2 },
   legend: { alignItems: "flex-end", gap: 3 },
-  legendText: { fontFamily: fonts.bold, fontSize: 9 },
+  legendText: { fontFamily: fonts.bold, fontSize: 12 },
   income: { color: colors.positive },
   expense: { color: colors.text },
-  axisLabel: { color: colors.muted, fontSize: 9 },
+  axisLabel: { color: colors.muted, fontSize: 12 },
 });

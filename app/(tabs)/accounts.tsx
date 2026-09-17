@@ -2,6 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 
 import { useAccountsViewModel } from "@/src/features/accounts/view-model/use-accounts-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 import { spacing } from "@/src/shared/theme/spacing";
 
 export default function AccountsScreen() {
@@ -13,7 +14,11 @@ export default function AccountsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ gap: spacing.lg, padding: spacing.xl }}
     >
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>Contas</Text>
+      <Text
+        style={{ color: colors.text, fontFamily: fonts.extraBold, fontSize: 28, fontWeight: "900" }}
+      >
+        Contas
+      </Text>
 
       {viewModel.accounts.map((account) => (
         <View
@@ -28,11 +33,14 @@ export default function AccountsScreen() {
             padding: spacing.lg,
           }}
         >
-          <Text style={{ color: colors.muted, fontSize: 13 }}>{account.name}</Text>
+          <Text style={{ color: colors.muted, fontFamily: fonts.regular, fontSize: 13 }}>
+            {account.name}
+          </Text>
           <Text
             selectable
             style={{
               color: colors.text,
+              fontFamily: fonts.extraBold,
               fontSize: 24,
               fontVariant: ["tabular-nums"],
               fontWeight: "900",

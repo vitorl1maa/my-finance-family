@@ -14,9 +14,6 @@ export function HealthInsightBanner({ healthMessage, healthStatus }: HealthInsig
       <View style={styles.copy}>
         <View style={styles.topRow}>
           <Text style={styles.headline}>{isGood ? "Mandou bem!" : "Fique de olho!"}</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{isGood ? "TOP 5" : "ATENÇÃO"}</Text>
-          </View>
         </View>
         <Text style={styles.message}>{healthMessage}</Text>
         <Text style={styles.caption}>ESTE MÊS</Text>
@@ -46,18 +43,10 @@ const styles = StyleSheet.create({
   },
   warning: { backgroundColor: "#FFE18A" },
   copy: { flex: 1, gap: 5, paddingVertical: 14 },
-  topRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  topRow: { alignItems: "center", flexDirection: "row" },
   headline: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 21 },
-  badge: {
-    backgroundColor: colors.text,
-    borderRadius: 12,
-    marginRight: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-  },
-  badgeText: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 9 },
-  message: { color: "#303030", fontFamily: fonts.medium, fontSize: 11, maxWidth: 190 },
-  caption: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 10, marginTop: 5 },
+  message: { color: "#303030", fontFamily: fonts.medium, fontSize: 12, maxWidth: 190 },
+  caption: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 12, marginTop: 5 },
   dots: { flexDirection: "row", gap: 5 },
   dot: { backgroundColor: colors.surface, borderRadius: 4, height: 6, width: 6 },
   activeDot: { backgroundColor: colors.text },

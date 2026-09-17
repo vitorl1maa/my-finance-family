@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { FormError } from "@/src/features/auth/components/auth-ui";
 import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 import { spacing } from "@/src/shared/theme/spacing";
 
 export default function SettingsScreen() {
@@ -14,7 +15,11 @@ export default function SettingsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ gap: spacing.lg, padding: spacing.xl }}
     >
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>Mais</Text>
+      <Text
+        style={{ color: colors.text, fontFamily: fonts.extraBold, fontSize: 28, fontWeight: "900" }}
+      >
+        Mais
+      </Text>
 
       <View
         style={{
@@ -27,8 +32,19 @@ export default function SettingsScreen() {
           padding: spacing.lg,
         }}
       >
-        <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900" }}>Arquitetura</Text>
-        <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 20 }}>
+        <Text
+          style={{
+            color: colors.text,
+            fontFamily: fonts.extraBold,
+            fontSize: 17,
+            fontWeight: "900",
+          }}
+        >
+          Arquitetura
+        </Text>
+        <Text
+          style={{ color: colors.muted, fontFamily: fonts.regular, fontSize: 14, lineHeight: 20 }}
+        >
           Base preparada para MVVM com Zustand, repositórios SQLite e futura sincronizacao com
           Supabase.
         </Text>
@@ -61,5 +77,10 @@ const styles = StyleSheet.create({
     minHeight: 54,
   },
   disabled: { opacity: 0.55 },
-  logoutText: { color: colors.negative, fontSize: 15, fontWeight: "900" },
+  logoutText: {
+    color: colors.negative,
+    fontFamily: fonts.extraBold,
+    fontSize: 15,
+    fontWeight: "900",
+  },
 });

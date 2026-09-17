@@ -18,7 +18,7 @@ type DashboardViewProps = Record<string, never>;
 
 export function DashboardView(_: DashboardViewProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { accounts, greeting, insights, recentTransactions, totalBalance, userName } =
+  const { greeting, insights, recentTransactions, totalBalance, userName } =
     useDashboardViewModel(selectedDate);
 
   return (
@@ -61,11 +61,11 @@ export function DashboardView(_: DashboardViewProps) {
         </View>
       </View>
 
-      <CashflowChart data={insights.weeklyCashflow} />
       <HealthInsightBanner
         healthMessage={insights.healthMessage}
         healthStatus={insights.healthStatus}
       />
+      <CashflowChart data={insights.weeklyCashflow} />
       <SpendingBreakdown categories={insights.expenseByCategory} />
 
       <SectionHeader action="Ver todas" title="Últimas transações" />
@@ -101,10 +101,6 @@ export function DashboardView(_: DashboardViewProps) {
           </View>
         ))}
       </View>
-      <View style={styles.accountsSummary}>
-        <Text style={styles.accountsSummaryText}>{accounts.length} contas conectadas</Text>
-        <Text style={styles.accountsSummaryValue}>{totalBalance}</Text>
-      </View>
     </ScrollView>
   );
 }
@@ -137,7 +133,7 @@ function SectionHeader({ action, title }: { action: string; title: string }) {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: colors.background },
-  content: { gap: 14, paddingBottom: 32, paddingHorizontal: 20, paddingTop: 60 },
+  content: { gap: 14, paddingBottom: 140, paddingHorizontal: 20, paddingTop: 60 },
   header: {
     alignItems: "center",
     flexDirection: "row",
@@ -148,11 +144,11 @@ const styles = StyleSheet.create({
   greeting: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
   notification: { alignItems: "center", height: 42, justifyContent: "center", width: 34 },
   summary: { backgroundColor: colors.text, borderRadius: 20, gap: 8, padding: 16 },
-  summaryLabel: { color: colors.accent, fontFamily: fonts.bold, fontSize: 11, letterSpacing: 0.3 },
+  summaryLabel: { color: colors.accent, fontFamily: fonts.bold, fontSize: 12, letterSpacing: 0.3 },
   total: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -0.5 },
-  summaryStats: { flexDirection: "row", gap: 10 },
+  summaryStats: { flexDirection: "row", gap: 160 },
   metric: { flex: 1, gap: 3 },
-  metricLabel: { color: "#A3A3A3", fontSize: 10 },
+  metricLabel: { color: "#A3A3A3", fontSize: 12 },
   metricValue: { color: colors.surface, fontFamily: fonts.bold, fontSize: 13 },
   metricAccent: { color: colors.accent },
   sectionHeader: {
@@ -162,7 +158,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   sectionTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15 },
-  sectionAction: { color: colors.muted, fontFamily: fonts.bold, fontSize: 10 },
+  sectionAction: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
   transactions: {
     borderColor: colors.border,
     borderRadius: 16,
@@ -183,16 +179,8 @@ const styles = StyleSheet.create({
   incomeIcon: { backgroundColor: colors.accent },
   transactionInfo: { flex: 1, gap: 3 },
   transactionTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 12 },
-  transactionDate: { color: colors.muted, fontSize: 9 },
-  transactionAmount: { fontFamily: fonts.bold, fontSize: 11 },
+  transactionDate: { color: colors.muted, fontSize: 12 },
+  transactionAmount: { fontFamily: fonts.bold, fontSize: 12 },
   expenseText: { color: colors.negative },
   incomeText: { color: colors.positive },
-  accountsSummary: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 2,
-  },
-  accountsSummaryText: { color: colors.muted, fontSize: 10 },
-  accountsSummaryValue: { color: colors.text, fontFamily: fonts.bold, fontSize: 11 },
 });

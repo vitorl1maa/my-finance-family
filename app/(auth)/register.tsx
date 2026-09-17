@@ -23,6 +23,7 @@ import {
 import type { RegisterProfile } from "@/src/features/auth/model/auth";
 import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-model";
 import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
 
 type RegisterForm = RegisterProfile & { email: string; password: string; confirmPassword: string };
 
@@ -277,9 +278,10 @@ const styles = StyleSheet.create({
     minHeight: 34,
     paddingHorizontal: 24,
   },
-  badgeText: { color: colors.muted, fontSize: 12, fontWeight: "800" },
+  badgeText: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12, fontWeight: "800" },
   title: {
     color: colors.text,
+    fontFamily: fonts.extraBold,
     fontSize: 36,
     fontWeight: "900",
     letterSpacing: -1,
@@ -289,7 +291,7 @@ const styles = StyleSheet.create({
   form: { gap: 4, marginTop: 80 },
   buttonContent: { alignItems: "center", flexDirection: "row", gap: 16, justifyContent: "center" },
   requirements: { gap: 3, marginBottom: 10, marginTop: -5, paddingLeft: 4 },
-  requirement: { color: colors.muted, fontSize: 12, fontWeight: "700" },
+  requirement: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12, fontWeight: "700" },
   requirementMet: { color: colors.positive },
   secondaryButton: {
     alignItems: "center",
@@ -300,5 +302,10 @@ const styles = StyleSheet.create({
     marginTop: 14,
     minHeight: 54,
   },
-  secondaryText: { color: colors.text, fontSize: 15, fontWeight: "900" },
+  secondaryText: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 15,
+    fontWeight: "900",
+  },
 });
