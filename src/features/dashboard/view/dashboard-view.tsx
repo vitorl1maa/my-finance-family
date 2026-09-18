@@ -46,7 +46,7 @@ export function DashboardView(_: DashboardViewProps) {
 
       <WeeklyCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
       <View style={styles.summary}>
-        <Text style={styles.summaryLabel}>SALDO TOTAL</Text>
+        <Text style={styles.summaryLabel}>COFRINHO</Text>
         <Text style={styles.total}>{totalBalance}</Text>
         <View style={styles.summaryStats}>
           <Metric
