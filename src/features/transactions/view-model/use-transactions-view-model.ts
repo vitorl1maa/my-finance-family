@@ -1,3 +1,4 @@
+import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
@@ -6,11 +7,20 @@ import {
 } from "@/src/features/categories/model/expense-category";
 import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
+import {
+  createRemoteExpense,
+  listRemoteTransactions,
+} from "@/src/features/transactions/repository/transactions-remote-repository";
+import {
+  listTransactions,
+  replaceTransaction,
+  upsertTransactions,
+} from "@/src/features/transactions/repository/transactions-repository";
 import { useTransactionsStore } from "@/src/features/transactions/store/transactions-store";
-import { supabase } from "@/src/shared/supabase/supabase-client";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 export function useTransactionsViewModel() {
+  const db = useSQLiteContext();
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
   const session = useAuthStore((state) => state.session);
@@ -19,6 +29,31 @@ export function useTransactionsViewModel() {
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
+
+  const loadTransactions = useCallback(async () => {
+    setTransactionsLoading(true);
+    setTransactionsError(null);
+
+    try {
+      setTransactions(await listTransactions(db));
+
+      if (!session) return;
+
+      const remoteTransactions = await listRemoteTransactions();
+      await upsertTransactions(db, remoteTransactions);
+      setTransactions(await listTransactions(db));
+    } catch {
+      setTransactionsError("Não foi possível atualizar as transações agora.");
+    } finally {
+      setTransactionsLoading(false);
+    }
+  }, [db, session, setTransactions]);
+
+  useEffect(() => {
+    void loadTransactions();
+  }, [loadTransactions]);
 
   const loadCategories = useCallback(async () => {
     setCategoriesLoading(true);
@@ -53,41 +88,32 @@ export function useTransactionsViewModel() {
 
       try {
         const payload = buildCreateExpensePayload(input);
-        let accountId = "main-account";
-        let id = `expense-${Date.now()}`;
-        let syncStatus: "pending" | "synced" = "pending";
+        const pendingTransaction = {
+          id: `pending-expense-${Date.now()}`,
+          accountId: "main-account",
+          title: payload.title,
+          category: input.categoryName,
+          categoryId: input.categoryId,
+          amountCents: -Math.abs(payload.amountCents),
+          occurredAt: payload.occurredAt,
+          recurrenceRule: payload.recurrenceRule,
+          syncStatus: "pending" as const,
+        };
 
-        if (session) {
-          const { data, error } = await supabase.rpc("create_expense", {
-            expense_title: payload.title,
-            expense_category_id: payload.categoryId,
-            expense_amount_cents: payload.amountCents,
-            expense_occurred_at: payload.occurredAt,
-            expense_recurrence_rule: payload.recurrenceRule,
-          });
+        await upsertTransactions(db, [pendingTransaction]);
+        setTransactions(await listTransactions(db));
 
-          if (error) throw error;
+        if (!session) return;
 
-          const result = Array.isArray(data) ? data[0] : data;
-          accountId = result.account_id;
-          id = result.transaction_id;
-          syncStatus = "synced";
+        try {
+          const syncedTransaction = await createRemoteExpense(payload);
+          await replaceTransaction(db, pendingTransaction.id, syncedTransaction);
+          setTransactions(await listTransactions(db));
+        } catch {
+          setTransactionsError(
+            "Despesa salva no dispositivo. A sincronização será tentada depois.",
+          );
         }
-
-        setTransactions([
-          {
-            id,
-            accountId,
-            title: payload.title,
-            category: input.categoryName,
-            categoryId: input.categoryId,
-            amountCents: -Math.abs(payload.amountCents),
-            occurredAt: payload.occurredAt,
-            recurrenceRule: payload.recurrenceRule,
-            syncStatus,
-          },
-          ...transactions,
-        ]);
       } catch (error) {
         setSaveError(error instanceof Error ? error.message : "Não foi possível salvar a despesa.");
         throw error;
@@ -95,7 +121,7 @@ export function useTransactionsViewModel() {
         setIsSaving(false);
       }
     },
-    [session, setTransactions, transactions],
+    [db, session, setTransactions],
   );
 
   return useMemo(
@@ -106,6 +132,9 @@ export function useTransactionsViewModel() {
         isExpense: transaction.amountCents < 0,
       })),
       createExpense,
+      transactionsLoading,
+      transactionsError,
+      reloadTransactions: loadTransactions,
       categories,
       categoriesLoading,
       categoriesError,
@@ -120,8 +149,11 @@ export function useTransactionsViewModel() {
       createExpense,
       isSaving,
       loadCategories,
+      loadTransactions,
       saveError,
       transactions,
+      transactionsError,
+      transactionsLoading,
     ],
   );
 }

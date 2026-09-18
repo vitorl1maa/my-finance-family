@@ -35,3 +35,48 @@ export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[
     syncStatus: row.sync_status,
   }));
 }
+
+export async function upsertTransactions(
+  db: SQLiteDatabase,
+  transactions: Transaction[],
+): Promise<void> {
+  for (const transaction of transactions) {
+    await db.runAsync(
+      `INSERT INTO transactions (
+        id, account_id, family_id, title, category, category_id, amount_cents, occurred_at,
+        recurrence_rule, sync_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        account_id = excluded.account_id,
+        family_id = excluded.family_id,
+        title = excluded.title,
+        category = excluded.category,
+        category_id = excluded.category_id,
+        amount_cents = excluded.amount_cents,
+        occurred_at = excluded.occurred_at,
+        recurrence_rule = excluded.recurrence_rule,
+        sync_status = excluded.sync_status`,
+      transaction.id,
+      transaction.accountId,
+      transaction.familyId ?? null,
+      transaction.title,
+      transaction.category,
+      transaction.categoryId ?? null,
+      transaction.amountCents,
+      transaction.occurredAt,
+      transaction.recurrenceRule ?? "none",
+      transaction.syncStatus,
+    );
+  }
+}
+
+export async function replaceTransaction(
+  db: SQLiteDatabase,
+  previousId: string,
+  transaction: Transaction,
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await upsertTransactions(db, [transaction]);
+    await db.runAsync("DELETE FROM transactions WHERE id = ?", previousId);
+  });
+}
