@@ -6,5 +6,6 @@
 4. Adicionar o campo de link do produto/serviço ao modelo e ao formulário de metas.
 5. Preservar validação de nome/valor, criar testes de regressão e atualizar documentação da esteira.
 6. Executar QA: testes, TypeScript, Expo dependency check, diff check e revisão visual estática dos critérios.
+7. Corrigir o cabeçalho legado de Nova despesa, substituindo o título centralizado por título/subtítulo alinhados e retorno acessível.
 
 Decisão recomendada: fazer a menor alteração compatível com o protótipo, reutilizando o formulário e a navegação existentes; não introduzir backend novo nem worktree.

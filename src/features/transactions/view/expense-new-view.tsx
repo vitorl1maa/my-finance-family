@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Ellipsis, FileText, Repeat2, Tags } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, FileText, Repeat2, Tags } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -97,15 +97,14 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
     >
-      <View style={styles.topRow}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>Nova despesa</Text>
+          <Text style={styles.headerSubtitle}>Registre uma nova despesa</Text>
+        </View>
         <Pressable accessibilityLabel="Voltar" onPress={onBack} style={styles.back}>
           <ArrowLeft color={colors.text} size={22} />
         </Pressable>
-        <View style={styles.headerCopy}>
-          <Text style={styles.headerTitle}>Nova despesa</Text>
-          <Text style={styles.headerStep}>1 de 1</Text>
-        </View>
-        <Ellipsis color={colors.text} size={22} />
       </View>
       <Controller
         control={control}
@@ -274,7 +273,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 140,
   },
-  topRow: {
+  header: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -285,9 +284,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 28,
   },
-  headerCopy: { alignItems: "center", gap: 1 },
-  headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 17 },
-  headerStep: { color: colors.muted, fontSize: 12 },
+  headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 28 },
+  headerSubtitle: { color: colors.muted, fontSize: 13, marginTop: 2 },
   fieldGroup: {},
   compactField: { flex: 1 },
   row: { flexDirection: "row", gap: 10 },

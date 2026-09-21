@@ -25,6 +25,7 @@ A navegação ainda exibe a tela “Mais”, a ação de despesas não está rep
 - Link do produto/serviço e prazo são opcionais.
 - A meta criada inicia com valor acumulado zero e status pendente de sincronização.
 - O padrão visual de cabeçalho deve ser mantido nas telas de Metas, Transações e Nova despesa.
+- Nova despesa deve usar título alinhado à esquerda, subtítulo de apoio e ação de retorno no lado direito; não deve exibir o cabeçalho legado centralizado com “1 de 1” e reticências.
 
 ## Casos de erro
 
