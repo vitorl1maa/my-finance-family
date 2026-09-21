@@ -47,9 +47,6 @@ export function GoalNewView({ onBack }: { onBack: () => void }) {
           <X color={colors.text} size={20} />
         </Pressable>
       </View>
-      <View style={styles.heroIcon}>
-        <WalletCards color={colors.text} size={25} />
-      </View>
       <Text style={styles.title}>Dê um nome para sua meta</Text>
       <Text style={styles.description}>
         Defina um objetivo e acompanhe seu progresso até alcançar.
@@ -145,15 +142,6 @@ const styles = StyleSheet.create({
     height: 42,
     justifyContent: "center",
     width: 42,
-  },
-  heroIcon: {
-    alignItems: "center",
-    backgroundColor: colors.accent,
-    borderRadius: 17,
-    height: 54,
-    justifyContent: "center",
-    marginTop: 18,
-    width: 54,
   },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 30, marginTop: 4 },
   description: { color: colors.muted, fontSize: 14, lineHeight: 20, marginBottom: 8 },

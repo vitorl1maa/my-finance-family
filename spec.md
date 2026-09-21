@@ -26,6 +26,7 @@ A navegação ainda exibe a tela “Mais”, a ação de despesas não está rep
 - A meta criada inicia com valor acumulado zero e status pendente de sincronização.
 - O padrão visual de cabeçalho deve ser mantido nas telas de Metas, Transações e Nova despesa.
 - Nova despesa deve usar título alinhado à esquerda, subtítulo de apoio e ação de retorno no lado direito; não deve exibir o cabeçalho legado centralizado com “1 de 1” e reticências.
+- O drawer de nova meta não deve exibir ícone decorativo entre o cabeçalho e o título do formulário; os ícones dos campos permanecem.
 
 ## Casos de erro
 
@@ -40,6 +41,7 @@ A navegação ainda exibe a tela “Mais”, a ação de despesas não está rep
 - O menu exibe “Despesas” com `BanknoteArrowUp` e abre o formulário de nova despesa.
 - O cabeçalho de Metas segue o protótipo com título, subtítulo e botão “+”.
 - O drawer de nova meta apresenta título, descrição, fechar, nome, link, valor-alvo, prazo e ação “Criar meta”.
+- O drawer de nova meta não apresenta ícone decorativo no corpo do cabeçalho.
 - Uma meta válida aparece na lista após o salvamento.
 - Dados inválidos não criam metas e apresentam mensagem de erro acessível.
 - TypeScript, testes e verificações de dependências executam sem falhas novas.
