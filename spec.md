@@ -81,6 +81,8 @@ O aplicativo ainda não oferece um espaço dedicado para organizar as entradas r
 - Nome da fonte e valor mensal são obrigatórios.
 - O valor mensal deve ser maior que zero.
 - O saldo consolidado inicial deve ser a soma das fontes cadastradas; a edição manual permite ajustar o valor exibido sem apagar as fontes.
+- O campo de saldo deve iniciar preenchido com `R$ 0,00` e persistir a edição manual após 10 segundos sem novas alterações.
+- O valor do saldo deve usar tipografia ampliada e não exibir texto auxiliar de instrução dentro do card.
 - As fontes devem permanecer disponíveis após reabrir a tela no mesmo dispositivo.
 - A criação deve ser local e offline-first; sincronização remota fica preparada para etapa posterior.
 

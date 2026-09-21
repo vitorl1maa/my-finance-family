@@ -1,4 +1,4 @@
-import { Pencil, PiggyBank, Plus, RefreshCw, WalletCards } from "lucide-react-native";
+import { PiggyBank, Plus, RefreshCw, WalletCards } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,16 +17,34 @@ import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-s
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
-import { formatBrlInput, formatCurrencyFromCents } from "@/src/shared/utils/money";
+import {
+  formatBrlInput,
+  formatCurrencyFromCents,
+  parseBrlInputToCents,
+} from "@/src/shared/utils/money";
 
 export function IncomeSourcesView() {
   const viewModel = useIncomeSourcesViewModel();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [balance, setBalance] = useState("");
+  const [balance, setBalance] = useState(formatCurrencyFromCents(0));
+  const [balanceReady, setBalanceReady] = useState(false);
 
   useEffect(() => {
-    if (!balance) setBalance(formatCurrencyFromCents(viewModel.totalCents));
-  }, [balance, viewModel.totalCents]);
+    if (!viewModel.balanceLoading) {
+      setBalance(formatCurrencyFromCents(viewModel.balanceCents));
+      setBalanceReady(true);
+    }
+  }, [viewModel.balanceCents, viewModel.balanceLoading]);
+
+  useEffect(() => {
+    if (viewModel.balanceLoading || !balanceReady) return;
+
+    const timeout = setTimeout(() => {
+      void viewModel.saveBalance(parseBrlInputToCents(balance));
+    }, 10_000);
+
+    return () => clearTimeout(timeout);
+  }, [balance, balanceReady, viewModel.balanceLoading, viewModel.saveBalance]);
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
@@ -62,10 +80,6 @@ export function IncomeSourcesView() {
             style={styles.balanceInput}
             value={balance}
           />
-          <View style={styles.balanceEdit}>
-            <Pencil color={colors.darkPink} size={13} />
-            <Text style={styles.balanceEditText}>Toque para editar o valor</Text>
-          </View>
         </View>
       </View>
 
@@ -180,13 +194,11 @@ const styles = StyleSheet.create({
   balanceInput: {
     color: colors.darkPink,
     fontFamily: fonts.extraBold,
-    fontSize: 31,
+    fontSize: 38,
     marginTop: 3,
     padding: 0,
     textAlign: "center",
   },
-  balanceEdit: { alignItems: "center", flexDirection: "row", gap: 5, marginTop: 7 },
-  balanceEditText: { color: colors.darkPink, fontSize: 11 },
   sectionHeader: {
     alignItems: "center",
     flexDirection: "row",

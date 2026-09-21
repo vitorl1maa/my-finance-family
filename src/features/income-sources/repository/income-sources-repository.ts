@@ -2,6 +2,11 @@ import type { SQLiteDatabase } from "expo-sqlite";
 
 import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
 
+export type PiggyBankSettings = {
+  balanceCents: number;
+  updatedAt: string;
+};
+
 type IncomeSourceRow = {
   id: string;
   name: string;
@@ -32,6 +37,30 @@ export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource)
     source.amountCents,
     source.updatedAt,
     source.syncStatus,
+  );
+}
+
+export async function getPiggyBankSettings(db: SQLiteDatabase): Promise<PiggyBankSettings | null> {
+  const row = await db.getFirstAsync<{ balance_cents: number; updated_at: string }>(
+    `SELECT balance_cents, updated_at
+     FROM piggy_bank_settings
+     WHERE id = ?`,
+    "default",
+  );
+
+  return row ? { balanceCents: row.balance_cents, updatedAt: row.updated_at } : null;
+}
+
+export async function savePiggyBankSettings(
+  db: SQLiteDatabase,
+  settings: PiggyBankSettings,
+): Promise<void> {
+  await db.runAsync(
+    `INSERT OR REPLACE INTO piggy_bank_settings (id, balance_cents, updated_at)
+     VALUES (?, ?, ?)`,
+    "default",
+    settings.balanceCents,
+    settings.updatedAt,
   );
 }
 

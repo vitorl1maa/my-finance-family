@@ -6,8 +6,10 @@ import {
   totalIncomeSources,
 } from "@/src/features/income-sources/model/income-source";
 import {
+  getPiggyBankSettings,
   listIncomeSources,
   saveIncomeSource,
+  savePiggyBankSettings,
 } from "@/src/features/income-sources/repository/income-sources-repository";
 import { useIncomeSourcesStore } from "@/src/features/income-sources/store/income-sources-store";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
@@ -37,6 +39,8 @@ export function useIncomeSourcesViewModel() {
   const setSources = useIncomeSourcesStore((state) => state.setSources);
   const addSource = useIncomeSourcesStore((state) => state.addSource);
   const [loading, setLoading] = useState(true);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [balanceCents, setBalanceCents] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const loadSources = useCallback(async () => {
@@ -49,10 +53,13 @@ export function useIncomeSourcesViewModel() {
         loadedSources = defaultSources;
       }
       setSources(loadedSources);
+      const settings = await getPiggyBankSettings(db);
+      setBalanceCents(settings?.balanceCents ?? 0);
     } catch {
       setError("Não foi possível carregar suas fontes de renda.");
     } finally {
       setLoading(false);
+      setBalanceLoading(false);
     }
   }, [db, setSources]);
 
@@ -76,15 +83,29 @@ export function useIncomeSourcesViewModel() {
     [addSource, db],
   );
 
+  const saveBalance = useCallback(
+    async (nextBalanceCents: number) => {
+      await savePiggyBankSettings(db, {
+        balanceCents: nextBalanceCents,
+        updatedAt: new Date().toISOString(),
+      });
+      setBalanceCents(nextBalanceCents);
+    },
+    [db],
+  );
+
   const totalCents = useMemo(() => totalIncomeSources(sources), [sources]);
 
   return {
     sources,
     totalCents,
-    formattedTotal: formatCurrencyFromCents(totalCents),
+    balanceCents,
+    formattedTotal: formatCurrencyFromCents(balanceCents),
+    balanceLoading,
     loading,
     error,
     createSource,
+    saveBalance,
     reload: loadSources,
   };
 }

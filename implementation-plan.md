@@ -24,3 +24,10 @@ Decisão recomendada: fazer a menor alteração compatível com o protótipo, re
 7. Registrar o resultado no Linear e concluir a issue somente após o QA.
 
 Decisão recomendada: manter cinco entradas na navegação (Início, Transações, Metas, Despesas e Cofrinho), pois remover Despesas quebraria uma funcionalidade já entregue; aplicar o protótipo visual do Pencil ao novo destino.
+
+# Ajuste de input — CRE-12
+
+1. Persistir o saldo manual em uma tabela local própria do Cofrinho.
+2. Inicializar o campo com `R$ 0,00` e salvar alterações somente após 10 segundos sem digitação.
+3. Aumentar a tipografia do saldo e remover a instrução auxiliar do card.
+4. Validar persistência, TypeScript, testes e diff check.

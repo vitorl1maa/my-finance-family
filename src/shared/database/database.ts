@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from "expo-sqlite";
 
 export const databaseName = "my-finance-family.db";
 
-const databaseVersion = 4;
+const databaseVersion = 5;
 
 export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
   const result = await db.getFirstAsync<{ user_version: number }>("PRAGMA user_version");
@@ -71,6 +71,17 @@ export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
         amount_cents INTEGER NOT NULL,
         updated_at TEXT NOT NULL,
         sync_status TEXT NOT NULL DEFAULT 'pending'
+      );
+      PRAGMA user_version = ${databaseVersion};
+    `);
+  }
+
+  if (currentVersion < 5) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS piggy_bank_settings (
+        id TEXT PRIMARY KEY NOT NULL,
+        balance_cents INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL
       );
       PRAGMA user_version = ${databaseVersion};
     `);
