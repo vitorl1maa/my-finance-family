@@ -1,7 +1,6 @@
 import { PiggyBank, Plus, RefreshCw, WalletCards } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Modal,
   Pressable,
@@ -16,6 +15,7 @@ import { incomeSourceKindLabel } from "@/src/features/income-sources/model/incom
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
+import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import {
@@ -60,8 +60,7 @@ export function IncomeSourcesView() {
           onPress={() => setDrawerVisible(true)}
           style={styles.registerButton}
         >
-          <Plus color={colors.text} size={17} strokeWidth={2.6} />
-          <Text style={styles.registerText}>Registrar</Text>
+          <Plus color={colors.text} size={24} strokeWidth={2.4} />
         </Pressable>
       </View>
 
@@ -108,9 +107,7 @@ export function IncomeSourcesView() {
           </Pressable>
         </View>
       ) : null}
-      {viewModel.loading && viewModel.sources.length === 0 ? (
-        <ActivityIndicator color={colors.text} />
-      ) : null}
+      {viewModel.loading && viewModel.sources.length === 0 ? <LoadingShimmer rows={2} /> : null}
       {!viewModel.loading && viewModel.sources.length === 0 ? (
         <View style={styles.empty}>
           <PiggyBank color={colors.mutedLight} size={26} />

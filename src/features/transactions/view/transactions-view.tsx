@@ -1,14 +1,6 @@
 import { Search, ShoppingCart, WalletCards } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import {
   filterTransactions,
@@ -16,6 +8,7 @@ import {
 } from "@/src/features/transactions/model/transaction-list";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
+import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
@@ -52,7 +45,7 @@ export function TransactionsView() {
         </View>
       ) : null}
       {viewModel.transactionsLoading && viewModel.transactions.length === 0 ? (
-        <ActivityIndicator accessibilityLabel="Carregando transações" color={colors.text} />
+        <LoadingShimmer rows={3} />
       ) : groups.length === 0 ? (
         <Text style={styles.empty}>
           {query ? "Nenhuma transação encontrada." : "Ainda não há transações registradas."}
