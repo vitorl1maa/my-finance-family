@@ -5,6 +5,7 @@ import type { IncomeSource } from "@/src/features/income-sources/model/income-so
 export type PiggyBankSettings = {
   balanceCents: number;
   updatedAt: string;
+  syncStatus: "pending" | "synced" | "failed";
 };
 
 type IncomeSourceRow = {
@@ -41,14 +42,24 @@ export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource)
 }
 
 export async function getPiggyBankSettings(db: SQLiteDatabase): Promise<PiggyBankSettings | null> {
-  const row = await db.getFirstAsync<{ balance_cents: number; updated_at: string }>(
-    `SELECT balance_cents, updated_at
+  const row = await db.getFirstAsync<{
+    balance_cents: number;
+    updated_at: string;
+    sync_status: PiggyBankSettings["syncStatus"];
+  }>(
+    `SELECT balance_cents, updated_at, sync_status
      FROM piggy_bank_settings
      WHERE id = ?`,
     "default",
   );
 
-  return row ? { balanceCents: row.balance_cents, updatedAt: row.updated_at } : null;
+  return row
+    ? {
+        balanceCents: row.balance_cents,
+        updatedAt: row.updated_at,
+        syncStatus: row.sync_status,
+      }
+    : null;
 }
 
 export async function savePiggyBankSettings(
@@ -56,11 +67,12 @@ export async function savePiggyBankSettings(
   settings: PiggyBankSettings,
 ): Promise<void> {
   await db.runAsync(
-    `INSERT OR REPLACE INTO piggy_bank_settings (id, balance_cents, updated_at)
-     VALUES (?, ?, ?)`,
+    `INSERT OR REPLACE INTO piggy_bank_settings (id, balance_cents, updated_at, sync_status)
+     VALUES (?, ?, ?, ?)`,
     "default",
     settings.balanceCents,
     settings.updatedAt,
+    settings.syncStatus,
   );
 }
 

@@ -8,21 +8,8 @@ type GoalsState = {
   setGoals: (goals: Goal[]) => void;
 };
 
-const initialGoals: Goal[] = [
-  {
-    id: "family-reserve",
-    title: "Reserva da familia",
-    category: "Segurança",
-    priority: "Alta",
-    targetCents: 1000000,
-    savedCents: 640000,
-    dueDate: "2027-03-18",
-    syncStatus: "pending",
-  },
-];
-
 export const useGoalsStore = create<GoalsState>((set) => ({
-  goals: initialGoals,
+  goals: [],
   addGoal: (goal) => set((state) => ({ goals: [goal, ...state.goals] })),
   setGoals: (goals) => set({ goals }),
 }));

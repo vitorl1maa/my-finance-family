@@ -9,14 +9,75 @@ create table if not exists public.categories (
   constraint categories_name_not_blank check (length(trim(name)) > 0)
 );
 
+create table if not exists public.transactions (
+  id uuid primary key default gen_random_uuid(),
+  family_id uuid not null references public.families(id) on delete cascade,
+  account_id uuid not null references public.accounts(id),
+  title text not null,
+  category text not null,
+  category_id uuid references public.categories(id),
+  amount_cents bigint not null,
+  occurred_at timestamptz not null default now(),
+  recurrence_rule text not null default 'none',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.accounts add column if not exists is_default boolean not null default false;
+alter table public.categories add column if not exists slug text;
+alter table public.categories add column if not exists is_active boolean not null default true;
 alter table public.transactions add column if not exists family_id uuid references public.families(id);
 alter table public.transactions add column if not exists category_id uuid references public.categories(id);
 alter table public.transactions add column if not exists recurrence_rule text not null default 'none';
 
+update public.categories
+set slug = lower(regexp_replace(trim(name), '\\s+', '-', 'g'))
+where slug is null;
+
+create unique index if not exists categories_family_slug_unique
+  on public.categories (family_id, slug);
+
 create unique index if not exists accounts_one_default_per_family
   on public.accounts (family_id)
   where is_default = true;
+
+insert into public.accounts (
+  family_id, name, institution, kind, opening_balance_cents, balance_cents, created_by, is_default
+)
+select family.id, 'Conta principal', null, 'checking', 0, 0, family.created_by, true
+from public.families family
+where not exists (
+  select 1
+  from public.accounts account
+  where account.family_id = family.id
+    and account.is_default = true
+);
+
+create or replace function public.create_initial_family()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_family_id uuid;
+begin
+  insert into public.families (name, created_by)
+  values ('Minha família', new.id)
+  returning id into new_family_id;
+
+  insert into public.family_members (family_id, user_id, role)
+  values (new_family_id, new.id, 'owner');
+
+  insert into public.accounts (
+    family_id, name, institution, kind, opening_balance_cents, balance_cents, created_by, is_default
+  ) values (
+    new_family_id, 'Conta principal', null, 'checking', 0, 0, new.id, true
+  );
+
+  return new;
+end;
+$$;
 
 create or replace function public.seed_family_categories(target_family_id uuid)
 returns void
@@ -168,3 +229,11 @@ begin
   return query select new_transaction_id, current_family_id, default_account_id, expense_category_id;
 end;
 $$;
+
+revoke all on function public.seed_family_categories(uuid) from public;
+revoke all on function public.seed_new_family_categories() from public;
+revoke all on function public.list_family_categories() from public;
+revoke all on function public.create_expense(text, uuid, bigint, timestamptz, text) from public;
+
+grant execute on function public.list_family_categories() to authenticated;
+grant execute on function public.create_expense(text, uuid, bigint, timestamptz, text) to authenticated;

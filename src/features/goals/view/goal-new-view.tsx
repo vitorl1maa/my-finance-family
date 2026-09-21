@@ -2,38 +2,40 @@ import { ArrowRight, CalendarDays, Link, Target, WalletCards, X } from "lucide-r
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { useGoalsStore } from "@/src/features/goals/store/goals-store";
+import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
 
 export function GoalNewView({ onBack }: { onBack: () => void }) {
-  const addGoal = useGoalsStore((state) => state.addGoal);
+  const { createGoal } = useGoalsViewModel();
   const [title, setTitle] = useState("");
   const [productUrl, setProductUrl] = useState("");
   const [target, setTarget] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const save = () => {
+  const save = async () => {
     const targetCents = parseBrlInputToCents(target);
     if (!title.trim() || targetCents <= 0) {
       setError("Informe um nome e um valor-alvo válido.");
       return;
     }
 
-    addGoal({
-      id: `goal-${Date.now()}`,
-      title: title.trim(),
-      productUrl: productUrl.trim() || undefined,
-      category: "Planejamento",
-      priority: "Média",
-      targetCents,
-      savedCents: 0,
-      dueDate: dueDate.trim() || null,
-      syncStatus: "pending",
-    });
-    onBack();
+    try {
+      await createGoal({
+        title: title.trim(),
+        productUrl: productUrl.trim() || undefined,
+        category: "Planejamento",
+        priority: "Média",
+        targetCents,
+        savedCents: 0,
+        dueDate: dueDate.trim() || null,
+      });
+      onBack();
+    } catch {
+      setError("Não foi possível salvar a meta agora.");
+    }
   };
 
   return (
@@ -82,7 +84,7 @@ export function GoalNewView({ onBack }: { onBack: () => void }) {
         onChangeText={setDueDate}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Pressable accessibilityRole="button" onPress={save} style={styles.primary}>
+      <Pressable accessibilityRole="button" onPress={() => void save()} style={styles.primary}>
         <Text style={styles.primaryText}>Criar meta</Text>
         <ArrowRight color={colors.text} size={19} strokeWidth={2.5} />
       </Pressable>

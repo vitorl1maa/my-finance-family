@@ -46,3 +46,14 @@ Decisão recomendada: manter cinco entradas na navegação (Início, Transaçõe
 2. Criar o estado vazio determinístico e o banner com ilustração, texto e ação para adicionar fonte.
 3. Renderizar o banner apenas após o carregamento e somente quando não houver fontes persistidas.
 4. Cobrir a regra de exibição com teste automatizado e executar TypeScript, testes, Biome e diff check.
+
+# Plano de implementação — CRE-18 Interações com Supabase
+
+1. Completar a base de migrações para que uma instalação limpa possua `transactions`, `goals`, `income_sources` e `piggy_bank_settings`.
+2. Criar RLS e funções RPC para listar e gravar metas, fontes de renda e configurações do Cofrinho conforme a família autenticada.
+3. Criar repositories remotos tipados e mapeadores para os novos domínios, sem expor `family_id` como escolha do cliente.
+4. Ampliar o banco SQLite e os view models de Metas e Cofrinho para persistir localmente, carregar a cópia local primeiro e sincronizar dados remotos quando houver sessão.
+5. Preservar o fluxo já existente de Nova despesa/Transações e garantir que registros pendentes não se percam em falhas remotas.
+6. Adicionar testes de mapeamento e persistência; executar TypeScript, testes, Biome, Expo dependency check, diff check e revisão de segurança focada em Supabase/RLS.
+
+Decisão recomendada: Dashboard permanece um consumidor de dados financeiros, sem tabela de agregados. A família é resolvida em RPCs com `auth.uid()` para evitar que o cliente escreva em outra família.

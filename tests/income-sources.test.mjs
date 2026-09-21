@@ -46,7 +46,11 @@ test("persists and reads the manually edited piggy-bank balance", async () => {
   const operations = [];
   const db = {
     async getFirstAsync() {
-      return { balance_cents: 1248050, updated_at: "2026-09-21T12:00:00.000Z" };
+      return {
+        balance_cents: 1248050,
+        updated_at: "2026-09-21T12:00:00.000Z",
+        sync_status: "pending",
+      };
     },
     async runAsync(sql, ...params) {
       operations.push({ sql, params });
@@ -56,11 +60,18 @@ test("persists and reads the manually edited piggy-bank balance", async () => {
   await savePiggyBankSettings(db, {
     balanceCents: 1248050,
     updatedAt: "2026-09-21T12:00:00.000Z",
+    syncStatus: "pending",
   });
 
   assert.deepEqual(await getPiggyBankSettings(db), {
     balanceCents: 1248050,
     updatedAt: "2026-09-21T12:00:00.000Z",
+    syncStatus: "pending",
   });
-  assert.deepEqual(operations[0].params, ["default", 1248050, "2026-09-21T12:00:00.000Z"]);
+  assert.deepEqual(operations[0].params, [
+    "default",
+    1248050,
+    "2026-09-21T12:00:00.000Z",
+    "pending",
+  ]);
 });

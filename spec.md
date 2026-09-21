@@ -116,6 +116,55 @@ O aplicativo ainda não oferece um espaço dedicado para organizar as entradas r
 
 Quando não houver fontes de renda persistidas, o Dashboard deve substituir o banner de boas-vindas por um card de estado vazio do Cofrinho. O card usa a ilustração rosa do cofrinho, fundo rosa claro, texto curto e uma ação “Adicionar fonte” que abre a tela Cofrinho. Enquanto as fontes estiverem carregando, o card não deve aparecer; quando existir ao menos uma fonte, o banner de boas-vindas original permanece.
 
+# Especificações funcionais — CRE-18 Interações com Supabase
+
+## Objetivo
+
+Persistir no Supabase os dados financeiros exibidos nas telas de Dashboard, Transações, Nova despesa, Metas e Cofrinho, preservando o funcionamento local sem conexão.
+
+## Problema
+
+Metas e Cofrinho hoje existem apenas no dispositivo; despesas já possuem integração parcial. Assim, os dados não ficam disponíveis de forma consistente após trocar de dispositivo ou reinstalar o aplicativo.
+
+## Fluxo
+
+1. A pessoa cria ou altera uma despesa, meta, fonte de renda ou saldo do cofrinho.
+2. O aplicativo grava a alteração localmente antes de tentar a rede.
+3. Com sessão autenticada, o aplicativo sincroniza a alteração com os dados da família no Supabase.
+4. Ao abrir as telas, o aplicativo mostra primeiro os dados locais e atualiza-os com os dados remotos quando disponíveis.
+5. O Dashboard calcula seus indicadores usando os dados sincronizados; não possui uma tabela própria.
+
+## Regras
+
+- Cada registro remoto pertence à família da pessoa autenticada.
+- O cliente não escolhe a família do registro; o Supabase a determina pela associação autenticada.
+- Metas, fontes de renda e configuração do cofrinho devem possuir tabelas, RLS e operações de leitura/gravação remotas.
+- Despesas continuam usando a operação remota existente; a migração deve garantir que a tabela de transações exista em uma instalação limpa.
+- Em falhas de rede, a gravação local deve ser preservada e marcada como pendente/erro sem descartar a ação da pessoa.
+- Dados remotos recebidos devem substituir/atualizar a cópia local sem duplicação por identificador.
+
+## Casos de erro
+
+- Sem sessão: manter a operação somente local e não realizar uma chamada remota.
+- Sem conexão ou falha do Supabase: manter a operação local e informar que a sincronização será tentada posteriormente.
+- Acesso a registros de outra família: o Supabase deve rejeitar a leitura e a escrita por RLS.
+- Dados inválidos: a operação remota deve rejeitar valores vazios, negativos ou fora dos valores aceitos sem alterar registros válidos.
+
+## Critérios de aceite
+
+- O repositório possui migração Supabase para transações, metas, fontes de renda e configuração do cofrinho.
+- As tabelas financeiras novas usam RLS baseada na família autenticada.
+- Nova despesa, nova meta, fonte de renda e saldo do cofrinho são gravados localmente e sincronizados quando há sessão.
+- Reabrir Dashboard, Transações, Metas ou Cofrinho atualiza a cópia local com os registros remotos.
+- O Dashboard apresenta os dados derivados, sem uma tabela duplicada de resumo.
+- Os testes cobrem o mapeamento e a regra de persistência/sincronização adicionada.
+
+## Fora do escopo
+
+- Sincronização em tempo real por assinatura.
+- Exclusão e edição remota de metas ou fontes existentes que a interface ainda não expõe.
+- Migração de dados de uma família para outra.
+
 # Especificações funcionais — CRE-14, CRE-15 e CRE-16
 
 ## Objetivo

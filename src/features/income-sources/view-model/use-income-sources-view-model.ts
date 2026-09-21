@@ -1,10 +1,16 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
   type IncomeSource,
   totalIncomeSources,
 } from "@/src/features/income-sources/model/income-source";
+import {
+  getRemotePiggyBankSettings,
+  listRemoteIncomeSources,
+  upsertRemoteIncomeSource,
+  upsertRemotePiggyBankSettings,
+} from "@/src/features/income-sources/repository/income-sources-remote-repository";
 import {
   getPiggyBankSettings,
   listIncomeSources,
@@ -19,6 +25,7 @@ export function useIncomeSourcesViewModel() {
   const sources = useIncomeSourcesStore((state) => state.sources);
   const setSources = useIncomeSourcesStore((state) => state.setSources);
   const addSource = useIncomeSourcesStore((state) => state.addSource);
+  const session = useAuthStore((state) => state.session);
   const [loading, setLoading] = useState(true);
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [balanceCents, setBalanceCents] = useState(0);
@@ -28,9 +35,42 @@ export function useIncomeSourcesViewModel() {
     setLoading(true);
     setError(null);
     try {
-      const loadedSources = await listIncomeSources(db);
+      let loadedSources = await listIncomeSources(db);
       setSources(loadedSources);
-      const settings = await getPiggyBankSettings(db);
+      let settings = await getPiggyBankSettings(db);
+      setBalanceCents(settings?.balanceCents ?? 0);
+
+      if (!session) return;
+
+      for (const source of loadedSources.filter((item) => item.syncStatus !== "synced")) {
+        try {
+          await saveIncomeSource(db, await upsertRemoteIncomeSource(source));
+        } catch {
+          // Keep the local source pending so a later session refresh can retry it.
+        }
+      }
+
+      if (settings && settings.syncStatus !== "synced") {
+        try {
+          await savePiggyBankSettings(
+            db,
+            await upsertRemotePiggyBankSettings(settings.balanceCents),
+          );
+        } catch {
+          // The local balance remains pending when the device is offline.
+        }
+      }
+
+      const [remoteSources, remoteSettings] = await Promise.all([
+        listRemoteIncomeSources(),
+        getRemotePiggyBankSettings(),
+      ]);
+      await Promise.all(remoteSources.map((source) => saveIncomeSource(db, source)));
+      if (remoteSettings) await savePiggyBankSettings(db, remoteSettings);
+
+      loadedSources = await listIncomeSources(db);
+      settings = await getPiggyBankSettings(db);
+      setSources(loadedSources);
       setBalanceCents(settings?.balanceCents ?? 0);
     } catch {
       setError("Não foi possível carregar suas fontes de renda.");
@@ -38,7 +78,7 @@ export function useIncomeSourcesViewModel() {
       setLoading(false);
       setBalanceLoading(false);
     }
-  }, [db, setSources]);
+  }, [db, session, setSources]);
 
   useEffect(() => {
     void loadSources();
@@ -56,8 +96,17 @@ export function useIncomeSourcesViewModel() {
       };
       await saveIncomeSource(db, source);
       addSource(source);
+
+      if (!session) return;
+
+      try {
+        await saveIncomeSource(db, await upsertRemoteIncomeSource(source));
+        setSources(await listIncomeSources(db));
+      } catch {
+        setError("Fonte salva no dispositivo. A sincronização será tentada depois.");
+      }
     },
-    [addSource, db],
+    [addSource, db, session, setSources],
   );
 
   const saveBalance = useCallback(
@@ -65,10 +114,21 @@ export function useIncomeSourcesViewModel() {
       await savePiggyBankSettings(db, {
         balanceCents: nextBalanceCents,
         updatedAt: new Date().toISOString(),
+        syncStatus: "pending",
       });
       setBalanceCents(nextBalanceCents);
+
+      if (!session) return;
+
+      try {
+        const syncedSettings = await upsertRemotePiggyBankSettings(nextBalanceCents);
+        await savePiggyBankSettings(db, syncedSettings);
+        setBalanceCents(syncedSettings.balanceCents);
+      } catch {
+        setError("Saldo salvo no dispositivo. A sincronização será tentada depois.");
+      }
     },
-    [db],
+    [db, session],
   );
 
   const totalCents = useMemo(() => totalIncomeSources(sources), [sources]);

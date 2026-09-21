@@ -41,3 +41,17 @@ export async function createRemoteExpense(payload: CreateExpensePayload): Promis
 
   return mapRemoteTransaction(transaction as RemoteTransactionRow);
 }
+
+export async function syncRemoteExpense(transaction: Transaction): Promise<Transaction> {
+  if (!transaction.categoryId || transaction.amountCents >= 0) {
+    throw new Error("A transação pendente não é uma despesa sincronizável.");
+  }
+
+  return createRemoteExpense({
+    title: transaction.title,
+    categoryId: transaction.categoryId,
+    amountCents: Math.abs(transaction.amountCents),
+    occurredAt: transaction.occurredAt,
+    recurrenceRule: transaction.recurrenceRule ?? "none",
+  });
+}

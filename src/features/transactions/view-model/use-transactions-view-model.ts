@@ -10,6 +10,7 @@ import { buildCreateExpensePayload } from "@/src/features/transactions/model/exp
 import {
   createRemoteExpense,
   listRemoteTransactions,
+  syncRemoteExpense,
 } from "@/src/features/transactions/repository/transactions-remote-repository";
 import {
   listTransactions,
@@ -37,9 +38,20 @@ export function useTransactionsViewModel() {
     setTransactionsError(null);
 
     try {
-      setTransactions(await listTransactions(db));
+      const localTransactions = await listTransactions(db);
+      setTransactions(localTransactions);
 
       if (!session) return;
+
+      for (const transaction of localTransactions.filter(
+        (item) => item.syncStatus !== "synced" && item.amountCents < 0 && item.categoryId,
+      )) {
+        try {
+          await replaceTransaction(db, transaction.id, await syncRemoteExpense(transaction));
+        } catch {
+          // Keep the local expense pending so a later refresh can retry it.
+        }
+      }
 
       const remoteTransactions = await listRemoteTransactions();
       await upsertTransactions(db, remoteTransactions);
