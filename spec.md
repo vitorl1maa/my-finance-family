@@ -111,3 +111,52 @@ O aplicativo ainda não oferece um espaço dedicado para organizar as entradas r
 - Tela de receitas separada.
 - Edição ou exclusão de fontes já cadastradas.
 - Alteração das regras de autenticação ou das demais telas financeiras.
+
+# Especificações funcionais — CRE-14, CRE-15 e CRE-16
+
+## Objetivo
+
+Atualizar a experiência principal com navegação flutuante, banner de boas-vindas no Dashboard e edição de perfil acessível.
+
+## Problema
+
+A navegação curva ocupa uma área visual excessiva, o Dashboard não apresenta a mensagem visual de boas-vindas aprovada e não existe uma tela acessível para atualizar os dados da conta.
+
+## Fluxo
+
+1. A pessoa navega entre as cinco áreas pela barra branca flutuante na parte inferior.
+2. No Dashboard, vê o banner de boas-vindas com a ilustração aprovada.
+3. Ao tocar no avatar do Dashboard, abre “Editar perfil”.
+4. A pessoa altera foto, nome, email ou senha; os dados são salvos automaticamente após 10 segundos sem novas alterações.
+5. A pessoa pode tocar em “Sair” para encerrar a sessão.
+
+## Regras
+
+- A barra flutuante deve manter Início, Transações, Metas, Despesas e Cofrinho.
+- O item ativo deve ter contraste e estado visual distintos; todos os itens devem ter área de toque acessível.
+- O banner deve usar `assets/images/welcome.png` sem comprometer a leitura do texto.
+- O avatar deve indicar visualmente que pode ser alterado.
+- Senha vazia não deve ser enviada ao Supabase durante a edição de nome/email.
+- O salvamento automático deve usar debounce de 10 segundos.
+
+## Casos de erro
+
+- Falha no salvamento de perfil: exibir mensagem de erro sem apagar os valores digitados.
+- Falha no logout: manter a tela aberta e informar o problema.
+- Falha na imagem do banner: manter o card e o texto utilizáveis.
+
+## Critérios de aceite
+
+- A barra curva é substituída por uma cápsula flutuante branca, sem overflow.
+- O Dashboard exibe o banner de boas-vindas como primeiro banner de conteúdo.
+- O avatar abre a tela de editar perfil.
+- A tela contém foto, nome, email, senha e Sair.
+- O avatar exibe lápis diagonal e não há botão “Salvar alterações”.
+- Alterações são salvas automaticamente após 10 segundos.
+- TypeScript, testes, lint/format e diff check passam.
+
+## Fora do escopo
+
+- Upload real de foto para storage.
+- Histórico de alterações de perfil.
+- Mudanças no fluxo de cadastro de contas.

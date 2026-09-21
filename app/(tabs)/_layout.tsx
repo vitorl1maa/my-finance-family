@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import { BanknoteArrowUp, Home, PiggyBank, ReceiptText, Target } from "lucide-react-native";
 import type { ComponentProps } from "react";
 
-import { CurvedBottomTabs } from "@/src/shared/components/base/curved-bottom-tabs";
+import { FloatingBottomTabs } from "@/src/shared/components/base/floating-bottom-tabs";
 import { colors } from "@/src/shared/theme/colors";
 
 export default function TabLayout() {
@@ -17,14 +17,9 @@ export default function TabLayout() {
           borderTopColor: colors.border,
         },
       }}
-      tabBar={(props) => {
-        const curvedTabsProps = {
-          ...props,
-          gradients: [colors.text, colors.text],
-        } as unknown as ComponentProps<typeof CurvedBottomTabs>;
-
-        return <CurvedBottomTabs {...curvedTabsProps} />;
-      }}
+      tabBar={(props) => (
+        <FloatingBottomTabs {...(props as unknown as ComponentProps<typeof FloatingBottomTabs>)} />
+      )}
     >
       <Tabs.Screen
         name="index"

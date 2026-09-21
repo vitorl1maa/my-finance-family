@@ -31,3 +31,11 @@ Decisão recomendada: manter cinco entradas na navegação (Início, Transaçõe
 2. Inicializar o campo com `R$ 0,00` e salvar alterações somente após 10 segundos sem digitação.
 3. Aumentar a tipografia do saldo e remover a instrução auxiliar do card.
 4. Validar persistência, TypeScript, testes e diff check.
+
+# Plano de implementação — CRE-14, CRE-15 e CRE-16
+
+1. Substituir a barra curva por uma barra flutuante cápsula com estados ativo/inativo e acessibilidade.
+2. Criar o componente de boas-vindas com a imagem local aprovada e substituir o banner antigo do Dashboard.
+3. Criar rota protegida de editar perfil, conectar o avatar do Dashboard e usar o updateUser do Supabase com debounce de 10 segundos.
+4. Implementar logout, visibilidade da senha e estados de salvamento/erro sem botão manual.
+5. Executar TypeScript, testes, Biome, Expo dependency check e diff check; atualizar Linear após QA.

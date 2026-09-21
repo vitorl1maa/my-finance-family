@@ -3,6 +3,12 @@ import type { AuthFormError, RegisterProfile } from "@/src/features/auth/model/a
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { supabase } from "@/src/shared/supabase/supabase-client";
 
+export type ProfileUpdate = {
+  name: string;
+  email: string;
+  password?: string;
+};
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateLogin(email: string, password: string): AuthFormError {
@@ -90,7 +96,40 @@ export function useAuthViewModel() {
     return true;
   };
 
-  return { errorMessage, isLoading, setError, signInWithEmail, signUpWithEmail, signOut };
+  const updateProfile = async ({ name, email, password }: ProfileUpdate) => {
+    setLoading(true);
+    setError(null);
+
+    const [firstName, ...lastNameParts] = name.trim().split(/\s+/);
+    const attributes: Parameters<typeof supabase.auth.updateUser>[0] = {
+      data: {
+        first_name: firstName,
+        last_name: lastNameParts.join(" "),
+      },
+    };
+
+    if (email.trim()) attributes.email = email.trim();
+    if (password?.trim()) attributes.password = password;
+
+    const { error } = await supabase.auth.updateUser(attributes);
+    setLoading(false);
+    if (error) {
+      setError(getAuthErrorMessage(error));
+      return false;
+    }
+
+    return true;
+  };
+
+  return {
+    errorMessage,
+    isLoading,
+    setError,
+    signInWithEmail,
+    signUpWithEmail,
+    signOut,
+    updateProfile,
+  };
 }
 
 function getAuthErrorMessage(error: AuthError) {

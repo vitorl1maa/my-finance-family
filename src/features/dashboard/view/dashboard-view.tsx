@@ -1,13 +1,14 @@
 import { format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useRouter } from "expo-router";
 import { Bell, CircleDollarSign, Send } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
-import { HealthInsightBanner } from "@/src/features/dashboard/components/health-insight-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
+import { WelcomeBanner } from "@/src/features/dashboard/components/welcome-banner";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
 import { GradientAvatar } from "@/src/shared/components/base/gradient-avatar";
 import { colors } from "@/src/shared/theme/colors";
@@ -17,6 +18,7 @@ import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 type DashboardViewProps = Record<string, never>;
 
 export function DashboardView(_: DashboardViewProps) {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const { greeting, insights, recentTransactions, totalBalance, userName } =
     useDashboardViewModel(selectedDate);
@@ -29,12 +31,17 @@ export function DashboardView(_: DashboardViewProps) {
     >
       <View style={styles.header}>
         <View style={styles.profile}>
-          <GradientAvatar
-            palette={[colors.accent, colors.text, colors.surfaceMuted]}
-            sheen={false}
-            size={42}
-            token={userName}
-          />
+          <Pressable
+            accessibilityLabel="Editar perfil"
+            onPress={() => router.push("/edit-profile")}
+          >
+            <GradientAvatar
+              palette={[colors.accent, colors.text, colors.surfaceMuted]}
+              sheen={false}
+              size={42}
+              token={userName}
+            />
+          </Pressable>
           <Text style={styles.greeting}>
             {greeting.replace(",", "")} {userName}
           </Text>
@@ -61,10 +68,7 @@ export function DashboardView(_: DashboardViewProps) {
         </View>
       </View>
 
-      <HealthInsightBanner
-        healthMessage={insights.healthMessage}
-        healthStatus={insights.healthStatus}
-      />
+      <WelcomeBanner />
       <CashflowChart data={insights.weeklyCashflow} />
       <SpendingBreakdown categories={insights.expenseByCategory} />
 
