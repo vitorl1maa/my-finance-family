@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, FileText, Repeat2, Tags } from "lucide-react-native";
+import { ArrowRight, FileText, Repeat2, Tags } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -102,9 +102,6 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
           <Text style={styles.headerTitle}>Nova despesa</Text>
           <Text style={styles.headerSubtitle}>Registre uma nova despesa</Text>
         </View>
-        <Pressable accessibilityLabel="Voltar" onPress={onBack} style={styles.back}>
-          <ArrowLeft color={colors.text} size={22} />
-        </Pressable>
       </View>
       <Controller
         control={control}
@@ -278,12 +275,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  back: {
-    alignItems: "center",
-    height: 42,
-    justifyContent: "center",
-    width: 28,
   },
   headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 28 },
   headerSubtitle: { color: colors.muted, fontSize: 13, marginTop: 2 },
