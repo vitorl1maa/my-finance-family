@@ -6,10 +6,13 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
+import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
 import { WelcomeBanner } from "@/src/features/dashboard/components/welcome-banner";
+import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
+import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { GradientAvatar } from "@/src/shared/components/base/gradient-avatar";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
@@ -22,6 +25,8 @@ export function DashboardView(_: DashboardViewProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const { greeting, insights, recentTransactions, totalBalance, userName } =
     useDashboardViewModel(selectedDate);
+  const { loading: incomeSourcesLoading, sources } = useIncomeSourcesViewModel();
+  const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(incomeSourcesLoading, sources.length);
 
   return (
     <ScrollView
@@ -68,7 +73,11 @@ export function DashboardView(_: DashboardViewProps) {
         </View>
       </View>
 
-      <WelcomeBanner />
+      {isPiggyBankEmpty ? (
+        <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
+      ) : (
+        <WelcomeBanner />
+      )}
       <CashflowChart data={insights.weeklyCashflow} />
       <SpendingBreakdown categories={insights.expenseByCategory} />
 

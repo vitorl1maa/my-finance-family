@@ -39,3 +39,10 @@ Decisão recomendada: manter cinco entradas na navegação (Início, Transaçõe
 3. Criar rota protegida de editar perfil, conectar o avatar do Dashboard e usar o updateUser do Supabase com debounce de 10 segundos.
 4. Implementar logout, visibilidade da senha e estados de salvamento/erro sem botão manual.
 5. Executar TypeScript, testes, Biome, Expo dependency check e diff check; atualizar Linear após QA.
+
+# Plano de implementação — Estado vazio do Cofrinho no Dashboard
+
+1. Remover a criação automática de fontes fictícias no carregamento do Cofrinho.
+2. Criar o estado vazio determinístico e o banner com ilustração, texto e ação para adicionar fonte.
+3. Renderizar o banner apenas após o carregamento e somente quando não houver fontes persistidas.
+4. Cobrir a regra de exibição com teste automatizado e executar TypeScript, testes, Biome e diff check.

@@ -14,25 +14,6 @@ import {
 import { useIncomeSourcesStore } from "@/src/features/income-sources/store/income-sources-store";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
-const defaultSources: IncomeSource[] = [
-  {
-    id: "default-salary",
-    name: "Salários",
-    kind: "salary",
-    amountCents: 580000,
-    updatedAt: new Date(0).toISOString(),
-    syncStatus: "pending",
-  },
-  {
-    id: "default-investments",
-    name: "Investimentos",
-    kind: "investment",
-    amountCents: 668050,
-    updatedAt: new Date(0).toISOString(),
-    syncStatus: "pending",
-  },
-];
-
 export function useIncomeSourcesViewModel() {
   const db = useSQLiteContext();
   const sources = useIncomeSourcesStore((state) => state.sources);
@@ -47,11 +28,7 @@ export function useIncomeSourcesViewModel() {
     setLoading(true);
     setError(null);
     try {
-      let loadedSources = await listIncomeSources(db);
-      if (loadedSources.length === 0) {
-        await Promise.all(defaultSources.map((source) => saveIncomeSource(db, source)));
-        loadedSources = defaultSources;
-      }
+      const loadedSources = await listIncomeSources(db);
       setSources(loadedSources);
       const settings = await getPiggyBankSettings(db);
       setBalanceCents(settings?.balanceCents ?? 0);

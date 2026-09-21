@@ -112,6 +112,10 @@ O aplicativo ainda não oferece um espaço dedicado para organizar as entradas r
 - Edição ou exclusão de fontes já cadastradas.
 - Alteração das regras de autenticação ou das demais telas financeiras.
 
+# Estado vazio do Cofrinho no Dashboard
+
+Quando não houver fontes de renda persistidas, o Dashboard deve substituir o banner de boas-vindas por um card de estado vazio do Cofrinho. O card usa a ilustração rosa do cofrinho, fundo rosa claro, texto curto e uma ação “Adicionar fonte” que abre a tela Cofrinho. Enquanto as fontes estiverem carregando, o card não deve aparecer; quando existir ao menos uma fonte, o banner de boas-vindas original permanece.
+
 # Especificações funcionais — CRE-14, CRE-15 e CRE-16
 
 ## Objetivo
