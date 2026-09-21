@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { ChartNoAxesColumn, Home, ReceiptText, Settings, Target } from "lucide-react-native";
+import { Home, ReceiptText, Settings, Target } from "lucide-react-native";
 import type { ComponentProps } from "react";
 
 import { CurvedBottomTabs } from "@/src/shared/components/base/curved-bottom-tabs";
@@ -41,15 +41,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="accounts"
-        options={{
-          title: "Contas",
-          tabBarIcon: ({ color }) => (
-            <ChartNoAxesColumn color={color} size={22} strokeWidth={2.4} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="goals"
         options={{
           title: "Metas",
@@ -63,7 +54,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Settings color={color} size={22} strokeWidth={2.4} />,
         }}
       />
-      <Tabs.Screen name="account-new" options={{ href: null }} />
       <Tabs.Screen name="expense-new" options={{ href: null }} />
     </Tabs>
   );

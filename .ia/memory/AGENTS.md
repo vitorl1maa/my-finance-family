@@ -73,6 +73,7 @@ Referências de estilo: [Strategy Pattern](https://medium.com/mulheres-de-produt
 ## Git e entrega
 
 - Inspecionar `git status` e o diff antes de editar para não sobrescrever trabalho existente.
+- Não criar, usar ou solicitar worktrees. Realizar alterações sempre no checkout atual do projeto.
 - Fazer commits pequenos, focados e com mensagens no imperativo, por exemplo: `feat: add offline accounts repository`.
 - Não usar comandos destrutivos como `git reset --hard` ou `git checkout --` sem autorização explícita.
 - Nunca commitar `.env`, tokens, credenciais, bancos locais de desenvolvimento ou outros dados sensíveis.
@@ -86,6 +87,16 @@ Referências de estilo: [Strategy Pattern](https://medium.com/mulheres-de-produt
 - Considerar as regras deste arquivo durante o planejamento, a implementação e a validação; não consultar apenas após concluir a alteração.
 - Confirmar no início da execução que o arquivo foi lido e, na entrega, informar qualquer regra relevante que tenha influenciado a solução.
 - Se uma regra deste arquivo estiver desatualizada, conflitante ou impedir uma implementação segura, interromper a alteração e sinalizar o conflito antes de prosseguir.
+
+### Esteira obrigatória de agentes
+
+- Antes de analisar, planejar, implementar, revisar ou responder qualquer demanda do projeto, consultar e aplicar a esteira definida em `.ia/`.
+- Para novas funcionalidades e mudanças de comportamento, seguir obrigatoriamente a sequência: Product Owner (`.ia/AGENTS/po.md`) → Engenheiro Senior (`.ia/AGENTS/senior-dev.md`) → QA (`.ia/AGENTS/qa.md`).
+- Executar a esteira de forma autônoma, avançando para a próxima etapa assim que a etapa atual estiver concluída. Não solicitar aprovações intermediárias para especificação, plano ou implementação.
+- O Product Owner deve produzir ou atualizar `spec.md` antes do planejamento técnico. O Engenheiro Senior deve criar `implementation-plan.md`, implementar a especificação e encaminhar o resultado ao QA. O QA deve avaliar a implementação e o plano antes da conclusão.
+- Quando houver opções de solução e uma alternativa for recomendada, escolher automaticamente a alternativa recomendada e registrar de forma objetiva a decisão e a justificativa. Só interromper para pedir orientação quando não houver recomendação segura, a decisão alterar materialmente o escopo solicitado ou for necessária nova autorização externa.
+- Para correções, usar o prompt e os papéis correspondentes em `.ia/` antes de alterar código.
+- Em caso de conflito entre esta esteira e uma instrução específica da pessoa usuária, a instrução da pessoa usuária prevalece.
 
 1. Entender o pedido e verificar o estado atual do projeto antes de alterar arquivos.
 2. Para mudanças de produto ou comportamento, esclarecer a intenção e registrar uma decisão curta quando houver ambiguidade relevante.
