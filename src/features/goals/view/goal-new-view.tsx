@@ -1,8 +1,9 @@
 import { ArrowRight, CalendarDays, Link, Target, WalletCards, X } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
+import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
@@ -112,7 +113,7 @@ function Field({
       {icon}
       <View style={styles.fieldContent}>
         <Text style={styles.label}>{label}</Text>
-        <TextInput
+        <SmoothTextInput
           autoCapitalize="sentences"
           keyboardType={keyboardType}
           onChangeText={onChangeText}

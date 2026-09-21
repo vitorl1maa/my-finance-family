@@ -1,21 +1,13 @@
 import { PiggyBank, Plus, RefreshCw, WalletCards } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import {
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
+import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import {
@@ -73,7 +65,7 @@ export function IncomeSourcesView() {
         <View style={styles.cardOverlay} />
         <View style={styles.balanceContent}>
           <Text style={styles.balanceEyebrow}>SALDO DO COFRINHO</Text>
-          <TextInput
+          <SmoothTextInput
             accessibilityLabel="Saldo do cofrinho"
             keyboardType="decimal-pad"
             onChangeText={(value) => setBalance(formatBrlInput(value))}

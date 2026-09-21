@@ -1,6 +1,6 @@
 import { Search, ShoppingCart, WalletCards } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   filterTransactions,
@@ -9,6 +9,7 @@ import {
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
+import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
@@ -26,7 +27,7 @@ export function TransactionsView() {
       <Text style={styles.subtitle}>Acompanhe tudo que entra e sai</Text>
       <View style={styles.searchBox}>
         <Search color={colors.muted} size={19} />
-        <TextInput
+        <SmoothTextInput
           accessibilityLabel="Buscar transações"
           autoCapitalize="none"
           onChangeText={setQuery}

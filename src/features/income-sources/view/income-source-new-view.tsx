@@ -1,8 +1,9 @@
 import { ArrowRight, CircleDollarSign, X } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
+import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
@@ -102,7 +103,7 @@ function Field({
       <CircleDollarSign color={colors.muted} size={18} />
       <View style={styles.fieldContent}>
         <Text style={styles.label}>{label}</Text>
-        <TextInput
+        <SmoothTextInput
           accessibilityLabel={label}
           keyboardType={keyboardType}
           onChangeText={onChangeText}
