@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   balanceEyebrow: {
     color: colors.darkPink,
     fontFamily: fonts.bold,
-    fontSize: 12,
+    fontSize: 14,
     letterSpacing: 0.4,
   },
   balanceInput: {

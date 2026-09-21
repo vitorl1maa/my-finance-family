@@ -6,6 +6,7 @@ import {
 } from "@/src/features/dashboard/model/dashboard-greeting";
 import { buildDashboardInsights } from "@/src/features/dashboard/model/dashboard-insights";
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
+import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 
 export function useDashboardViewModel(selectedDate: Date = new Date()) {
@@ -13,6 +14,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const accounts = useAccountsViewModel();
   const transactions = useTransactionsViewModel();
   const goals = useGoalsViewModel();
+  const incomeSources = useIncomeSourcesViewModel();
 
   return {
     accounts: accounts.accounts,
@@ -20,8 +22,10 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     greeting: getDashboardGreeting(),
     insights: buildDashboardInsights(transactions.transactions, selectedDate),
     recentTransactions: transactions.transactions.slice(0, 3),
-    totalBalance: accounts.totalBalance,
-    totalBalanceCents: accounts.totalBalanceCents,
+    totalBalance: incomeSources.formattedTotal,
+    totalBalanceCents: incomeSources.balanceCents,
+    incomeSourcesLoading: incomeSources.loading,
+    incomeSources: incomeSources.sources,
     userName: getUserDisplayName(session?.user.user_metadata),
   };
 }

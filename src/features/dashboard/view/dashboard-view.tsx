@@ -12,7 +12,6 @@ import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calen
 import { WelcomeBanner } from "@/src/features/dashboard/components/welcome-banner";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
-import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { GradientAvatar } from "@/src/shared/components/base/gradient-avatar";
 import { colors } from "@/src/shared/theme/colors";
@@ -23,10 +22,19 @@ type DashboardViewProps = Record<string, never>;
 export function DashboardView(_: DashboardViewProps) {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { greeting, insights, recentTransactions, totalBalanceCents, userName } =
-    useDashboardViewModel(selectedDate);
-  const { loading: incomeSourcesLoading, sources } = useIncomeSourcesViewModel();
-  const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(incomeSourcesLoading, sources.length);
+  const {
+    greeting,
+    incomeSources,
+    incomeSourcesLoading,
+    insights,
+    recentTransactions,
+    totalBalanceCents,
+    userName,
+  } = useDashboardViewModel(selectedDate);
+  const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(
+    incomeSourcesLoading,
+    incomeSources.length,
+  );
 
   return (
     <ScrollView
