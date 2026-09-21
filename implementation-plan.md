@@ -8,5 +8,6 @@
 6. Executar QA: testes, TypeScript, Expo dependency check, diff check e revisão visual estática dos critérios.
 7. Corrigir o cabeçalho legado de Nova despesa, substituindo o título centralizado por título/subtítulo alinhados e retorno acessível.
 8. Remover o ícone decorativo do drawer de nova meta sem alterar os ícones funcionais dos campos.
+9. Padronizar o espaçamento superior de Nova despesa com o respiro vertical das demais páginas.
 
 Decisão recomendada: fazer a menor alteração compatível com o protótipo, reutilizando o formulário e a navegação existentes; não introduzir backend novo nem worktree.

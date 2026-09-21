@@ -27,6 +27,7 @@ A navegação ainda exibe a tela “Mais”, a ação de despesas não está rep
 - O padrão visual de cabeçalho deve ser mantido nas telas de Metas, Transações e Nova despesa.
 - Nova despesa deve usar título alinhado à esquerda, subtítulo de apoio e ação de retorno no lado direito; não deve exibir o cabeçalho legado centralizado com “1 de 1” e reticências.
 - O drawer de nova meta não deve exibir ícone decorativo entre o cabeçalho e o título do formulário; os ícones dos campos permanecem.
+- Nova despesa deve manter o mesmo espaçamento superior das telas principais, preservando 58px antes do cabeçalho.
 
 ## Casos de erro
 
