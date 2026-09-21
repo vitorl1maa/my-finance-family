@@ -2,8 +2,8 @@ import { CalendarDays, CircleCheck, Flag, Plus, Target, WalletCards } from "luci
 import { useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { GoalNewView } from "@/src/features/goals/view/goal-new-view";
+import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 

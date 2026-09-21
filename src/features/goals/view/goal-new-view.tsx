@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Target, WalletCards, X } from "lucide-react-native";
+import { ArrowRight, CalendarDays, Link, Target, WalletCards, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -10,6 +10,7 @@ import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
 export function GoalNewView({ onBack }: { onBack: () => void }) {
   const addGoal = useGoalsStore((state) => state.addGoal);
   const [title, setTitle] = useState("");
+  const [productUrl, setProductUrl] = useState("");
   const [target, setTarget] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function GoalNewView({ onBack }: { onBack: () => void }) {
     addGoal({
       id: `goal-${Date.now()}`,
       title: title.trim(),
+      productUrl: productUrl.trim() || undefined,
       category: "Planejamento",
       priority: "Média",
       targetCents,
@@ -36,12 +38,14 @@ export function GoalNewView({ onBack }: { onBack: () => void }) {
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <View style={styles.topRow}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>Nova meta</Text>
+          <Text style={styles.headerSubtitle}>Defina um objetivo para acompanhar</Text>
+        </View>
         <Pressable accessibilityLabel="Fechar nova meta" onPress={onBack} style={styles.back}>
           <X color={colors.text} size={20} />
         </Pressable>
-        <Text style={styles.step}>Nova meta</Text>
-        <Target color={colors.text} size={22} />
       </View>
       <View style={styles.heroIcon}>
         <WalletCards color={colors.text} size={25} />
@@ -56,6 +60,14 @@ export function GoalNewView({ onBack }: { onBack: () => void }) {
         placeholder="Ex.: Viagem de férias"
         value={title}
         onChangeText={setTitle}
+      />
+      <Field
+        icon={<Link color={colors.muted} size={18} />}
+        label="Link do produto ou serviço"
+        placeholder="https://... (opcional)"
+        value={productUrl}
+        onChangeText={setProductUrl}
+        keyboardType="url"
       />
       <Field
         icon={<WalletCards color={colors.muted} size={18} />}
@@ -94,7 +106,7 @@ function Field({
   placeholder: string;
   value: string;
   onChangeText: (value: string) => void;
-  keyboardType?: "default" | "decimal-pad";
+  keyboardType?: "default" | "decimal-pad" | "url";
 }) {
   return (
     <View style={styles.field}>
@@ -121,9 +133,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 14,
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 32,
   },
-  topRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 20 },
+  headerSubtitle: { color: colors.muted, fontSize: 12, marginTop: 4 },
   back: {
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
@@ -132,7 +146,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 42,
   },
-  step: { color: colors.text, fontFamily: fonts.bold, fontSize: 16 },
   heroIcon: {
     alignItems: "center",
     backgroundColor: colors.accent,

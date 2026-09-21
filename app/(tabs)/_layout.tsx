@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, ReceiptText, Settings, Target } from "lucide-react-native";
+import { BanknoteArrowUp, Home, ReceiptText, Target } from "lucide-react-native";
 import type { ComponentProps } from "react";
 
 import { CurvedBottomTabs } from "@/src/shared/components/base/curved-bottom-tabs";
@@ -48,13 +48,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="expense-new"
         options={{
-          title: "Mais",
-          tabBarIcon: ({ color }) => <Settings color={color} size={22} strokeWidth={2.4} />,
+          title: "Despesas",
+          tabBarIcon: ({ color }) => <BanknoteArrowUp color={color} size={22} strokeWidth={2.4} />,
         }}
       />
-      <Tabs.Screen name="expense-new" options={{ href: null }} />
     </Tabs>
   );
 }

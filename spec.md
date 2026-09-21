@@ -1,52 +1,51 @@
-# Tela de transações
+# Especificação funcional — issues abertas do Product Board
 
 ## Objetivo
 
-Permitir que a família consulte, em uma única tela, as transações financeiras já registradas, encontrando rapidamente uma despesa ou receita por descrição ou categoria.
+Alinhar a navegação e os fluxos visuais do aplicativo ao protótipo aprovado e concluir o fluxo de criação de metas.
 
 ## Problema
 
-A aplicação possui registros de transações, mas a tela atual não apresenta o histórico de forma alinhada ao protótipo e usa itens de exemplo em vez dos registros reais. Isso limita o acompanhamento das movimentações da família.
+A navegação ainda exibe a tela “Mais”, a ação de despesas não está representada como uma entrada clara do menu, e o drawer de nova meta não contém todos os campos definidos no protótipo nem segue completamente o padrão visual do drawer de recorrência.
 
 ## Fluxo
 
-1. Ao acessar a aba **Transações**, a pessoa usuária vê o título, uma frase curta de apoio e um campo de busca.
-2. O aplicativo apresenta as transações disponíveis, da mais recente para a mais antiga, agrupadas em **HOJE**, **ONTEM** ou pela data correspondente para registros anteriores.
-3. Cada transação mostra ícone, descrição, tipo e categoria, além do valor com sinal e cor que indiquem despesa ou receita.
-4. Ao digitar no campo de busca, a lista é filtrada por descrição e categoria, sem exigir uma ação adicional.
-5. Quando uma despesa é salva pelo fluxo já existente, ela passa a aparecer na lista de transações.
+1. A pessoa navega pelo menu inferior entre Início, Transações, Metas e Despesas.
+2. “Mais” não aparece como tela nem como item do menu.
+3. Ao abrir Despesas, a pessoa acessa o formulário de nova despesa, identificado pelo ícone `banknote-arrow-up` e pelo rótulo “Despesas”.
+4. Na tela Metas, a pessoa toca no botão “+” e vê um drawer inferior com título, descrição, botão de fechar e campos de nova meta.
+5. A pessoa informa nome, link do produto ou serviço, valor-alvo e prazo opcional; ao salvar, a nova meta aparece na lista.
 
 ## Regras
 
-- A tela não possui botão de adição de transação.
-- O cadastro de receitas não faz parte desta entrega.
-- Despesas e receitas existentes devem ser exibidas na lista.
-- A busca não diferencia letras maiúsculas de minúsculas e considera descrição e categoria.
-- Despesas devem exibir valor negativo em vermelho; receitas, valor positivo em verde.
-- A ordenação deve priorizar as transações mais recentes.
-- As informações apresentadas devem pertencer somente à família da pessoa usuária autenticada.
+- A navegação inferior deve conter somente Início, Transações, Metas e Despesas.
+- O item Despesas deve usar o ícone `BanknoteArrowUp` e o rótulo “Despesas”.
+- O drawer de metas deve preservar o padrão de superfície, título, descrição, fechar e botão de ação do drawer de Recorrência.
+- Nome e valor-alvo são obrigatórios; valor-alvo deve ser maior que zero.
+- Link do produto/serviço e prazo são opcionais.
+- A meta criada inicia com valor acumulado zero e status pendente de sincronização.
+- O padrão visual de cabeçalho deve ser mantido nas telas de Metas, Transações e Nova despesa.
 
 ## Casos de erro
 
-- Sem transações: informar que ainda não há transações registradas.
-- Busca sem resultado: informar que nenhuma transação foi encontrada.
-- Falha ao obter transações: exibir mensagem compreensível e uma ação para tentar novamente.
-- Sem conexão: manter disponíveis os dados de transações já existentes no dispositivo e informar a indisponibilidade de atualização quando aplicável.
+- Nome vazio ou somente espaços: impedir o salvamento e informar que nome e valor-alvo são necessários.
+- Valor-alvo vazio, inválido ou igual a zero: impedir o salvamento e informar valor-alvo inválido.
+- Link preenchido: preservar o texto informado sem bloquear a criação por ausência de validação de URL nesta etapa.
+- Fechamento do drawer: descartar os dados ainda não salvos e retornar à lista.
 
 ## Critérios de aceite
 
-- A tela segue a hierarquia visual do protótipo fornecido: título, texto de apoio, campo de busca e lista agrupada por data.
-- Não é exibido botão “+” na tela.
-- A lista apresenta registros reais disponíveis para a família autenticada, ordenados do mais recente para o mais antigo.
-- A busca encontra registros por descrição e categoria, sem diferenciar maiúsculas e minúsculas.
-- Cada registro identifica corretamente despesa ou receita por texto, sinal, cor e valor.
-- A tela apresenta estados claros de carregamento, ausência de dados, busca sem resultado e falha de carregamento.
-- Uma nova despesa salva pelo fluxo existente fica disponível na listagem.
-- O histórico já salvo no dispositivo continua visível quando não houver conexão.
+- O menu inferior não exibe “Mais” e não registra a rota de configurações.
+- O menu exibe “Despesas” com `BanknoteArrowUp` e abre o formulário de nova despesa.
+- O cabeçalho de Metas segue o protótipo com título, subtítulo e botão “+”.
+- O drawer de nova meta apresenta título, descrição, fechar, nome, link, valor-alvo, prazo e ação “Criar meta”.
+- Uma meta válida aparece na lista após o salvamento.
+- Dados inválidos não criam metas e apresentam mensagem de erro acessível.
+- TypeScript, testes e verificações de dependências executam sem falhas novas.
 
 ## Fora do escopo
 
-- Cadastro, edição ou exclusão de receitas.
-- Cadastro, edição ou exclusão de transações diretamente pela tela de transações.
-- Filtros por período, conta, valor ou categoria além da busca textual.
-- Alterações nas regras de categorias, contas, metas ou autenticação.
+- Implementar tela de receitas.
+- Alterar autenticação ou criar uma nova tela de logout.
+- Persistir o novo link em backend remoto nesta etapa, caso a infraestrutura atual de metas ainda não o suporte.
+- Redesenhar o conteúdo das telas além dos cabeçalhos, navegação e drawer descritos.
