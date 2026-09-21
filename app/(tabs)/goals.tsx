@@ -1,6 +1,6 @@
 import { CalendarDays, CircleCheck, Flag, Plus, Target, WalletCards } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { GoalNewView } from "@/src/features/goals/view/goal-new-view";
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
@@ -9,14 +9,25 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export default function GoalsScreen() {
   const [goalDrawerVisible, setGoalDrawerVisible] = useState(false);
-  const { goals } = useGoalsViewModel();
+  const { goals, loading, reload } = useGoalsViewModel();
   const totalTarget = goals.reduce((total, goal) => total + goal.targetCents, 0);
   const totalSaved = goals.reduce((total, goal) => total + goal.savedCents, 0);
   const overallProgress = totalTarget ? Math.min(1, totalSaved / totalTarget) : 0;
   const completedGoals = goals.filter((goal) => goal.status === "Concluída").length;
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          colors={[colors.darkPink]}
+          onRefresh={reload}
+          refreshing={loading}
+          tintColor={colors.darkPink}
+        />
+      }
+      style={styles.screen}
+    >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Metas</Text>

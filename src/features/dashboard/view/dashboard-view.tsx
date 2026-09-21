@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
 import { Bell, CircleDollarSign, Send } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
 import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
@@ -27,7 +27,9 @@ export function DashboardView(_: DashboardViewProps) {
     incomeSources,
     incomeSourcesLoading,
     insights,
+    loading,
     recentTransactions,
+    reload,
     totalBalanceCents,
     userName,
   } = useDashboardViewModel(selectedDate);
@@ -40,6 +42,14 @@ export function DashboardView(_: DashboardViewProps) {
     <ScrollView
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl
+          colors={[colors.darkPink]}
+          onRefresh={reload}
+          refreshing={loading}
+          tintColor={colors.darkPink}
+        />
+      }
       style={styles.container}
     >
       <View style={styles.header}>
@@ -65,19 +75,25 @@ export function DashboardView(_: DashboardViewProps) {
       </View>
 
       <WeeklyCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
-      <View style={styles.summary}>
-        <Text style={styles.summaryLabel}>COFRINHO</Text>
-        <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
-        <View style={styles.summaryStats}>
-          <Metric label="Entradas no mês" prefix="+ " valueInCents={insights.monthlyIncomeCents} />
-          <Metric
-            accent
-            label="Despesas no mês"
-            prefix="- "
-            valueInCents={insights.monthlyExpenseCents}
-          />
+      {totalBalanceCents > 0 ? (
+        <View style={styles.summary}>
+          <Text style={styles.summaryLabel}>COFRINHO</Text>
+          <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
+          <View style={styles.summaryStats}>
+            <Metric
+              label="Entradas no mês"
+              prefix="+ "
+              valueInCents={insights.monthlyIncomeCents}
+            />
+            <Metric
+              accent
+              label="Despesas no mês"
+              prefix="- "
+              valueInCents={insights.monthlyExpenseCents}
+            />
+          </View>
         </View>
-      </View>
+      ) : null}
 
       {isPiggyBankEmpty ? (
         <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />

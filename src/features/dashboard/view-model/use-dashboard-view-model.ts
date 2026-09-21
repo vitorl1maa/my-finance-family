@@ -16,6 +16,15 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const goals = useGoalsViewModel();
   const incomeSources = useIncomeSourcesViewModel();
 
+  const reload = async () => {
+    await Promise.all([
+      goals.reload(),
+      incomeSources.reload(),
+      transactions.reloadTransactions(),
+      transactions.reloadCategories(),
+    ]);
+  };
+
   return {
     accounts: accounts.accounts,
     goals: goals.goals,
@@ -26,6 +35,8 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     totalBalanceCents: incomeSources.balanceCents,
     incomeSourcesLoading: incomeSources.loading,
     incomeSources: incomeSources.sources,
+    loading: incomeSources.loading || goals.loading || transactions.transactionsLoading,
+    reload,
     userName: getUserDisplayName(session?.user.user_metadata),
   };
 }

@@ -1,6 +1,6 @@
 import { Search, ShoppingCart, WalletCards } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   filterTransactions,
@@ -22,7 +22,18 @@ export function TransactionsView() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          colors={[colors.darkPink]}
+          onRefresh={viewModel.reloadTransactions}
+          refreshing={viewModel.transactionsLoading}
+          tintColor={colors.darkPink}
+        />
+      }
+      style={styles.screen}
+    >
       <Text style={styles.title}>Transações</Text>
       <Text style={styles.subtitle}>Acompanhe tudo que entra e sai</Text>
       <View style={styles.searchBox}>
