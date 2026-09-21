@@ -1,6 +1,15 @@
-import { PiggyBank, Plus, RefreshCw, WalletCards } from "lucide-react-native";
+import { PiggyBank, Plus, WalletCards } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
@@ -40,7 +49,18 @@ export function IncomeSourcesView() {
   }, [balance, balanceReady, viewModel.balanceLoading, viewModel.saveBalance]);
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          colors={[colors.darkPink]}
+          onRefresh={viewModel.reload}
+          refreshing={viewModel.loading && viewModel.sources.length > 0}
+          tintColor={colors.darkPink}
+        />
+      }
+      style={styles.screen}
+    >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Cofrinho</Text>
@@ -90,15 +110,6 @@ export function IncomeSourcesView() {
         </Pressable>
       </View>
 
-      {viewModel.error ? (
-        <View style={styles.notice}>
-          <Text style={styles.noticeText}>{viewModel.error}</Text>
-          <Pressable accessibilityRole="button" onPress={viewModel.reload} style={styles.retry}>
-            <RefreshCw color={colors.text} size={15} />
-            <Text style={styles.retryText}>Tentar novamente</Text>
-          </Pressable>
-        </View>
-      ) : null}
       {viewModel.loading && viewModel.sources.length === 0 ? <LoadingShimmer rows={2} /> : null}
       {!viewModel.loading && viewModel.sources.length === 0 ? (
         <View style={styles.empty}>
@@ -219,10 +230,6 @@ const styles = StyleSheet.create({
   sourceName: { color: colors.text, fontFamily: fonts.bold, fontSize: 15 },
   sourceMeta: { color: colors.muted, fontSize: 12 },
   sourceAmount: { color: colors.positive, fontFamily: fonts.bold, fontSize: 14 },
-  notice: { backgroundColor: colors.surfaceMuted, borderRadius: 14, gap: 8, padding: 12 },
-  noticeText: { color: colors.muted, fontSize: 12 },
-  retry: { alignItems: "center", flexDirection: "row", gap: 6 },
-  retryText: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
   empty: { alignItems: "center", gap: 7, padding: 24 },
   emptyTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 15 },
   emptyText: { color: colors.muted, fontSize: 12 },
