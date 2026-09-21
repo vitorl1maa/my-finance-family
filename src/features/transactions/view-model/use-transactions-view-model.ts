@@ -71,7 +71,11 @@ export function useTransactionsViewModel() {
     try {
       const remoteCategories = await listFamilyCategories();
 
-      if (remoteCategories.length > 0) setCategories(remoteCategories);
+      if (remoteCategories.length === 0) {
+        throw new Error("categories_not_found");
+      }
+
+      setCategories(remoteCategories);
     } catch {
       if (session) setCategoriesError("Não foi possível atualizar as categorias.");
     } finally {
