@@ -1,10 +1,7 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
-import {
-  type ExpenseCategory,
-  fallbackExpenseCategories,
-} from "@/src/features/categories/model/expense-category";
+import type { ExpenseCategory } from "@/src/features/categories/model/expense-category";
 import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
 import {
@@ -25,7 +22,7 @@ export function useTransactionsViewModel() {
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
   const session = useAuthStore((state) => state.session);
-  const [categories, setCategories] = useState<ExpenseCategory[]>(fallbackExpenseCategories);
+  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -102,7 +99,7 @@ export function useTransactionsViewModel() {
         const payload = buildCreateExpensePayload(input);
         const pendingTransaction = {
           id: `pending-expense-${Date.now()}`,
-          accountId: "main-account",
+          accountId: "",
           title: payload.title,
           category: input.categoryName,
           categoryId: input.categoryId,

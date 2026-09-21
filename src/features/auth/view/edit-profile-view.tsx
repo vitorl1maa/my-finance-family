@@ -13,9 +13,8 @@ export function EditProfileView({ onBack }: { onBack: () => void }) {
   const metadata = session?.user.user_metadata as
     | { first_name?: string; last_name?: string }
     | undefined;
-  const initialName =
-    [metadata?.first_name, metadata?.last_name].filter(Boolean).join(" ") || "Vitor e família";
-  const initialEmail = session?.user.email ?? "vitor@email.com";
+  const initialName = [metadata?.first_name, metadata?.last_name].filter(Boolean).join(" ");
+  const initialEmail = session?.user.email ?? "";
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");

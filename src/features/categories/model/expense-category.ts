@@ -21,16 +21,3 @@ export function orderExpenseCategories(categories: ExpenseCategory[]): ExpenseCa
       );
     });
 }
-
-export const fallbackExpenseCategories: ExpenseCategory[] = [
-  { id: "moradia", familyId: "local-family", name: "Moradia", slug: "moradia", isActive: true },
-  {
-    id: "alimentacao",
-    familyId: "local-family",
-    name: "Alimentação",
-    slug: "alimentacao",
-    isActive: true,
-  },
-  { id: "saude", familyId: "local-family", name: "Saúde", slug: "saude", isActive: true },
-  { id: "lazer", familyId: "local-family", name: "Lazer", slug: "lazer", isActive: true },
-];

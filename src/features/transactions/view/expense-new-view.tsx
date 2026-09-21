@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { fallbackExpenseCategories } from "@/src/features/categories/model/expense-category";
 import { CategoryPicker } from "@/src/features/transactions/components/category-picker";
 import {
   ExpenseRecurrencePicker,
@@ -46,7 +45,7 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
   } = useTransactionsViewModel();
   const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
   const [recurrencePickerVisible, setRecurrencePickerVisible] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(fallbackExpenseCategories[0].id);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedRecurrence, setSelectedRecurrence] = useState<RecurrenceRule>("none");
   const {
@@ -58,7 +57,7 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
     defaultValues: {
       title: "",
       amount: "",
-      categoryId: fallbackExpenseCategories[0].id,
+      categoryId: "",
       recurrence: recurrenceLabel("none"),
     },
   });
