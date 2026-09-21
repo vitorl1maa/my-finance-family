@@ -15,6 +15,7 @@ import {
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import {
@@ -126,7 +127,7 @@ export function IncomeSourcesView() {
               <Text style={styles.sourceName}>{source.name}</Text>
               <Text style={styles.sourceMeta}>{incomeSourceKindLabel(source.kind)}</Text>
             </View>
-            <Text style={styles.sourceAmount}>{formatCurrencyFromCents(source.amountCents)}</Text>
+            <AnimatedCurrency style={styles.sourceAmount} valueInCents={source.amountCents} />
           </View>
         ))
       )}

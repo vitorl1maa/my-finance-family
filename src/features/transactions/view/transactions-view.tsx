@@ -15,9 +15,9 @@ import {
   groupTransactionsByDay,
 } from "@/src/features/transactions/model/transaction-list";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
+import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
-import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 export function TransactionsView() {
   const [query, setQuery] = useState("");
@@ -72,14 +72,13 @@ export function TransactionsView() {
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
                   </Text>
                 </View>
-                <Text
+                <AnimatedCurrency
                   style={[
                     styles.amount,
                     transaction.amountCents < 0 ? styles.expense : styles.income,
                   ]}
-                >
-                  {formatCurrencyFromCents(transaction.amountCents)}
-                </Text>
+                  valueInCents={transaction.amountCents}
+                />
               </View>
             ))}
           </View>

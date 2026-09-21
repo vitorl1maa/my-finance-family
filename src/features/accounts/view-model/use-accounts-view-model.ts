@@ -46,6 +46,7 @@ export function useAccountsViewModel() {
       totalBalance: formatCurrencyFromCents(
         accounts.reduce((total, account) => total + account.balanceCents, 0),
       ),
+      totalBalanceCents: accounts.reduce((total, account) => total + account.balanceCents, 0),
       createAccount,
     }),
     [accounts, createAccount],

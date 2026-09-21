@@ -21,6 +21,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     insights: buildDashboardInsights(transactions.transactions, selectedDate),
     recentTransactions: transactions.transactions.slice(0, 3),
     totalBalance: accounts.totalBalance,
+    totalBalanceCents: accounts.totalBalanceCents,
     userName: getUserDisplayName(session?.user.user_metadata),
   };
 }

@@ -13,17 +13,17 @@ import { WelcomeBanner } from "@/src/features/dashboard/components/welcome-banne
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { GradientAvatar } from "@/src/shared/components/base/gradient-avatar";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
-import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 type DashboardViewProps = Record<string, never>;
 
 export function DashboardView(_: DashboardViewProps) {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const { greeting, insights, recentTransactions, totalBalance, userName } =
+  const { greeting, insights, recentTransactions, totalBalanceCents, userName } =
     useDashboardViewModel(selectedDate);
   const { loading: incomeSourcesLoading, sources } = useIncomeSourcesViewModel();
   const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(incomeSourcesLoading, sources.length);
@@ -59,16 +59,14 @@ export function DashboardView(_: DashboardViewProps) {
       <WeeklyCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
       <View style={styles.summary}>
         <Text style={styles.summaryLabel}>COFRINHO</Text>
-        <Text style={styles.total}>{totalBalance}</Text>
+        <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
         <View style={styles.summaryStats}>
-          <Metric
-            label="Entradas no mês"
-            value={`+ ${formatCurrencyFromCents(insights.monthlyIncomeCents)}`}
-          />
+          <Metric label="Entradas no mês" prefix="+ " valueInCents={insights.monthlyIncomeCents} />
           <Metric
             accent
             label="Despesas no mês"
-            value={`- ${formatCurrencyFromCents(insights.monthlyExpenseCents)}`}
+            prefix="- "
+            valueInCents={insights.monthlyExpenseCents}
           />
         </View>
       </View>
@@ -124,11 +122,27 @@ function formatTransactionDate(value: string): string {
   return `${format(date, "dd MMM", { locale: ptBR })} · ${format(date, "HH:mm")}`;
 }
 
-function Metric({ accent, label, value }: { accent?: boolean; label: string; value: string }) {
+function Metric({
+  accent,
+  label,
+  prefix,
+  valueInCents,
+}: {
+  accent?: boolean;
+  label: string;
+  prefix: string;
+  valueInCents: number;
+}) {
   return (
     <View style={styles.metric}>
       <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={[styles.metricValue, accent && styles.metricAccent]}>{value}</Text>
+      <View style={styles.metricAmount}>
+        <Text style={[styles.metricValue, accent && styles.metricAccent]}>{prefix}</Text>
+        <AnimatedCurrency
+          style={[styles.metricValue, accent && styles.metricAccent]}
+          valueInCents={valueInCents}
+        />
+      </View>
     </View>
   );
 }
@@ -161,6 +175,7 @@ const styles = StyleSheet.create({
   total: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -0.5 },
   summaryStats: { flexDirection: "row", gap: 160 },
   metric: { flex: 1, gap: 3 },
+  metricAmount: { alignItems: "center", flexDirection: "row" },
   metricLabel: { color: "#A3A3A3", fontSize: 12 },
   metricValue: { color: colors.surface, fontFamily: fonts.bold, fontSize: 13 },
   metricAccent: { color: colors.accent },
