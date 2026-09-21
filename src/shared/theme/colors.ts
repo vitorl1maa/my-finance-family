@@ -9,4 +9,5 @@ export const colors = {
   text: "#101010",
   positive: "#16A34A",
   negative: "#DC2626",
+  darkPink: "#9D174D",
 };

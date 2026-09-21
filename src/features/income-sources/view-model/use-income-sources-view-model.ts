@@ -1,0 +1,90 @@
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import {
+  type IncomeSource,
+  totalIncomeSources,
+} from "@/src/features/income-sources/model/income-source";
+import {
+  listIncomeSources,
+  saveIncomeSource,
+} from "@/src/features/income-sources/repository/income-sources-repository";
+import { useIncomeSourcesStore } from "@/src/features/income-sources/store/income-sources-store";
+import { formatCurrencyFromCents } from "@/src/shared/utils/money";
+
+const defaultSources: IncomeSource[] = [
+  {
+    id: "default-salary",
+    name: "Salários",
+    kind: "salary",
+    amountCents: 580000,
+    updatedAt: new Date(0).toISOString(),
+    syncStatus: "pending",
+  },
+  {
+    id: "default-investments",
+    name: "Investimentos",
+    kind: "investment",
+    amountCents: 668050,
+    updatedAt: new Date(0).toISOString(),
+    syncStatus: "pending",
+  },
+];
+
+export function useIncomeSourcesViewModel() {
+  const db = useSQLiteContext();
+  const sources = useIncomeSourcesStore((state) => state.sources);
+  const setSources = useIncomeSourcesStore((state) => state.setSources);
+  const addSource = useIncomeSourcesStore((state) => state.addSource);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadSources = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let loadedSources = await listIncomeSources(db);
+      if (loadedSources.length === 0) {
+        await Promise.all(defaultSources.map((source) => saveIncomeSource(db, source)));
+        loadedSources = defaultSources;
+      }
+      setSources(loadedSources);
+    } catch {
+      setError("Não foi possível carregar suas fontes de renda.");
+    } finally {
+      setLoading(false);
+    }
+  }, [db, setSources]);
+
+  useEffect(() => {
+    void loadSources();
+  }, [loadSources]);
+
+  const createSource = useCallback(
+    async (name: string, amountCents: number, kind: IncomeSource["kind"] = "other") => {
+      const source: IncomeSource = {
+        id: `income-source-${Date.now()}`,
+        name: name.trim(),
+        kind,
+        amountCents,
+        updatedAt: new Date().toISOString(),
+        syncStatus: "pending",
+      };
+      await saveIncomeSource(db, source);
+      addSource(source);
+    },
+    [addSource, db],
+  );
+
+  const totalCents = useMemo(() => totalIncomeSources(sources), [sources]);
+
+  return {
+    sources,
+    totalCents,
+    formattedTotal: formatCurrencyFromCents(totalCents),
+    loading,
+    error,
+    createSource,
+    reload: loadSources,
+  };
+}

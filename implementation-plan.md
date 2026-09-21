@@ -12,3 +12,15 @@
 10. Remover a seta de retorno do cabeçalho de Nova despesa, mantendo o cancelamento no final do formulário.
 
 Decisão recomendada: fazer a menor alteração compatível com o protótipo, reutilizando o formulário e a navegação existentes; não introduzir backend novo nem worktree.
+
+# Plano de implementação — CRE-12 Cofrinho
+
+1. Modelar fonte de renda e ampliar a migração SQLite para persistência local offline-first.
+2. Criar repositório, store e view-model para carregar fontes, inserir novas fontes e calcular o saldo consolidado.
+3. Implementar a tela Cofrinho conforme o Pencil: card com imagem de fundo e overlay rosa claro, saldo editável, lista de fontes e estados vazio/erro.
+4. Implementar o drawer de registro com validação acessível de nome e valor.
+5. Adicionar Cofrinho à navegação inferior preservando a rota Despesas existente.
+6. Adicionar testes para validação, formatação e cálculo do saldo; executar TypeScript, testes, Expo dependency check e diff check.
+7. Registrar o resultado no Linear e concluir a issue somente após o QA.
+
+Decisão recomendada: manter cinco entradas na navegação (Início, Transações, Metas, Despesas e Cofrinho), pois remover Despesas quebraria uma funcionalidade já entregue; aplicar o protótipo visual do Pencil ao novo destino.

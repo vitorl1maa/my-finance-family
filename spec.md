@@ -53,3 +53,59 @@ A navegação ainda exibe a tela “Mais”, a ação de despesas não está rep
 - Alterar autenticação ou criar uma nova tela de logout.
 - Persistir o novo link em backend remoto nesta etapa, caso a infraestrutura atual de metas ainda não o suporte.
 - Redesenhar o conteúdo das telas além dos cabeçalhos, navegação e drawer descritos.
+
+# Especificação funcional — CRE-12 Cofrinho
+
+## Objetivo
+
+Disponibilizar uma tela de Cofrinho para acompanhar o saldo consolidado e registrar as fontes de renda da família.
+
+## Problema
+
+O aplicativo ainda não oferece um espaço dedicado para organizar as entradas recorrentes, dificultando a visualização de onde vem o dinheiro e do valor total considerado no Cofrinho.
+
+## Fluxo
+
+1. A pessoa acessa “Cofrinho” pelo menu inferior.
+2. A tela exibe o saldo do Cofrinho em um card com a ilustração do cofrinho como imagem de fundo e um filtro claro para preservar a leitura.
+3. A pessoa pode editar manualmente o saldo exibido no card.
+4. A seção “Fontes de renda” lista as fontes cadastradas, incluindo nome e valor mensal.
+5. Ao tocar em “+ Registrar” ou “+ Adicionar fonte”, a pessoa abre um drawer inferior.
+6. A pessoa informa o nome e o valor da fonte e salva; a nova fonte aparece na lista e atualiza o saldo consolidado.
+
+## Regras
+
+- “Cofrinho” deve ser uma entrada visível na navegação inferior, preservando também o acesso existente a “Despesas”.
+- O card de saldo deve usar a imagem do cofrinho como background, com overlay claro harmonizado à paleta rosa da ilustração.
+- O valor do saldo deve ser editável manualmente e formatado em reais.
+- Nome da fonte e valor mensal são obrigatórios.
+- O valor mensal deve ser maior que zero.
+- O saldo consolidado inicial deve ser a soma das fontes cadastradas; a edição manual permite ajustar o valor exibido sem apagar as fontes.
+- As fontes devem permanecer disponíveis após reabrir a tela no mesmo dispositivo.
+- A criação deve ser local e offline-first; sincronização remota fica preparada para etapa posterior.
+
+## Casos de erro
+
+- Nome vazio ou composto somente por espaços: impedir o salvamento e informar que o nome é obrigatório.
+- Valor vazio, inválido ou menor/igual a zero: impedir o salvamento e informar um valor válido.
+- Falha ao carregar ou salvar dados locais: manter a tela utilizável, informar o problema e não descartar os dados já exibidos.
+- Fechamento do drawer: descartar os dados ainda não salvos.
+
+## Critérios de aceite
+
+- A rota “Cofrinho” aparece na navegação e abre a nova tela.
+- O card exibe a imagem do cofrinho em background com filtro claro e texto legível.
+- O saldo é exibido em reais e pode ser editado manualmente.
+- A lista exibe fontes de renda cadastradas com seus valores.
+- “+ Registrar” e “+ Adicionar fonte” abrem um drawer funcional.
+- Uma fonte válida é salva, aparece imediatamente na lista e altera o saldo consolidado.
+- Dados inválidos não criam fontes e apresentam mensagens acessíveis.
+- As fontes persistem localmente após desmontar e reabrir a tela.
+- TypeScript, testes, checagem de dependências e diff check são executados sem falhas novas.
+
+## Fora do escopo
+
+- Sincronização remota das fontes com o Supabase.
+- Tela de receitas separada.
+- Edição ou exclusão de fontes já cadastradas.
+- Alteração das regras de autenticação ou das demais telas financeiras.
