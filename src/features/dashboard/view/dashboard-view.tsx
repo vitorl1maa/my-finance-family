@@ -9,7 +9,6 @@ import { CashflowChart } from "@/src/features/dashboard/components/cashflow-char
 import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
-import { WelcomeBanner } from "@/src/features/dashboard/components/welcome-banner";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -97,9 +96,7 @@ export function DashboardView(_: DashboardViewProps) {
 
       {isPiggyBankEmpty ? (
         <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
-      ) : (
-        <WelcomeBanner />
-      )}
+      ) : null}
       <CashflowChart data={insights.weeklyCashflow} />
       <SpendingBreakdown categories={insights.expenseByCategory} />
 
