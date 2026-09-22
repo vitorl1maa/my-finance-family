@@ -50,14 +50,6 @@ export function IncomeSourcesView() {
           <Text style={styles.title}>Cofrinho</Text>
           <Text style={styles.subtitle}>Registre e acompanhe suas finanças</Text>
         </View>
-        <Pressable
-          accessibilityLabel="Registrar fonte de renda"
-          accessibilityRole="button"
-          onPress={() => setDrawerVisible(true)}
-          style={styles.registerButton}
-        >
-          <Plus color={colors.text} size={24} strokeWidth={2.4} />
-        </Pressable>
       </View>
 
       <View style={styles.balanceCard}>
