@@ -17,7 +17,7 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { errorMessage, isLoading, signInWithEmail } = useAuthViewModel();
+  const { errorMessage, isLoading, signInWithEmail, signInWithSocial } = useAuthViewModel();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const {
     control,
@@ -117,8 +117,8 @@ export default function LoginScreen() {
         <View style={styles.line} />
       </View>
       <View style={styles.socialRow}>
-        <SocialButton icon="G" label="Google" />
-        <SocialButton icon="A" label="Apple" />
+        <SocialButton icon="G" label="Google" onPress={() => void signInWithSocial("google")} />
+        <SocialButton icon="A" label="Apple" onPress={() => void signInWithSocial("apple")} />
       </View>
       <Text style={styles.terms}>
         Ao continuar, você concorda com os Termos e a Política de Privacidade.
@@ -147,9 +147,17 @@ function messageFor(message: unknown) {
   return typeof message === "string" ? message : undefined;
 }
 
-function SocialButton({ icon, label }: { icon: string; label: string }) {
+function SocialButton({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  onPress: () => void;
+}) {
   return (
-    <Pressable accessibilityRole="button" onPress={() => {}} style={styles.socialButton}>
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.socialButton}>
       <View style={styles.socialIcon}>
         <Text style={styles.socialIconText}>{icon}</Text>
       </View>

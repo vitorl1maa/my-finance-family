@@ -51,6 +51,21 @@ export function useAuthViewModel() {
     return true;
   };
 
+  const signInWithSocial = async (provider: "google" | "apple") => {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: "myfinancefamily://auth/callback" },
+    });
+    setLoading(false);
+    if (error) {
+      setError(getAuthErrorMessage(error));
+      return false;
+    }
+    return true;
+  };
+
   const signUpWithEmail = async (email: string, password: string, profile: RegisterProfile) => {
     setLoading(true);
     setError(null);
@@ -126,6 +141,7 @@ export function useAuthViewModel() {
     isLoading,
     setError,
     signInWithEmail,
+    signInWithSocial,
     signUpWithEmail,
     signOut,
     updateProfile,
