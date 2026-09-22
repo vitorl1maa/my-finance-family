@@ -1,27 +1,26 @@
-import { Plus, Search, ShoppingCart, WalletCards } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
-
+import { ShoppingCart, WalletCards } from "lucide-react-native";
+import { useState } from "react";
 import {
-  filterTransactions,
-  groupTransactionsByDay,
-} from "@/src/features/transactions/model/transaction-list";
+  Image,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
 import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
-import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
 export function TransactionsView() {
-  const [query, setQuery] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const viewModel = useTransactionsViewModel();
-  const groups = useMemo(
-    () => groupTransactionsByDay(filterTransactions(viewModel.transactions, query), new Date()),
-    [query, viewModel.transactions],
-  );
 
   return (
     <ScrollView
@@ -41,41 +40,27 @@ export function TransactionsView() {
           <Text style={styles.title}>Despesas</Text>
           <Text style={styles.subtitle}>Acompanhe tudo que saiu</Text>
         </View>
-        <Pressable
-          accessibilityLabel="Registrar despesa"
-          accessibilityRole="button"
-          onPress={() => setDrawerVisible(true)}
-          style={styles.addButton}
-        >
-          <Plus color={colors.text} size={22} strokeWidth={2.4} />
-          <Text style={styles.addLabel}>Registrar</Text>
-        </Pressable>
-      </View>
-      <View style={styles.searchBox}>
-        <Search color={colors.muted} size={19} />
-        <SmoothTextInput
-          accessibilityLabel="Buscar transações"
-          autoCapitalize="none"
-          onChangeText={setQuery}
-          placeholder="Buscar por descrição ou categoria"
-          placeholderTextColor={colors.mutedLight}
-          style={styles.searchInput}
-          value={query}
-        />
       </View>
       <View style={styles.summary}>
-        <Text style={styles.summaryLabel}>DESPESAS DO MÊS</Text>
-        <AnimatedCurrency
-          style={styles.summaryValue}
-          valueInCents={
-            -viewModel.transactions.reduce(
-              (total, transaction) =>
-                total + (transaction.amountCents < 0 ? Math.abs(transaction.amountCents) : 0),
-              0,
-            )
-          }
+        <Image
+          accessibilityIgnoresInvertColors
+          source={require("../../../../assets/images/expenses.png")}
+          style={styles.summaryImage}
         />
-        <Text style={styles.summaryHint}>Total registrado neste período</Text>
+        <View style={styles.summaryOverlay} />
+        <View style={styles.summaryContent}>
+          <Text style={styles.summaryLabel}>SALDO DE DESPESAS</Text>
+          <AnimatedCurrency
+            style={styles.summaryValue}
+            valueInCents={
+              -viewModel.transactions.reduce(
+                (total, transaction) =>
+                  total + (transaction.amountCents < 0 ? Math.abs(transaction.amountCents) : 0),
+                0,
+              )
+            }
+          />
+        </View>
       </View>
       {viewModel.transactionsError ? (
         <View style={styles.notice}>
@@ -87,15 +72,19 @@ export function TransactionsView() {
       ) : null}
       {viewModel.transactionsLoading && viewModel.transactions.length === 0 ? (
         <LoadingShimmer rows={3} />
-      ) : groups.length === 0 ? (
-        <Text style={styles.empty}>
-          {query ? "Nenhuma transação encontrada." : "Ainda não há transações registradas."}
-        </Text>
+      ) : viewModel.transactions.length === 0 ? (
+        <Text style={styles.empty}>Ainda não há despesas registradas.</Text>
       ) : (
-        groups.map((group) => (
-          <View key={group.id} style={styles.group}>
-            <Text style={styles.day}>{group.label}</Text>
-            {group.transactions.map((transaction) => (
+        <View style={styles.group}>
+          <View style={styles.expenseHeader}>
+            <Text style={styles.expenseTitle}>Suas despesas</Text>
+            <Pressable onPress={() => setDrawerVisible(true)}>
+              <Text style={styles.registerLink}>+ Registrar</Text>
+            </Pressable>
+          </View>
+          {viewModel.transactions
+            .filter((transaction) => transaction.amountCents < 0)
+            .map((transaction) => (
               <View key={transaction.id} style={styles.transaction}>
                 <View style={styles.icon}>
                   <TransactionIcon isExpense={transaction.amountCents < 0} />
@@ -115,8 +104,7 @@ export function TransactionsView() {
                 />
               </View>
             ))}
-          </View>
-        ))
+        </View>
       )}
       <Modal
         animationType="slide"
@@ -148,41 +136,44 @@ const styles = StyleSheet.create({
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 28 },
   subtitle: { color: colors.muted, fontSize: 13, marginTop: 5 },
-  addButton: {
-    alignItems: "center",
-    backgroundColor: colors.accent,
-    borderRadius: 16,
-    flexDirection: "row",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 9,
+  summary: { borderRadius: 22, height: 188, overflow: "hidden", position: "relative" },
+  summaryImage: { height: "100%", position: "absolute", width: "100%" },
+  summaryOverlay: {
+    backgroundColor: "#FFF0B8B8",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
   },
-  addLabel: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
-  searchBox: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: 14,
-    flexDirection: "row",
-    gap: 9,
-    paddingHorizontal: 14,
-  },
-  searchInput: { color: colors.text, flex: 1, fontFamily: fonts.regular, fontSize: 14, height: 48 },
-  summary: { backgroundColor: "#FFF0F2", borderRadius: 20, gap: 6, padding: 16 },
+  summaryContent: { alignItems: "center", flex: 1, justifyContent: "center", padding: 18 },
   summaryLabel: {
-    color: colors.darkPink,
+    color: "#8A5A00",
     fontFamily: fonts.bold,
     fontSize: 11,
     letterSpacing: 0.3,
   },
-  summaryValue: { color: colors.darkPink, fontFamily: fonts.extraBold, fontSize: 30 },
-  summaryHint: { color: colors.darkPink, fontSize: 11 },
+  summaryValue: { color: "#7A4F00", fontFamily: fonts.extraBold, fontSize: 34 },
   notice: { backgroundColor: colors.surfaceMuted, borderRadius: 12, gap: 5, padding: 12 },
   noticeText: { color: colors.muted, fontSize: 12 },
   retry: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
   empty: { color: colors.muted, fontSize: 14, paddingTop: 28, textAlign: "center" },
-  group: { gap: 8, marginTop: 4 },
-  day: { color: colors.mutedLight, fontFamily: fonts.bold, fontSize: 12 },
-  transaction: { alignItems: "center", flexDirection: "row", minHeight: 54 },
+  group: { gap: 8, marginTop: 0 },
+  expenseHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  expenseTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
+  registerLink: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
+  transaction: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 64,
+    paddingHorizontal: 12,
+  },
   icon: { width: 38 },
   info: { flex: 1, gap: 2 },
   name: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
