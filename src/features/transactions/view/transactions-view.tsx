@@ -1,11 +1,4 @@
-import {
-  BanknoteArrowDown,
-  Gamepad2,
-  House,
-  ShoppingCart,
-  Stethoscope,
-  Utensils,
-} from "lucide-react-native";
+import { Gamepad2, House, Plus, ShoppingCart, Stethoscope, Utensils } from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -90,8 +83,7 @@ export function TransactionsView() {
               onPress={() => setDrawerVisible(true)}
               style={styles.addExpenseButton}
             >
-              <BanknoteArrowDown color={colors.text} size={18} strokeWidth={2.5} />
-              <Text style={styles.addExpenseText}>Registrar</Text>
+              <Plus color={colors.text} size={20} strokeWidth={2.5} />
             </Pressable>
           </View>
           <Text style={styles.empty}>Ainda não há despesas registradas.</Text>
@@ -106,8 +98,7 @@ export function TransactionsView() {
               onPress={() => setDrawerVisible(true)}
               style={styles.addExpenseButton}
             >
-              <BanknoteArrowDown color={colors.text} size={18} strokeWidth={2.5} />
-              <Text style={styles.addExpenseText}>Registrar</Text>
+              <Plus color={colors.text} size={20} strokeWidth={2.5} />
             </Pressable>
           </View>
           {viewModel.transactions
@@ -214,14 +205,11 @@ const styles = StyleSheet.create({
   addExpenseButton: {
     alignItems: "center",
     backgroundColor: colors.accent,
-    borderRadius: 16,
-    flexDirection: "row",
-    gap: 7,
+    borderRadius: 18,
+    height: 36,
     justifyContent: "center",
-    minHeight: 42,
-    paddingHorizontal: 14,
+    width: 36,
   },
-  addExpenseText: { color: colors.text, fontFamily: fonts.bold, fontSize: 13 },
   transaction: {
     alignItems: "center",
     borderColor: colors.border,
