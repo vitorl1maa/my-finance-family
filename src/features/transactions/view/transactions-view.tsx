@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import type { Transaction } from "@/src/features/transactions/model/transaction";
 import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -19,6 +20,7 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export function TransactionsView() {
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Transaction | undefined>();
   const viewModel = useTransactionsViewModel();
 
   return (
@@ -89,7 +91,14 @@ export function TransactionsView() {
           {viewModel.transactions
             .filter((transaction) => transaction.amountCents < 0)
             .map((transaction) => (
-              <View key={transaction.id} style={styles.transaction}>
+              <Pressable
+                key={transaction.id}
+                onPress={() => {
+                  setSelectedExpense(transaction);
+                  setDrawerVisible(true);
+                }}
+                style={styles.transaction}
+              >
                 <View style={styles.icon}>
                   <TransactionIcon category={transaction.category} />
                 </View>
@@ -106,7 +115,7 @@ export function TransactionsView() {
                   ]}
                   valueInCents={transaction.amountCents}
                 />
-              </View>
+              </Pressable>
             ))}
         </View>
       )}
@@ -118,7 +127,13 @@ export function TransactionsView() {
       >
         <View style={styles.drawerBackdrop}>
           <View style={styles.drawer}>
-            <ExpenseNewView onBack={() => setDrawerVisible(false)} />
+            <ExpenseNewView
+              initialTransaction={selectedExpense}
+              onBack={() => {
+                setDrawerVisible(false);
+                setSelectedExpense(undefined);
+              }}
+            />
           </View>
         </View>
       </Modal>

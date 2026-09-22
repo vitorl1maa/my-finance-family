@@ -7,12 +7,16 @@ import {
 } from "@/src/features/categories/model/expense-category";
 import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
+import type { Transaction } from "@/src/features/transactions/model/transaction";
 import {
   createRemoteExpense,
+  deleteRemoteExpense,
   listRemoteTransactions,
   syncRemoteExpense,
+  updateRemoteExpense,
 } from "@/src/features/transactions/repository/transactions-remote-repository";
 import {
+  deleteTransaction,
   listTransactions,
   replaceTransaction,
   upsertTransactions,
@@ -137,6 +141,38 @@ export function useTransactionsViewModel() {
     [db, session, setTransactions],
   );
 
+  const updateExpense = useCallback(
+    async (transaction: Transaction) => {
+      const pending = { ...transaction, syncStatus: "pending" as const };
+      await upsertTransactions(db, [pending]);
+      setTransactions(await listTransactions(db));
+      if (!session) return;
+      try {
+        await replaceTransaction(db, transaction.id, await updateRemoteExpense(transaction));
+        setTransactions(await listTransactions(db));
+      } catch {
+        setTransactionsError(
+          "Despesa atualizada no dispositivo. A sincronização será tentada depois.",
+        );
+      }
+    },
+    [db, session, setTransactions],
+  );
+
+  const removeExpense = useCallback(
+    async (id: string) => {
+      await deleteTransaction(db, id);
+      setTransactions(await listTransactions(db));
+      if (!session) return;
+      try {
+        await deleteRemoteExpense(id);
+      } catch {
+        setTransactionsError("Despesa removida do dispositivo, mas não foi possível sincronizar.");
+      }
+    },
+    [db, session, setTransactions],
+  );
+
   return useMemo(
     () => ({
       transactions: transactions.map((transaction) => ({
@@ -145,6 +181,8 @@ export function useTransactionsViewModel() {
         isExpense: transaction.amountCents < 0,
       })),
       createExpense,
+      updateExpense,
+      removeExpense,
       transactionsLoading,
       transactionsError,
       reloadTransactions: loadTransactions,
@@ -160,6 +198,8 @@ export function useTransactionsViewModel() {
       categoriesError,
       categoriesLoading,
       createExpense,
+      updateExpense,
+      removeExpense,
       isSaving,
       loadCategories,
       loadTransactions,

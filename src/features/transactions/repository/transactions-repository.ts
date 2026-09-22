@@ -80,3 +80,7 @@ export async function replaceTransaction(
     await db.runAsync("DELETE FROM transactions WHERE id = ?", previousId);
   });
 }
+
+export async function deleteTransaction(db: SQLiteDatabase, id: string): Promise<void> {
+  await db.runAsync("DELETE FROM transactions WHERE id = ?", id);
+}

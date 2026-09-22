@@ -10,10 +10,15 @@ import {
   recurrenceLabel,
 } from "@/src/features/transactions/components/expense-recurrence-picker";
 import { toExpenseIso } from "@/src/features/transactions/model/expense-date";
+import type { Transaction } from "@/src/features/transactions/model/transaction";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
-import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
+import {
+  formatBrlInput,
+  formatCurrencyFromCents,
+  parseBrlInputToCents,
+} from "@/src/shared/utils/money";
 
 type ExpenseForm = {
   title: string;
@@ -33,21 +38,35 @@ type FieldProps = {
   selector?: boolean;
 };
 
-export function ExpenseNewView({ onBack }: { onBack: () => void }) {
+export function ExpenseNewView({
+  onBack,
+  initialTransaction,
+}: {
+  onBack: () => void;
+  initialTransaction?: Transaction;
+}) {
   const {
     categories,
     categoriesError,
     categoriesLoading,
     createExpense,
+    updateExpense,
+    removeExpense,
     isSaving,
     reloadCategories,
     saveError,
   } = useTransactionsViewModel();
   const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
   const [recurrencePickerVisible, setRecurrencePickerVisible] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedRecurrence, setSelectedRecurrence] = useState<RecurrenceRule>("none");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    initialTransaction?.categoryId ?? "",
+  );
+  const [selectedDate, setSelectedDate] = useState(
+    initialTransaction ? new Date(initialTransaction.occurredAt) : new Date(),
+  );
+  const [selectedRecurrence, setSelectedRecurrence] = useState<RecurrenceRule>(
+    (initialTransaction?.recurrenceRule as RecurrenceRule) ?? "none",
+  );
   const {
     control,
     formState: { errors },
@@ -55,10 +74,12 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
     setValue,
   } = useForm<ExpenseForm>({
     defaultValues: {
-      title: "",
-      amount: "",
-      categoryId: "",
-      recurrence: recurrenceLabel("none"),
+      title: initialTransaction?.title ?? "",
+      amount: initialTransaction
+        ? formatCurrencyFromCents(Math.abs(initialTransaction.amountCents))
+        : "",
+      categoryId: initialTransaction?.categoryId ?? "",
+      recurrence: recurrenceLabel((initialTransaction?.recurrenceRule as RecurrenceRule) ?? "none"),
     },
   });
   useEffect(() => {
@@ -76,14 +97,25 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
     if (!category) return;
 
     try {
-      await createExpense({
-        title,
-        categoryId,
-        categoryName: category.name,
-        amount,
-        occurredAt: toExpenseIso(selectedDate),
-        recurrenceRule: selectedRecurrence,
-      });
+      if (initialTransaction) {
+        await updateExpense({
+          ...initialTransaction,
+          title: title.trim(),
+          categoryId,
+          category: category.name,
+          amountCents: -Math.abs(parseBrlInputToCents(amount)),
+          occurredAt: toExpenseIso(selectedDate),
+          recurrenceRule: selectedRecurrence,
+        });
+      } else
+        await createExpense({
+          title,
+          categoryId,
+          categoryName: category.name,
+          amount,
+          occurredAt: toExpenseIso(selectedDate),
+          recurrenceRule: selectedRecurrence,
+        });
       onBack();
     } catch {
       // The view-model exposes the error while preserving the form values.
@@ -186,9 +218,19 @@ export function ExpenseNewView({ onBack }: { onBack: () => void }) {
         onPress={handleSubmit(onSubmit)}
         style={[styles.primary, (isSaving || categoriesLoading) && styles.disabled]}
       >
-        <Text style={styles.primaryText}>Salvar despesa</Text>
+        <Text style={styles.primaryText}>
+          {initialTransaction ? "Atualizar despesa" : "Salvar despesa"}
+        </Text>
         <ArrowRight color={colors.text} size={19} strokeWidth={2.5} />
       </Pressable>
+      {initialTransaction ? (
+        <Pressable
+          onPress={() => void removeExpense(initialTransaction.id).then(onBack)}
+          style={styles.delete}
+        >
+          <Text style={styles.deleteText}>Excluir despesa</Text>
+        </Pressable>
+      ) : null}
       <Pressable onPress={onBack} style={styles.cancel}>
         <Text style={styles.cancelText}>Cancelar</Text>
       </Pressable>
@@ -354,4 +396,6 @@ const styles = StyleSheet.create({
     minHeight: 54,
   },
   cancelText: { color: colors.text, fontSize: 14, fontWeight: "900" },
+  delete: { alignItems: "center", paddingVertical: 12 },
+  deleteText: { color: colors.negative, fontFamily: fonts.bold, fontSize: 13 },
 });

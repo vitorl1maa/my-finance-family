@@ -55,3 +55,26 @@ export async function syncRemoteExpense(transaction: Transaction): Promise<Trans
     recurrenceRule: transaction.recurrenceRule ?? "none",
   });
 }
+
+export async function updateRemoteExpense(transaction: Transaction): Promise<Transaction> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .update({
+      title: transaction.title,
+      category: transaction.category,
+      category_id: transaction.categoryId,
+      amount_cents: transaction.amountCents,
+      occurred_at: transaction.occurredAt,
+      recurrence_rule: transaction.recurrenceRule ?? "none",
+    })
+    .eq("id", transaction.id)
+    .select(transactionColumns)
+    .single();
+  if (error) throw error;
+  return mapRemoteTransaction(data as RemoteTransactionRow);
+}
+
+export async function deleteRemoteExpense(id: string): Promise<void> {
+  const { error } = await supabase.from("transactions").delete().eq("id", id);
+  if (error) throw error;
+}
