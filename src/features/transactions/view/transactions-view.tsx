@@ -74,7 +74,20 @@ export function TransactionsView() {
       {viewModel.transactionsLoading && viewModel.transactions.length === 0 ? (
         <LoadingShimmer rows={3} />
       ) : viewModel.transactions.length === 0 ? (
-        <Text style={styles.empty}>Ainda não há despesas registradas.</Text>
+        <View style={styles.group}>
+          <View style={styles.expenseHeader}>
+            <Text style={styles.expenseTitle}>Suas despesas</Text>
+            <Pressable
+              accessibilityLabel="Adicionar nova despesa"
+              accessibilityRole="button"
+              onPress={() => setDrawerVisible(true)}
+              style={styles.addExpenseButton}
+            >
+              <Plus color={colors.text} size={20} strokeWidth={2.5} />
+            </Pressable>
+          </View>
+          <Text style={styles.empty}>Ainda não há despesas registradas.</Text>
+        </View>
       ) : (
         <View style={styles.group}>
           <View style={styles.expenseHeader}>
