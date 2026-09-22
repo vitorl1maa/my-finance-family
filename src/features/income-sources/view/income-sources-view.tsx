@@ -32,6 +32,12 @@ export function IncomeSourcesView() {
         total + (transaction.isExpense ? Math.abs(transaction.amountCents) : 0),
       0,
     );
+  const incomeCents = viewModel.totalCents;
+  const expenseCents = transactions.transactions.reduce(
+    (total, transaction) =>
+      total + (transaction.amountCents < 0 ? Math.abs(transaction.amountCents) : 0),
+    0,
+  );
 
   return (
     <ScrollView
@@ -67,6 +73,17 @@ export function IncomeSourcesView() {
             style={styles.balanceInput}
             valueInCents={balanceCents}
           />
+          <View style={styles.balanceStats}>
+            <View style={styles.balanceStat}>
+              <Text style={styles.balanceStatLabel}>Entradas</Text>
+              <AnimatedCurrency style={styles.incomeAmount} valueInCents={incomeCents} />
+            </View>
+            <View style={styles.balanceDivider} />
+            <View style={styles.balanceStat}>
+              <Text style={styles.balanceStatLabel}>Saídas</Text>
+              <AnimatedCurrency style={styles.expenseAmount} valueInCents={-expenseCents} />
+            </View>
+          </View>
         </View>
       </View>
 
@@ -199,6 +216,12 @@ const styles = StyleSheet.create({
     padding: 0,
     textAlign: "center",
   },
+  balanceStats: { alignItems: "center", flexDirection: "row", gap: 18, marginTop: 12 },
+  balanceStat: { alignItems: "center", gap: 2, minWidth: 100 },
+  balanceStatLabel: { color: colors.darkPink, fontFamily: fonts.bold, fontSize: 11 },
+  incomeAmount: { color: colors.positive, fontFamily: fonts.bold, fontSize: 14 },
+  expenseAmount: { color: colors.negative, fontFamily: fonts.bold, fontSize: 14 },
+  balanceDivider: { backgroundColor: colors.darkPink, height: 30, opacity: 0.28, width: 1 },
   sectionHeader: {
     alignItems: "center",
     flexDirection: "row",
