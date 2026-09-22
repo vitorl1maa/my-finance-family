@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    height: "50%",
+    height: "80%",
     overflow: "hidden",
   },
 });
