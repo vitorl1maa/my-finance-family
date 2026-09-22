@@ -6,6 +6,19 @@ export type ExpenseCategory = {
   isActive: boolean;
 };
 
+export const defaultExpenseCategories: ExpenseCategory[] = [
+  { id: "moradia", familyId: "local", name: "Moradia", slug: "moradia", isActive: true },
+  {
+    id: "alimentacao",
+    familyId: "local",
+    name: "Alimentação",
+    slug: "alimentacao",
+    isActive: true,
+  },
+  { id: "saude", familyId: "local", name: "Saúde", slug: "saude", isActive: true },
+  { id: "lazer", familyId: "local", name: "Lazer", slug: "lazer", isActive: true },
+];
+
 const categoryOrder = ["moradia", "alimentacao", "saude", "lazer"];
 
 export function orderExpenseCategories(categories: ExpenseCategory[]): ExpenseCategory[] {

@@ -1,7 +1,10 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
-import type { ExpenseCategory } from "@/src/features/categories/model/expense-category";
+import {
+  defaultExpenseCategories,
+  type ExpenseCategory,
+} from "@/src/features/categories/model/expense-category";
 import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
 import {
@@ -22,7 +25,7 @@ export function useTransactionsViewModel() {
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
   const session = useAuthStore((state) => state.session);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [categories, setCategories] = useState<ExpenseCategory[]>(defaultExpenseCategories);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,17 +74,14 @@ export function useTransactionsViewModel() {
     try {
       const remoteCategories = await listFamilyCategories();
 
-      if (remoteCategories.length === 0) {
-        throw new Error("categories_not_found");
-      }
-
-      setCategories(remoteCategories);
+      setCategories(remoteCategories.length > 0 ? remoteCategories : defaultExpenseCategories);
     } catch {
-      if (session) setCategoriesError("Não foi possível atualizar as categorias.");
+      setCategories(defaultExpenseCategories);
+      setCategoriesError(null);
     } finally {
       setCategoriesLoading(false);
     }
-  }, [session]);
+  }, []);
 
   useEffect(() => {
     void loadCategories();
