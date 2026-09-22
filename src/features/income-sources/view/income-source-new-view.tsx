@@ -93,7 +93,15 @@ export function IncomeSourceNewView({
       </Pressable>
       {initialSource && onDelete ? (
         <Pressable
-          onPress={() => void onDelete(initialSource.id).then(onBack)}
+          onPress={() => {
+            void (async () => {
+              try {
+                await onDelete(initialSource.id);
+              } finally {
+                onBack();
+              }
+            })();
+          }}
           style={styles.delete}
         >
           <Text style={styles.deleteText}>Excluir fonte</Text>

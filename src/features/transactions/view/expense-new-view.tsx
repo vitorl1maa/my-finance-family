@@ -225,7 +225,15 @@ export function ExpenseNewView({
       </Pressable>
       {initialTransaction ? (
         <Pressable
-          onPress={() => void removeExpense(initialTransaction.id).then(onBack)}
+          onPress={() => {
+            void (async () => {
+              try {
+                await removeExpense(initialTransaction.id);
+              } finally {
+                onBack();
+              }
+            })();
+          }}
           style={styles.delete}
         >
           <Text style={styles.deleteText}>Excluir despesa</Text>
