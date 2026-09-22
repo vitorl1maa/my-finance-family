@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    height: "80%",
+    maxHeight: "80%",
     overflow: "hidden",
   },
 });

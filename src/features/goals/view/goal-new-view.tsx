@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 20,
     paddingBottom: 32,
+    paddingTop: 20,
   },
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 20 },
