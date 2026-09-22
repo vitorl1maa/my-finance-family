@@ -60,7 +60,7 @@ export function AllTransactionsView() {
         <LoadingShimmer rows={3} />
       ) : groups.length === 0 ? (
         <View style={styles.empty}>
-          <TrendingUp color={colors.darkPink} size={26} />
+          <TrendingUp color={colors.mutedLight} size={26} />
           <Text style={styles.emptyTitle}>
             {query ? "Nenhuma transação encontrada" : "Nenhuma transação cadastrada"}
           </Text>
