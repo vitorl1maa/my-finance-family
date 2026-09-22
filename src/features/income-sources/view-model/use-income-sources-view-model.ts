@@ -109,6 +109,26 @@ export function useIncomeSourcesViewModel() {
     [addSource, db, session, setSources],
   );
 
+  const updateSource = useCallback(
+    async (source: IncomeSource) => {
+      const pending = {
+        ...source,
+        syncStatus: "pending" as const,
+        updatedAt: new Date().toISOString(),
+      };
+      await saveIncomeSource(db, pending);
+      setSources(await listIncomeSources(db));
+      if (!session) return;
+      try {
+        await saveIncomeSource(db, await upsertRemoteIncomeSource(pending));
+        setSources(await listIncomeSources(db));
+      } catch {
+        setError("Fonte atualizada no dispositivo. A sincronização será tentada depois.");
+      }
+    },
+    [db, session, setSources],
+  );
+
   const saveBalance = useCallback(
     async (nextBalanceCents: number) => {
       await savePiggyBankSettings(db, {
@@ -142,6 +162,7 @@ export function useIncomeSourcesViewModel() {
     loading,
     error,
     createSource,
+    updateSource,
     saveBalance,
     reload: loadSources,
   };

@@ -11,13 +11,17 @@ import { formatBrlInput, parseBrlInputToCents } from "@/src/shared/utils/money";
 export function IncomeSourceNewView({
   onBack,
   onSave,
+  initialSource,
 }: {
   onBack: () => void;
   onSave: (name: string, amountCents: number, kind: IncomeSource["kind"]) => Promise<void>;
+  initialSource?: IncomeSource;
 }) {
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [kind, setKind] = useState<IncomeSource["kind"]>("other");
+  const [name, setName] = useState(initialSource?.name ?? "");
+  const [amount, setAmount] = useState(
+    initialSource ? formatBrlInput(String(Math.abs(initialSource.amountCents))) : "",
+  );
+  const [kind, setKind] = useState<IncomeSource["kind"]>(initialSource?.kind ?? "other");
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
@@ -43,7 +47,9 @@ export function IncomeSourceNewView({
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Nova fonte de renda</Text>
+          <Text style={styles.headerTitle}>
+            {initialSource ? "Editar fonte de renda" : "Nova fonte de renda"}
+          </Text>
           <Text style={styles.headerSubtitle}>Registre uma entrada recorrente</Text>
         </View>
         <Pressable accessibilityLabel="Fechar nova fonte" onPress={onBack} style={styles.close}>
@@ -78,7 +84,9 @@ export function IncomeSourceNewView({
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable accessibilityRole="button" onPress={() => void save()} style={styles.primary}>
-        <Text style={styles.primaryText}>Adicionar fonte</Text>
+        <Text style={styles.primaryText}>
+          {initialSource ? "Salvar alterações" : "Adicionar fonte"}
+        </Text>
         <ArrowRight color={colors.text} size={19} strokeWidth={2.5} />
       </Pressable>
     </ScrollView>

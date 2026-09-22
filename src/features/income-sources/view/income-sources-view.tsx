@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-
+import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
@@ -24,6 +24,7 @@ export function IncomeSourcesView() {
   const viewModel = useIncomeSourcesViewModel();
   const transactions = useTransactionsViewModel();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<IncomeSource | undefined>();
   const balanceCents =
     viewModel.totalCents -
     transactions.transactions.reduce(
@@ -77,7 +78,10 @@ export function IncomeSourcesView() {
         <Pressable
           accessibilityLabel="Adicionar fonte de renda"
           accessibilityRole="button"
-          onPress={() => setDrawerVisible(true)}
+          onPress={() => {
+            setSelectedSource(undefined);
+            setDrawerVisible(true);
+          }}
           style={styles.addButton}
         >
           <Plus color={colors.text} size={18} />
@@ -93,7 +97,14 @@ export function IncomeSourcesView() {
         </View>
       ) : (
         viewModel.sources.map((source) => (
-          <View key={source.id} style={styles.sourceRow}>
+          <Pressable
+            key={source.id}
+            onPress={() => {
+              setSelectedSource(source);
+              setDrawerVisible(true);
+            }}
+            style={styles.sourceRow}
+          >
             <View style={styles.sourceIcon}>
               <IncomeSourceIcon kind={source.kind} />
             </View>
@@ -102,7 +113,7 @@ export function IncomeSourcesView() {
               <Text style={styles.sourceMeta}>{incomeSourceKindLabel(source.kind)}</Text>
             </View>
             <AnimatedCurrency style={styles.sourceAmount} valueInCents={source.amountCents} />
-          </View>
+          </Pressable>
         ))
       )}
 
@@ -115,8 +126,16 @@ export function IncomeSourcesView() {
         <View style={styles.drawerBackdrop}>
           <View style={styles.drawer}>
             <IncomeSourceNewView
-              onBack={() => setDrawerVisible(false)}
-              onSave={viewModel.createSource}
+              initialSource={selectedSource}
+              onBack={() => {
+                setDrawerVisible(false);
+                setSelectedSource(undefined);
+              }}
+              onSave={(name, amountCents, kind) =>
+                selectedSource
+                  ? viewModel.updateSource({ ...selectedSource, name, amountCents, kind })
+                  : viewModel.createSource(name, amountCents, kind)
+              }
             />
           </View>
         </View>
