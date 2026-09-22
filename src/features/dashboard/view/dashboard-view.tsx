@@ -73,7 +73,11 @@ export function DashboardView(_: DashboardViewProps) {
         </Pressable>
       </View>
 
-      <WeeklyCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+      <WeeklyCalendar
+        nextExpense={insights.nextExpense}
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+      />
       {totalBalanceCents > 0 ? (
         <View style={styles.summary}>
           <Text style={styles.summaryLabel}>COFRINHO</Text>
@@ -82,7 +86,7 @@ export function DashboardView(_: DashboardViewProps) {
             <Metric
               label="Entradas no mês"
               prefix="+ "
-              valueInCents={insights.monthlyIncomeCents}
+              valueInCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
             />
             <Metric
               accent

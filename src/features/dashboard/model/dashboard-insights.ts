@@ -22,6 +22,7 @@ export type DashboardInsights = {
   weeklyCashflow: WeeklyCashflow[];
   healthStatus: "Boa" | "Atenção" | "Crítica";
   healthMessage: string;
+  nextExpense?: { title: string; amountCents: number };
 };
 
 const weekdayLabels = ["S", "T", "Q", "Q", "S", "S", "D"];
@@ -95,6 +96,14 @@ export function buildDashboardInsights(
     .map(([category, amountCents]) => ({ category, amountCents }))
     .sort((left, right) => right.amountCents - left.amountCents);
   const healthStatus = getHealthStatus(monthlyIncomeCents, monthlyExpenseCents);
+  const nextExpense = [...transactions]
+    .filter(
+      (transaction) =>
+        transaction.amountCents < 0 && new Date(transaction.occurredAt) >= referenceDate,
+    )
+    .sort(
+      (left, right) => new Date(left.occurredAt).getTime() - new Date(right.occurredAt).getTime(),
+    )[0];
 
   return {
     monthlyIncomeCents,
@@ -103,6 +112,9 @@ export function buildDashboardInsights(
     weeklyCashflow: weeklyTotals,
     healthStatus,
     healthMessage: getHealthMessage(healthStatus),
+    nextExpense: nextExpense
+      ? { title: nextExpense.title, amountCents: nextExpense.amountCents }
+      : undefined,
   };
 }
 

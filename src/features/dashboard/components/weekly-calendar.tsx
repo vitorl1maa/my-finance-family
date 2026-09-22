@@ -1,6 +1,6 @@
 import { addDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Send } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { getWeekDays } from "@/src/features/dashboard/model/dashboard-insights";
@@ -10,9 +10,10 @@ import { fonts } from "@/src/shared/theme/fonts";
 type WeeklyCalendarProps = {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  nextExpense?: { title: string; amountCents: number };
 };
 
-export function WeeklyCalendar({ selectedDate, onSelectDate }: WeeklyCalendarProps) {
+export function WeeklyCalendar({ selectedDate, onSelectDate, nextExpense }: WeeklyCalendarProps) {
   const days = getWeekDays(selectedDate);
   const monthLabel = format(selectedDate, "MMMM yyyy", { locale: ptBR });
 
@@ -55,6 +56,14 @@ export function WeeklyCalendar({ selectedDate, onSelectDate }: WeeklyCalendarPro
           </Pressable>
         ))}
       </View>
+      {nextExpense ? (
+        <View style={styles.nextExpense}>
+          <Send color={colors.darkPink} size={14} />
+          <Text numberOfLines={1} style={styles.nextExpenseText}>
+            Próxima despesa: {nextExpense.title}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -83,6 +92,8 @@ const styles = StyleSheet.create({
   },
   selectedDay: { backgroundColor: colors.accent },
   weekday: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
-  date: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 12 },
-  selectedText: { color: colors.text },
+  date: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 12, padding: 12 },
+  selectedText: { color: colors.text, fontWeight: "900" },
+  nextExpense: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 10 },
+  nextExpenseText: { color: colors.muted, flex: 1, fontSize: 12 },
 });
