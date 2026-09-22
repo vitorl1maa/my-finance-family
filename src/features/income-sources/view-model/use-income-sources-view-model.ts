@@ -39,6 +39,10 @@ export function useIncomeSourcesViewModel() {
     try {
       let loadedSources = await listIncomeSources(db);
       setSources(loadedSources);
+      if (loadedSources.length === 0) {
+        setLoading(false);
+        setBalanceLoading(false);
+      }
       let settings = await getPiggyBankSettings(db);
       setBalanceCents(settings?.balanceCents ?? 0);
 

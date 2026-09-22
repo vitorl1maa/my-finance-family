@@ -44,6 +44,7 @@ export function useTransactionsViewModel() {
     try {
       const localTransactions = await listTransactions(db);
       setTransactions(localTransactions);
+      if (localTransactions.length === 0) setTransactionsLoading(false);
 
       if (!session) return;
 
