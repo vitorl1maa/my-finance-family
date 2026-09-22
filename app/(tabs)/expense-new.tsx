@@ -1,5 +1,5 @@
-import { TransactionsView } from "@/src/features/transactions/view/transactions-view";
+import { ExpensesView } from "@/src/features/transactions/view/expenses-view";
 
 export default function ExpenseNewRoute() {
-  return <TransactionsView />;
+  return <ExpensesView />;
 }

@@ -1,5 +1,5 @@
-import { TransactionsView } from "@/src/features/transactions/view/transactions-view";
+import { AllTransactionsView } from "@/src/features/transactions/view/all-transactions-view";
 
 export default function TransactionsScreen() {
-  return <TransactionsView />;
+  return <AllTransactionsView />;
 }
