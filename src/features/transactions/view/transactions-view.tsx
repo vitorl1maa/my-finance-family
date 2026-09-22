@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   content: { flexGrow: 1, gap: 14, padding: 20, paddingBottom: 140, paddingTop: 58 },
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 28 },
-  subtitle: { color: colors.muted, fontSize: 13, marginTop: -10 },
+  subtitle: { color: colors.muted, fontSize: 13, marginTop: 5 },
   addButton: {
     alignItems: "center",
     backgroundColor: colors.accent,
