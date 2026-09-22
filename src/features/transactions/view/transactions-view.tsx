@@ -1,4 +1,4 @@
-import { ShoppingCart, WalletCards } from "lucide-react-native";
+import { Plus, ShoppingCart, WalletCards } from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from "react-native";
-
 import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -78,8 +77,13 @@ export function TransactionsView() {
         <View style={styles.group}>
           <View style={styles.expenseHeader}>
             <Text style={styles.expenseTitle}>Suas despesas</Text>
-            <Pressable onPress={() => setDrawerVisible(true)}>
-              <Text style={styles.registerLink}>+ Registrar</Text>
+            <Pressable
+              accessibilityLabel="Adicionar nova despesa"
+              accessibilityRole="button"
+              onPress={() => setDrawerVisible(true)}
+              style={styles.addExpenseButton}
+            >
+              <Plus color={colors.text} size={20} strokeWidth={2.5} />
             </Pressable>
           </View>
           {viewModel.transactions
@@ -148,10 +152,10 @@ const styles = StyleSheet.create({
   summaryLabel: {
     color: "#8A5A00",
     fontFamily: fonts.bold,
-    fontSize: 11,
+    fontSize: 14,
     letterSpacing: 0.3,
   },
-  summaryValue: { color: "#7A4F00", fontFamily: fonts.extraBold, fontSize: 34 },
+  summaryValue: { color: "#7A4F00", fontFamily: fonts.extraBold, fontSize: 38 },
   notice: { backgroundColor: colors.surfaceMuted, borderRadius: 12, gap: 5, padding: 12 },
   noticeText: { color: colors.muted, fontSize: 12 },
   retry: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
@@ -164,7 +168,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   expenseTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
-  registerLink: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
+  addExpenseButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
   transaction: {
     alignItems: "center",
     borderColor: colors.border,
