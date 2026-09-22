@@ -36,17 +36,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="transactions"
+        name="cofrinho"
         options={{
-          title: "Transações",
-          tabBarIcon: ({ color }) => <TrendingUp color={color} size={22} strokeWidth={2.4} />,
-        }}
-      />
-      <Tabs.Screen
-        name="goals"
-        options={{
-          title: "Metas",
-          tabBarIcon: ({ color }) => <Target color={color} size={22} strokeWidth={2.4} />,
+          title: "Cofrinho",
+          tabBarIcon: ({ color }) => <PiggyBank color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
@@ -59,10 +52,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="cofrinho"
+        name="goals"
         options={{
-          title: "Cofrinho",
-          tabBarIcon: ({ color }) => <PiggyBank color={color} size={22} strokeWidth={2.4} />,
+          title: "Metas",
+          tabBarIcon: ({ color }) => <Target color={color} size={22} strokeWidth={2.4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: "Transações",
+          tabBarIcon: ({ color }) => <TrendingUp color={color} size={22} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
