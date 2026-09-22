@@ -84,12 +84,16 @@ returns void
 language sql security definer
 set search_path = public
 as $$
-  insert into public.categories (family_id, name, slug)
-  values
-    (target_family_id, 'Moradia', 'moradia'),
-    (target_family_id, 'Alimentação', 'alimentacao'),
-    (target_family_id, 'Saúde', 'saude'),
-    (target_family_id, 'Lazer', 'lazer')
+  insert into public.categories (family_id, name, slug, created_by)
+  select target_family_id, seed.name, seed.slug, family.created_by
+  from public.families family
+  cross join (values
+    ('Moradia'::text, 'moradia'::text),
+    ('Alimentação'::text, 'alimentacao'::text),
+    ('Saúde'::text, 'saude'::text),
+    ('Lazer'::text, 'lazer'::text)
+  ) as seed(name, slug)
+  where family.id = target_family_id
   on conflict (family_id, slug) do nothing;
 $$;
 
