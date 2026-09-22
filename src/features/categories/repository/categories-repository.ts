@@ -15,12 +15,27 @@ type CategoryRow = {
 export async function listFamilyCategories(): Promise<ExpenseCategory[]> {
   const { data, error } = await supabase.rpc("list_family_categories");
 
-  if (error) {
-    throw error;
+  if (!error) {
+    return orderExpenseCategories(
+      ((data ?? []) as CategoryRow[]).map((row) => ({
+        id: row.id,
+        familyId: row.family_id,
+        name: row.name,
+        slug: row.slug,
+        isActive: row.is_active,
+      })),
+    );
   }
 
+  const fallback = await supabase
+    .from("categories")
+    .select("id, family_id, name, slug, is_active")
+    .eq("is_active", true);
+
+  if (fallback.error) throw error;
+
   return orderExpenseCategories(
-    ((data ?? []) as CategoryRow[]).map((row) => ({
+    ((fallback.data ?? []) as CategoryRow[]).map((row) => ({
       id: row.id,
       familyId: row.family_id,
       name: row.name,
