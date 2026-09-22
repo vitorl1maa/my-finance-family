@@ -1,5 +1,12 @@
 import { Tabs } from "expo-router";
-import { BanknoteArrowDown, Home, PiggyBank, Target, TrendingUp } from "lucide-react-native";
+import {
+  BanknoteArrowDown,
+  Home,
+  PiggyBank,
+  Target,
+  TrendingUp,
+  UsersRound,
+} from "lucide-react-native";
 import type { ComponentProps } from "react";
 
 import { FloatingBottomTabs } from "@/src/shared/components/base/floating-bottom-tabs";
@@ -56,6 +63,13 @@ export default function TabLayout() {
         options={{
           title: "Cofrinho",
           tabBarIcon: ({ color }) => <PiggyBank color={color} size={22} strokeWidth={2.4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="family-members"
+        options={{
+          title: "Família",
+          tabBarIcon: ({ color }) => <UsersRound color={color} size={22} strokeWidth={2.4} />,
         }}
       />
     </Tabs>

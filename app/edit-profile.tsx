@@ -10,7 +10,7 @@ export default function EditProfileScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <EditProfileView
         onBack={() => router.back()}
-        onFamilyMembers={() => router.push("/family-members")}
+        onFamilyMembers={() => router.push("/(tabs)/family-members")}
       />
     </>
   );
