@@ -12,10 +12,12 @@ export function IncomeSourceNewView({
   onBack,
   onSave,
   initialSource,
+  onDelete,
 }: {
   onBack: () => void;
   onSave: (name: string, amountCents: number, kind: IncomeSource["kind"]) => Promise<void>;
   initialSource?: IncomeSource;
+  onDelete?: (id: string) => Promise<void>;
 }) {
   const [name, setName] = useState(initialSource?.name ?? "");
   const [amount, setAmount] = useState(
@@ -89,6 +91,14 @@ export function IncomeSourceNewView({
         </Text>
         <ArrowRight color={colors.text} size={19} strokeWidth={2.5} />
       </Pressable>
+      {initialSource && onDelete ? (
+        <Pressable
+          onPress={() => void onDelete(initialSource.id).then(onBack)}
+          style={styles.delete}
+        >
+          <Text style={styles.deleteText}>Excluir fonte</Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
@@ -185,4 +195,6 @@ const styles = StyleSheet.create({
     minHeight: 58,
   },
   primaryText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15 },
+  delete: { alignItems: "center", paddingVertical: 12 },
+  deleteText: { color: colors.negative, fontFamily: fonts.bold, fontSize: 13 },
 });

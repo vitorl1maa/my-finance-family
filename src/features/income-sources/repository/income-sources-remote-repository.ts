@@ -34,6 +34,11 @@ export async function upsertRemoteIncomeSource(source: IncomeSource): Promise<In
   return mapRemoteIncomeSource(row as RemoteIncomeSourceRow);
 }
 
+export async function deleteRemoteIncomeSource(id: string): Promise<void> {
+  const { error } = await supabase.from("income_sources").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function getRemotePiggyBankSettings(): Promise<PiggyBankSettings | null> {
   const { data, error } = await supabase.rpc("get_family_piggy_bank_settings");
 

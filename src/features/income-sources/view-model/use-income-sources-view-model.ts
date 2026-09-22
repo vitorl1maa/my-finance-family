@@ -6,12 +6,14 @@ import {
   totalIncomeSources,
 } from "@/src/features/income-sources/model/income-source";
 import {
+  deleteRemoteIncomeSource,
   getRemotePiggyBankSettings,
   listRemoteIncomeSources,
   upsertRemoteIncomeSource,
   upsertRemotePiggyBankSettings,
 } from "@/src/features/income-sources/repository/income-sources-remote-repository";
 import {
+  deleteIncomeSource,
   getPiggyBankSettings,
   listIncomeSources,
   saveIncomeSource,
@@ -129,6 +131,20 @@ export function useIncomeSourcesViewModel() {
     [db, session, setSources],
   );
 
+  const removeSource = useCallback(
+    async (id: string) => {
+      await deleteIncomeSource(db, id);
+      setSources(await listIncomeSources(db));
+      if (!session) return;
+      try {
+        await deleteRemoteIncomeSource(id);
+      } catch {
+        setError("Fonte removida do dispositivo, mas não foi possível sincronizar.");
+      }
+    },
+    [db, session, setSources],
+  );
+
   const saveBalance = useCallback(
     async (nextBalanceCents: number) => {
       await savePiggyBankSettings(db, {
@@ -163,6 +179,7 @@ export function useIncomeSourcesViewModel() {
     error,
     createSource,
     updateSource,
+    removeSource,
     saveBalance,
     reload: loadSources,
   };

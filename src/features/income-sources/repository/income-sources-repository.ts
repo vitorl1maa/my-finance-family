@@ -41,6 +41,10 @@ export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource)
   );
 }
 
+export async function deleteIncomeSource(db: SQLiteDatabase, id: string): Promise<void> {
+  await db.runAsync("DELETE FROM income_sources WHERE id = ?", id);
+}
+
 export async function getPiggyBankSettings(db: SQLiteDatabase): Promise<PiggyBankSettings | null> {
   const row = await db.getFirstAsync<{
     balance_cents: number;

@@ -136,6 +136,7 @@ export function IncomeSourcesView() {
                   ? viewModel.updateSource({ ...selectedSource, name, amountCents, kind })
                   : viewModel.createSource(name, amountCents, kind)
               }
+              onDelete={viewModel.removeSource}
             />
           </View>
         </View>
