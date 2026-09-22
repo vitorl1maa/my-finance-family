@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, WalletCards } from "lucide-react-native";
+import { Search, ShoppingCart, TrendingUp, WalletCards } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -59,9 +59,15 @@ export function AllTransactionsView() {
       {viewModel.transactionsLoading && viewModel.transactions.length === 0 ? (
         <LoadingShimmer rows={3} />
       ) : groups.length === 0 ? (
-        <Text style={styles.empty}>
-          {query ? "Nenhuma transação encontrada." : "Ainda não há transações registradas."}
-        </Text>
+        <View style={styles.empty}>
+          <TrendingUp color={colors.darkPink} size={26} />
+          <Text style={styles.emptyTitle}>
+            {query ? "Nenhuma transação encontrada" : "Nenhuma transação cadastrada"}
+          </Text>
+          <Text style={styles.emptyText}>
+            {query ? "Tente buscar outro termo." : "Suas entradas e saídas aparecerão aqui."}
+          </Text>
+        </View>
       ) : (
         groups.map((group) => (
           <View key={group.id} style={styles.group}>
@@ -114,7 +120,9 @@ const styles = StyleSheet.create({
   notice: { backgroundColor: colors.surfaceMuted, borderRadius: 12, gap: 5, padding: 12 },
   noticeText: { color: colors.muted, fontSize: 12 },
   retry: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
-  empty: { color: colors.muted, fontSize: 14, paddingTop: 28, textAlign: "center" },
+  empty: { alignItems: "center", gap: 8, paddingTop: 28 },
+  emptyTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 17 },
+  emptyText: { color: colors.muted, fontSize: 14, textAlign: "center" },
   group: { gap: 8, marginTop: 4 },
   day: { color: colors.mutedLight, fontFamily: fonts.bold, fontSize: 12 },
   transaction: { alignItems: "center", flexDirection: "row", minHeight: 54 },

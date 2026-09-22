@@ -282,13 +282,11 @@ const styles = StyleSheet.create({
   detailValue: { color: colors.text, fontFamily: fonts.bold, fontSize: 12, marginTop: 2 },
   empty: {
     alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: 18,
     gap: 8,
-    padding: 28,
+    paddingTop: 28,
   },
-  emptyTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 15 },
-  emptyText: { color: colors.muted, fontSize: 12, textAlign: "center" },
+  emptyTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 17 },
+  emptyText: { color: colors.muted, fontSize: 14, textAlign: "center" },
   drawerBackdrop: { backgroundColor: "rgba(0, 0, 0, 0.32)", flex: 1, justifyContent: "flex-end" },
   drawer: {
     backgroundColor: colors.background,

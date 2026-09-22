@@ -252,9 +252,9 @@ const styles = StyleSheet.create({
   sourceName: { color: colors.text, fontFamily: fonts.bold, fontSize: 15 },
   sourceMeta: { color: colors.muted, fontSize: 12 },
   sourceAmount: { color: colors.positive, fontFamily: fonts.bold, fontSize: 14 },
-  empty: { alignItems: "center", gap: 7, padding: 24 },
-  emptyTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 15 },
-  emptyText: { color: colors.muted, fontSize: 12 },
+  empty: { alignItems: "center", gap: 8, paddingTop: 28 },
+  emptyTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 17 },
+  emptyText: { color: colors.muted, fontSize: 14 },
   drawerBackdrop: { backgroundColor: "#00000055", flex: 1, justifyContent: "flex-end" },
   drawer: {
     backgroundColor: colors.background,
