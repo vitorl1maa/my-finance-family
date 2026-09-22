@@ -76,7 +76,10 @@ export function TransactionsView() {
       ) : viewModel.transactions.length === 0 ? (
         <View style={styles.group}>
           <View style={styles.expenseHeader}>
-            <Text style={styles.expenseTitle}>Suas despesas</Text>
+            <View>
+              <Text style={styles.expenseTitle}>Suas despesas</Text>
+              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu</Text>
+            </View>
             <Pressable
               accessibilityLabel="Adicionar nova despesa"
               accessibilityRole="button"
@@ -91,7 +94,10 @@ export function TransactionsView() {
       ) : (
         <View style={styles.group}>
           <View style={styles.expenseHeader}>
-            <Text style={styles.expenseTitle}>Suas despesas</Text>
+            <View>
+              <Text style={styles.expenseTitle}>Suas despesas</Text>
+              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu</Text>
+            </View>
             <Pressable
               accessibilityLabel="Adicionar nova despesa"
               accessibilityRole="button"
@@ -202,6 +208,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   expenseTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
+  expenseSubtitle: { color: colors.muted, fontSize: 13, marginTop: 4 },
   addExpenseButton: {
     alignItems: "center",
     backgroundColor: colors.accent,
