@@ -7,7 +7,13 @@ import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-m
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
-export function EditProfileView({ onBack }: { onBack: () => void }) {
+export function EditProfileView({
+  onBack,
+  onFamilyMembers,
+}: {
+  onBack: () => void;
+  onFamilyMembers?: () => void;
+}) {
   const session = useAuthStore((state) => state.session);
   const { errorMessage, isLoading, setError, signOut, updateProfile } = useAuthViewModel();
   const metadata = session?.user.user_metadata as
@@ -121,6 +127,12 @@ export function EditProfileView({ onBack }: { onBack: () => void }) {
       {saved ? <Text style={styles.saved}>Alterações salvas automaticamente.</Text> : null}
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
+      {onFamilyMembers ? (
+        <Pressable onPress={onFamilyMembers} style={styles.familyButton}>
+          <Text style={styles.familyText}>Membros da família</Text>
+        </Pressable>
+      ) : null}
+
       <Pressable accessibilityRole="button" onPress={handleSignOut} style={styles.signOut}>
         <LogOut color={colors.negative} size={18} />
         <Text style={styles.signOutText}>Sair</Text>
@@ -209,6 +221,15 @@ const styles = StyleSheet.create({
   status: { color: colors.muted, fontSize: 12, textAlign: "center" },
   saved: { color: colors.positive, fontSize: 12, textAlign: "center" },
   error: { color: colors.negative, fontSize: 12, textAlign: "center" },
+  familyButton: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    minHeight: 48,
+    justifyContent: "center",
+  },
+  familyText: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
   signOut: {
     alignItems: "center",
     flexDirection: "row",
