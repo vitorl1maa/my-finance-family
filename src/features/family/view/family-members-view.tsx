@@ -1,4 +1,4 @@
-import { Mail, UserPlus, X } from "lucide-react-native";
+import { Check, Mail, MoreHorizontal, UserPlus, Users, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
@@ -26,6 +26,18 @@ export function FamilyMembersView({ onBack }: { onBack: () => void }) {
         >
           <X color={colors.text} size={20} />
         </Pressable>
+      </View>
+      <View style={styles.summary}>
+        <View style={styles.summaryIcon}>
+          <Users color={colors.text} size={22} />
+        </View>
+        <View style={styles.summaryCopy}>
+          <Text style={styles.summaryTitle}>Sua família financeira</Text>
+          <Text style={styles.summaryText}>
+            {invited.length + 1} {invited.length + 1 === 1 ? "pessoa" : "pessoas"} participando
+          </Text>
+        </View>
+        <Check color={colors.positive} size={20} />
       </View>
       <View style={styles.inviteCard}>
         <View style={styles.cardIcon}>
@@ -66,6 +78,7 @@ export function FamilyMembersView({ onBack }: { onBack: () => void }) {
           name="Convite pendente"
           email={item}
           memberRole="Aguardando resposta"
+          action={() => setInvited((items) => items.filter((value) => value !== item))}
         />
       ))}
     </ScrollView>
@@ -76,10 +89,12 @@ function MemberRow({
   name,
   email,
   memberRole,
+  action,
 }: {
   name: string;
   email: string;
   memberRole: string;
+  action?: () => void;
 }) {
   return (
     <View style={styles.member}>
@@ -91,6 +106,11 @@ function MemberRow({
         <Text style={styles.memberEmail}>{email}</Text>
       </View>
       <Text style={styles.role}>{memberRole}</Text>
+      {action ? (
+        <Pressable accessibilityLabel="Remover convite" onPress={action} style={styles.more}>
+          <MoreHorizontal color={colors.muted} size={18} />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -116,6 +136,25 @@ const styles = StyleSheet.create({
     width: 40,
   },
   inviteCard: { backgroundColor: colors.surfaceMuted, borderRadius: 20, gap: 10, padding: 16 },
+  summary: {
+    alignItems: "center",
+    backgroundColor: colors.text,
+    borderRadius: 20,
+    flexDirection: "row",
+    gap: 12,
+    padding: 16,
+  },
+  summaryIcon: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 14,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  summaryCopy: { flex: 1, gap: 3 },
+  summaryTitle: { color: colors.background, fontFamily: fonts.extraBold, fontSize: 15 },
+  summaryText: { color: colors.mutedLight, fontSize: 12 },
   cardIcon: {
     alignItems: "center",
     backgroundColor: colors.accent,
@@ -172,4 +211,5 @@ const styles = StyleSheet.create({
   memberName: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
   memberEmail: { color: colors.muted, fontSize: 12 },
   role: { color: colors.muted, fontSize: 11, textAlign: "right" },
+  more: { alignItems: "center", height: 32, justifyContent: "center", width: 28 },
 });
