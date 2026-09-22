@@ -1,4 +1,12 @@
-import { Gamepad2, House, Plus, ShoppingCart, Stethoscope, Utensils } from "lucide-react-native";
+import {
+  BanknoteArrowDown,
+  Gamepad2,
+  House,
+  Plus,
+  ShoppingCart,
+  Stethoscope,
+  Utensils,
+} from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -89,7 +97,11 @@ export function TransactionsView() {
               <Plus color={colors.text} size={20} strokeWidth={2.5} />
             </Pressable>
           </View>
-          <Text style={styles.empty}>Ainda não há despesas registradas.</Text>
+          <View style={styles.empty}>
+            <BanknoteArrowDown color={colors.mutedLight} size={26} />
+            <Text style={styles.emptyTitle}>Nenhuma despesa cadastrada</Text>
+            <Text style={styles.emptyText}>Adicione sua primeira despesa.</Text>
+          </View>
         </View>
       ) : (
         <View style={styles.group}>
@@ -199,7 +211,9 @@ const styles = StyleSheet.create({
   notice: { backgroundColor: colors.surfaceMuted, borderRadius: 12, gap: 5, padding: 12 },
   noticeText: { color: colors.muted, fontSize: 12 },
   retry: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
-  empty: { color: colors.muted, fontSize: 14, paddingTop: 28, textAlign: "center" },
+  empty: { alignItems: "center", gap: 8, paddingTop: 28 },
+  emptyTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 17 },
+  emptyText: { color: colors.muted, fontSize: 14 },
   group: { gap: 8, marginTop: 0 },
   expenseHeader: {
     alignItems: "center",
