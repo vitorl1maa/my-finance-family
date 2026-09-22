@@ -1,5 +1,5 @@
 import { PiggyBank, Plus, WalletCards } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Image,
   Modal,
@@ -14,39 +14,23 @@ import {
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
-import { SmoothTextInput } from "@/src/shared/components/smooth-text-input";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
-import {
-  formatBrlInput,
-  formatCurrencyFromCents,
-  parseBrlInputToCents,
-} from "@/src/shared/utils/money";
 
 export function IncomeSourcesView() {
   const viewModel = useIncomeSourcesViewModel();
+  const transactions = useTransactionsViewModel();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [balance, setBalance] = useState(formatCurrencyFromCents(0));
-  const [balanceReady, setBalanceReady] = useState(false);
-
-  useEffect(() => {
-    if (!viewModel.balanceLoading) {
-      setBalance(formatCurrencyFromCents(viewModel.balanceCents));
-      setBalanceReady(true);
-    }
-  }, [viewModel.balanceCents, viewModel.balanceLoading]);
-
-  useEffect(() => {
-    if (viewModel.balanceLoading || !balanceReady) return;
-
-    const timeout = setTimeout(() => {
-      void viewModel.saveBalance(parseBrlInputToCents(balance));
-    }, 10_000);
-
-    return () => clearTimeout(timeout);
-  }, [balance, balanceReady, viewModel.balanceLoading, viewModel.saveBalance]);
+  const balanceCents =
+    viewModel.totalCents -
+    transactions.transactions.reduce(
+      (total, transaction) =>
+        total + (transaction.isExpense ? Math.abs(transaction.amountCents) : 0),
+      0,
+    );
 
   return (
     <ScrollView
@@ -85,12 +69,10 @@ export function IncomeSourcesView() {
         <View style={styles.cardOverlay} />
         <View style={styles.balanceContent}>
           <Text style={styles.balanceEyebrow}>SALDO DO COFRINHO</Text>
-          <SmoothTextInput
+          <AnimatedCurrency
             accessibilityLabel="Saldo do cofrinho"
-            keyboardType="decimal-pad"
-            onChangeText={(value) => setBalance(formatBrlInput(value))}
             style={styles.balanceInput}
-            value={balance}
+            valueInCents={balanceCents}
           />
         </View>
       </View>

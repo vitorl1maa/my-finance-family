@@ -15,6 +15,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const transactions = useTransactionsViewModel();
   const goals = useGoalsViewModel();
   const incomeSources = useIncomeSourcesViewModel();
+  const insights = buildDashboardInsights(transactions.transactions, selectedDate);
 
   const reload = async () => {
     await Promise.all([
@@ -29,10 +30,10 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     accounts: accounts.accounts,
     goals: goals.goals,
     greeting: getDashboardGreeting(),
-    insights: buildDashboardInsights(transactions.transactions, selectedDate),
+    insights,
     recentTransactions: transactions.transactions.slice(0, 3),
     totalBalance: incomeSources.formattedTotal,
-    totalBalanceCents: incomeSources.balanceCents,
+    totalBalanceCents: incomeSources.totalCents - insights.monthlyExpenseCents,
     incomeSourcesLoading: incomeSources.loading,
     incomeSources: incomeSources.sources,
     loading: incomeSources.loading || goals.loading || transactions.transactionsLoading,
