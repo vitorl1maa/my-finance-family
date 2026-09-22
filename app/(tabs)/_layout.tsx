@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { BanknoteArrowUp, Home, PiggyBank, ReceiptText, Target } from "lucide-react-native";
+import { BanknoteArrowDown, Home, PiggyBank, ReceiptText, Target } from "lucide-react-native";
 import type { ComponentProps } from "react";
 
 import { FloatingBottomTabs } from "@/src/shared/components/base/floating-bottom-tabs";
@@ -46,7 +46,9 @@ export default function TabLayout() {
         name="expense-new"
         options={{
           title: "Despesas",
-          tabBarIcon: ({ color }) => <BanknoteArrowUp color={color} size={22} strokeWidth={2.4} />,
+          tabBarIcon: ({ color }) => (
+            <BanknoteArrowDown color={color} size={22} strokeWidth={2.4} />
+          ),
         }}
       />
       <Tabs.Screen

@@ -1,4 +1,4 @@
-import { Plus, ShoppingCart, WalletCards } from "lucide-react-native";
+import { Gamepad2, House, Plus, ShoppingCart, Stethoscope, Utensils } from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -91,7 +91,7 @@ export function TransactionsView() {
             .map((transaction) => (
               <View key={transaction.id} style={styles.transaction}>
                 <View style={styles.icon}>
-                  <TransactionIcon isExpense={transaction.amountCents < 0} />
+                  <TransactionIcon category={transaction.category} />
                 </View>
                 <View style={styles.info}>
                   <Text style={styles.name}>{transaction.title}</Text>
@@ -126,12 +126,18 @@ export function TransactionsView() {
   );
 }
 
-function TransactionIcon({ isExpense }: { isExpense: boolean }) {
-  return isExpense ? (
-    <ShoppingCart color={colors.muted} size={20} />
-  ) : (
-    <WalletCards color={colors.muted} size={20} />
-  );
+function TransactionIcon({ category }: { category: string }) {
+  const Icon =
+    category === "Moradia"
+      ? House
+      : category === "Alimentação"
+        ? Utensils
+        : category === "Saúde"
+          ? Stethoscope
+          : category === "Lazer"
+            ? Gamepad2
+            : ShoppingCart;
+  return <Icon color={colors.muted} size={20} />;
 }
 
 const styles = StyleSheet.create({

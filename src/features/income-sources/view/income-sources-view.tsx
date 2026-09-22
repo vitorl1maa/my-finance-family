@@ -1,4 +1,4 @@
-import { PiggyBank, Plus, WalletCards } from "lucide-react-native";
+import { Banknote, ChartNoAxesCombined, PiggyBank, Plus, Shapes } from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -95,7 +95,7 @@ export function IncomeSourcesView() {
         viewModel.sources.map((source) => (
           <View key={source.id} style={styles.sourceRow}>
             <View style={styles.sourceIcon}>
-              <WalletCards color={colors.darkPink} size={20} />
+              <IncomeSourceIcon kind={source.kind} />
             </View>
             <View style={styles.sourceInfo}>
               <Text style={styles.sourceName}>{source.name}</Text>
@@ -123,6 +123,11 @@ export function IncomeSourcesView() {
       </Modal>
     </ScrollView>
   );
+}
+
+function IncomeSourceIcon({ kind }: { kind: "salary" | "investment" | "other" }) {
+  const Icon = kind === "salary" ? Banknote : kind === "investment" ? ChartNoAxesCombined : Shapes;
+  return <Icon color={colors.darkPink} size={20} />;
 }
 
 const styles = StyleSheet.create({
