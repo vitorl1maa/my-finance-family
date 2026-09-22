@@ -193,5 +193,12 @@ const styles = StyleSheet.create({
   expense: { color: colors.negative },
   income: { color: colors.positive },
   drawerBackdrop: { backgroundColor: "#00000055", flex: 1, justifyContent: "flex-end" },
-  drawer: { backgroundColor: colors.background, maxHeight: "92%", minHeight: "82%" },
+  drawer: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: "92%",
+    minHeight: "82%",
+    overflow: "hidden",
+  },
 });
