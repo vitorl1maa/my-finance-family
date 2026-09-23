@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isInvitationAcceptable } from "../src/features/family/model/family-invitation.ts";
+import * as familyInvitation from "../src/features/family/model/family-invitation.ts";
+
+const { isInvitationAcceptable } = familyInvitation;
 
 test("acceptance rejects expired, consumed, and already-associated users", () => {
   const past = new Date("1970-01-01T00:00:00.000Z");
@@ -108,5 +110,39 @@ test("acceptance rejects an invitation at its exact 60-second expiry boundary", 
       now: new Date("2026-09-22T12:01:00.000Z"),
     }),
     false,
+  );
+});
+
+test("returns the remaining whole seconds before expiry and 0 after expiry", () => {
+  assert.equal(typeof familyInvitation.getRemainingInvitationSeconds, "function");
+  assert.equal(
+    familyInvitation.getRemainingInvitationSeconds(
+      "2026-09-22T12:01:00.000Z",
+      new Date("2026-09-22T12:00:01.000Z"),
+    ),
+    59,
+  );
+  assert.equal(
+    familyInvitation.getRemainingInvitationSeconds(
+      "2026-09-22T12:01:00.000Z",
+      new Date("2026-09-22T12:01:01.000Z"),
+    ),
+    0,
+  );
+});
+
+test("maps known invitation RPC failures to actionable Portuguese messages", () => {
+  assert.equal(typeof familyInvitation.getFamilyInvitationErrorMessage, "function");
+  assert.equal(
+    familyInvitation.getFamilyInvitationErrorMessage(new Error("invalid_or_expired_invitation")),
+    "Este QR Code expirou ou já foi utilizado. Peça para gerar um novo código.",
+  );
+  assert.equal(
+    familyInvitation.getFamilyInvitationErrorMessage(new Error("user_already_associated")),
+    "Você já participa de uma família e não pode aceitar outro convite.",
+  );
+  assert.equal(
+    familyInvitation.getFamilyInvitationErrorMessage(new Error("family_owner_required")),
+    "Somente administradores podem gerar um QR Code de convite.",
   );
 });

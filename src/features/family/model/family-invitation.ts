@@ -12,6 +12,47 @@ type BootstrapFamily = {
   hasInvitations: boolean;
 };
 
+export type FamilyInvitation = {
+  token: string;
+  expiresAt: string;
+};
+
+export type FamilyMembership = {
+  role: "owner" | "member";
+  isBootstrap: boolean;
+  createdByCurrentUser: boolean;
+};
+
+export function getRemainingInvitationSeconds(expiresAt: string, now: Date = new Date()) {
+  const remainingMilliseconds = new Date(expiresAt).getTime() - now.getTime();
+
+  if (!Number.isFinite(remainingMilliseconds)) return 0;
+
+  return Math.max(0, Math.floor(remainingMilliseconds / 1000));
+}
+
+export function getFamilyInvitationErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+
+  if (message.includes("invalid_or_expired_invitation")) {
+    return "Este QR Code expirou ou já foi utilizado. Peça para gerar um novo código.";
+  }
+  if (message.includes("user_already_associated")) {
+    return "Você já participa de uma família e não pode aceitar outro convite.";
+  }
+  if (message.includes("family_owner_required")) {
+    return "Somente administradores podem gerar um QR Code de convite.";
+  }
+  if (message.includes("authentication_required")) {
+    return "Entre novamente na sua conta para usar convites familiares.";
+  }
+  if (message.includes("fetch") || message.includes("network")) {
+    return "Sem conexão. Verifique sua internet e tente novamente.";
+  }
+
+  return "Não foi possível concluir o convite agora. Tente novamente.";
+}
+
 export function isInvitationAcceptable({
   expiresAt,
   acceptedAt,
