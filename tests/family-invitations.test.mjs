@@ -147,6 +147,15 @@ test("maps known invitation RPC failures to actionable Portuguese messages", () 
   );
 });
 
+test("explains when the family invitation migration has not been applied", () => {
+  assert.equal(
+    familyInvitation.getFamilyInvitationErrorMessage(
+      new Error('column families.is_bootstrap does not exist'),
+    ),
+    "A atualização de famílias ainda não foi aplicada no servidor. Tente novamente após sincronizar o banco.",
+  );
+});
+
 test("derives invitation progress from its 60-second lifetime", () => {
   assert.equal(typeof familyInvitation.getInvitationProgress, "function");
   assert.equal(familyInvitation.getInvitationProgress(60), 1);

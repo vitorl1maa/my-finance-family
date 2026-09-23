@@ -43,6 +43,10 @@ export function parseFamilyInvitationToken(value: string) {
 export function getFamilyInvitationErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message.toLowerCase() : "";
 
+  if (message.includes("is_bootstrap") || message.includes("does not exist")) {
+    return "A atualização de famílias ainda não foi aplicada no servidor. Tente novamente após sincronizar o banco.";
+  }
+
   if (message.includes("invalid_or_expired_invitation")) {
     return "Este QR Code expirou ou já foi utilizado. Peça para gerar um novo código.";
   }
