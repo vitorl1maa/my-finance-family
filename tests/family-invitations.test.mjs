@@ -132,6 +132,14 @@ test("returns the remaining whole seconds before expiry and 0 after expiry", () 
   );
 });
 
+test("normalizes PostgreSQL timestamps before calculating the invitation countdown", () => {
+  assert.equal(typeof familyInvitation.normalizeInvitationTimestamp, "function");
+  assert.equal(
+    familyInvitation.normalizeInvitationTimestamp("2026-09-23 16:17:33.452452+00"),
+    "2026-09-23T16:17:33.452452+00:00",
+  );
+});
+
 test("maps known invitation RPC failures to actionable Portuguese messages", () => {
   assert.equal(typeof familyInvitation.getFamilyInvitationErrorMessage, "function");
   assert.equal(

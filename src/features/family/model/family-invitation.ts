@@ -23,8 +23,15 @@ export type FamilyMembership = {
   createdByCurrentUser: boolean;
 };
 
+export function normalizeInvitationTimestamp(value: string) {
+  return value
+    .trim()
+    .replace(" ", "T")
+    .replace(/([+-]\d{2})$/, "$1:00");
+}
+
 export function getRemainingInvitationSeconds(expiresAt: string, now: Date = new Date()) {
-  const remainingMilliseconds = new Date(expiresAt).getTime() - now.getTime();
+  const remainingMilliseconds = new Date(normalizeInvitationTimestamp(expiresAt)).getTime() - now.getTime();
 
   if (!Number.isFinite(remainingMilliseconds)) return 0;
 
