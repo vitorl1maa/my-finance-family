@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import * as familyInvitation from "../src/features/family/model/family-invitation.ts";
@@ -154,6 +155,17 @@ test("explains when the family invitation migration has not been applied", () =>
     ),
     "A atualização de famílias ainda não foi aplicada no servidor. Tente novamente após sincronizar o banco.",
   );
+});
+
+test("QR invitation token functions resolve pgcrypto from the extensions schema", () => {
+  const migration = readFileSync(
+    new URL("../supabase/migrations/202609230001_fix_qr_invitation_pgcrypto.sql", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(migration, /extensions\.gen_random_bytes\(32\)/);
+  assert.match(migration, /extensions\.digest\(token, 'sha256'\)/);
+  assert.match(migration, /extensions\.digest\(raw_token, 'sha256'\)/);
 });
 
 test("derives invitation progress from its 60-second lifetime", () => {

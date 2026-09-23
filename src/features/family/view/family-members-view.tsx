@@ -2,10 +2,10 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { Camera, Check, QrCode, RefreshCw, ScanLine, Users, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { type FamilyInvitation, getInvitationProgress, getRemainingInvitationSeconds, parseFamilyInvitationToken } from "@/src/features/family/model/family-invitation";
 import { useFamilyInvitationsViewModel } from "@/src/features/family/view-model/use-family-invitations-view-model";
+import { ReacticxQrCode } from "@/src/shared/components/base/reacticx-qr-code";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
@@ -70,7 +70,7 @@ export function FamilyMembersView({ onBack }: { onBack: () => void }) {
     {canJoin ? <View style={styles.joinCard}><Text style={styles.cardTitle}>Entrar em uma família</Text><Text style={styles.cardText}>Leia o QR Code gerado pelo administrador.</Text><Pressable onPress={() => setJoinVisible(true)} style={styles.secondary}><ScanLine color={colors.text} size={18} /><Text style={styles.primaryText}>Ler QR Code</Text></Pressable></View> : null}
     <Text style={styles.sectionTitle}>Membros</Text><MemberRow name={name} email={session?.user.email ?? "Conta principal"} memberRole={isOwner ? "Administrador" : "Membro"} />
     <Modal animationType="slide" onRequestClose={closeInvite} transparent visible={invitationVisible}><View style={styles.backdrop}><ScrollView contentContainerStyle={styles.drawer}><DrawerHeader subtitle="Compartilhe com quem fará parte da família." title="Convite por QR Code" onClose={closeInvite} />
-      {invitation && seconds > 0 ? <View style={styles.qrArea}><View style={styles.qrFrame}><QRCode backgroundColor={colors.background} color={colors.text} size={190} value={invitation.token} /></View><Text style={styles.countdown}>{seconds}s</Text><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${getInvitationProgress(seconds) * 100}%` }]} /></View><Text style={styles.helper}>Este QR Code expira em 60 segundos e pode ser usado uma única vez.</Text></View> : <View style={styles.expired}><RefreshCw color={colors.muted} size={26} /><Text style={styles.expiredTitle}>{vm.creating ? "Gerando QR Code..." : "QR Code expirado"}</Text><Text style={styles.helper}>Gere um novo código para continuar.</Text></View>}
+      {invitation && seconds > 0 ? <View style={styles.qrArea}><View style={styles.qrFrame}><ReacticxQrCode value={invitation.token} /></View><Text style={styles.countdown}>{seconds}s</Text><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${getInvitationProgress(seconds) * 100}%` }]} /></View><Text style={styles.helper}>Este QR Code expira em 60 segundos e pode ser usado uma única vez.</Text></View> : <View style={styles.expired}><RefreshCw color={colors.muted} size={26} /><Text style={styles.expiredTitle}>{vm.creating ? "Gerando QR Code..." : "QR Code expirado"}</Text><Text style={styles.helper}>Gere um novo código para continuar.</Text></View>}
       {vm.error ? <Text style={styles.error}>{vm.error}</Text> : null}<Pressable disabled={vm.creating} onPress={() => void generate()} style={[styles.primary, vm.creating && styles.disabled]}><RefreshCw color={colors.text} size={18} /><Text style={styles.primaryText}>{vm.creating ? "Gerando..." : "Gerar novo QR Code"}</Text></Pressable>
     </ScrollView></View></Modal>
     <Modal animationType="slide" onRequestClose={closeJoin} transparent visible={joinVisible}><View style={styles.backdrop}><ScrollView contentContainerStyle={styles.drawer} keyboardShouldPersistTaps="handled"><DrawerHeader subtitle="Leia o QR Code do administrador." title="Entrar na família" onClose={closeJoin} />
