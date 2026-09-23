@@ -1,7 +1,6 @@
 import type { AuthError } from "@supabase/supabase-js";
 import type { AuthFormError, RegisterProfile } from "@/src/features/auth/model/auth";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
-import { startSocialAuth } from "@/src/features/auth/repository/social-auth-repository";
 import { supabase } from "@/src/shared/supabase/supabase-client";
 
 export type ProfileUpdate = {
@@ -55,23 +54,16 @@ export function useAuthViewModel() {
   const signInWithSocial = async (provider: "google" | "apple") => {
     setLoading(true);
     setError(null);
-
-    try {
-      const result = await startSocialAuth(provider);
-      if (result === "success") return true;
-
-      setError(
-        result === "cancel"
-          ? "Login social cancelado. Você pode tentar novamente quando quiser."
-          : "Não foi possível concluir o login social. Tente novamente.",
-      );
-      return false;
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: "myfinancefamily://auth/callback" },
+    });
+    setLoading(false);
+    if (error) {
       setError(getAuthErrorMessage(error));
       return false;
-    } finally {
-      setLoading(false);
     }
+    return true;
   };
 
   const signUpWithEmail = async (email: string, password: string, profile: RegisterProfile) => {
@@ -156,10 +148,9 @@ export function useAuthViewModel() {
   };
 }
 
-function getAuthErrorMessage(error: AuthError | Error | unknown) {
-  const authError = error as AuthError;
-  const message = error instanceof Error ? error.message.toLowerCase() : "";
-  const code = authError.code?.toLowerCase() ?? "";
+function getAuthErrorMessage(error: AuthError) {
+  const message = error.message.toLowerCase();
+  const code = error.code?.toLowerCase() ?? "";
 
   if (message.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
   if (message.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
