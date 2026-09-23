@@ -12,6 +12,7 @@ import {
   PrimaryButton,
 } from "@/src/features/auth/components/auth-ui";
 import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-model";
+import { SocialButton } from "@/src/shared/components/base/social-button";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
@@ -117,8 +118,24 @@ export default function LoginScreen() {
         <View style={styles.line} />
       </View>
       <View style={styles.socialRow}>
-        <SocialButton icon="G" label="Google" onPress={() => void signInWithSocial("google")} />
-        <SocialButton icon="A" label="Apple" onPress={() => void signInWithSocial("apple")} />
+        <SocialButton.Root
+          disabled={isLoading}
+          fullWidth
+          onPress={() => void signInWithSocial("google")}
+          provider="google"
+        >
+          <SocialButton.Icon />
+          <SocialButton.Label>Google</SocialButton.Label>
+        </SocialButton.Root>
+        <SocialButton.Root
+          disabled={isLoading}
+          fullWidth
+          onPress={() => void signInWithSocial("apple")}
+          provider="apple"
+        >
+          <SocialButton.Icon />
+          <SocialButton.Label>Apple</SocialButton.Label>
+        </SocialButton.Root>
       </View>
       <Text style={styles.terms}>
         Ao continuar, você concorda com os Termos e a Política de Privacidade.
@@ -145,25 +162,6 @@ function PasswordToggle({ visible, onPress }: { visible: boolean; onPress: () =>
 
 function messageFor(message: unknown) {
   return typeof message === "string" ? message : undefined;
-}
-
-function SocialButton({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.socialButton}>
-      <View style={styles.socialIcon}>
-        <Text style={styles.socialIconText}>{icon}</Text>
-      </View>
-      <Text style={styles.socialLabel}>{label}</Text>
-    </Pressable>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -219,27 +217,6 @@ const styles = StyleSheet.create({
   line: { backgroundColor: colors.border, flex: 1, height: 1 },
   or: { color: colors.muted, fontSize: 12, fontWeight: "700" },
   socialRow: { flexDirection: "row", gap: 12 },
-  socialButton: {
-    alignItems: "center",
-    borderColor: colors.border,
-    borderRadius: 14,
-    borderWidth: 1,
-    flex: 1,
-    flexDirection: "row",
-    gap: 10,
-    justifyContent: "center",
-    minHeight: 54,
-  },
-  socialIcon: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: 14,
-    height: 28,
-    justifyContent: "center",
-    width: 28,
-  },
-  socialIconText: { color: colors.text, fontSize: 13, fontWeight: "900" },
-  socialLabel: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15, fontWeight: "900" },
   terms: {
     color: colors.mutedLight,
     fontSize: 12,

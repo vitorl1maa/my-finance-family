@@ -12,3 +12,10 @@ test("reads an OAuth code only from the configured callback path", () => {
 test("rejects a callback URL without an OAuth code", () => {
   assert.equal(socialAuth.getOAuthCode("myfinancefamily://auth/callback"), null);
 });
+
+test("accepts only Google and Apple social providers", () => {
+  assert.equal(typeof socialAuth.isSocialProvider, "function");
+  assert.equal(socialAuth.isSocialProvider("google"), true);
+  assert.equal(socialAuth.isSocialProvider("apple"), true);
+  assert.equal(socialAuth.isSocialProvider("facebook"), false);
+});
