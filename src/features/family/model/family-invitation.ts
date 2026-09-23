@@ -31,6 +31,15 @@ export function getRemainingInvitationSeconds(expiresAt: string, now: Date = new
   return Math.max(0, Math.floor(remainingMilliseconds / 1000));
 }
 
+export function getInvitationProgress(remainingSeconds: number) {
+  return Math.max(0, Math.min(1, remainingSeconds / 60));
+}
+
+export function parseFamilyInvitationToken(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return /^[a-f0-9]{64}$/.test(normalized) ? normalized : null;
+}
+
 export function getFamilyInvitationErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message.toLowerCase() : "";
 

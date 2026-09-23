@@ -146,3 +146,23 @@ test("maps known invitation RPC failures to actionable Portuguese messages", () 
     "Somente administradores podem gerar um QR Code de convite.",
   );
 });
+
+test("derives invitation progress from its 60-second lifetime", () => {
+  assert.equal(typeof familyInvitation.getInvitationProgress, "function");
+  assert.equal(familyInvitation.getInvitationProgress(60), 1);
+  assert.equal(familyInvitation.getInvitationProgress(30), 0.5);
+  assert.equal(familyInvitation.getInvitationProgress(0), 0);
+});
+
+test("accepts only normalized 64-character hexadecimal invitation tokens", () => {
+  assert.equal(typeof familyInvitation.parseFamilyInvitationToken, "function");
+  assert.equal(
+    familyInvitation.parseFamilyInvitationToken(
+      "  ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789  ",
+    ),
+    "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+  );
+  assert.equal(familyInvitation.parseFamilyInvitationToken(""), null);
+  assert.equal(familyInvitation.parseFamilyInvitationToken("convite-qualquer"), null);
+  assert.equal(familyInvitation.parseFamilyInvitationToken("a".repeat(63)), null);
+});

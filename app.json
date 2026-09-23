@@ -37,7 +37,13 @@
       "expo-status-bar",
       "expo-sqlite",
       "expo-image",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permita o acesso à câmera para ler o QR Code da sua família."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
