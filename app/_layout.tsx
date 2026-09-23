@@ -69,6 +69,7 @@ function AuthGate() {
 
   return (
     <Stack>
+      <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
       <Stack.Protected guard={Boolean(session)}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="edit-profile" options={{ headerShown: false }} />

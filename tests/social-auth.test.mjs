@@ -8,3 +8,7 @@ test("reads an OAuth code only from the configured callback path", () => {
   assert.equal(socialAuth.getOAuthCode("myfinancefamily://auth/callback?code=abc"), "abc");
   assert.equal(socialAuth.getOAuthCode("myfinancefamily://settings?code=abc"), null);
 });
+
+test("rejects a callback URL without an OAuth code", () => {
+  assert.equal(socialAuth.getOAuthCode("myfinancefamily://auth/callback"), null);
+});
