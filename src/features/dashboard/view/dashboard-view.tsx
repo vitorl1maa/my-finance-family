@@ -43,10 +43,10 @@ export function DashboardView(_: DashboardViewProps) {
     incomeSourcesLoading,
     insights,
     loading,
+    monthlyWalletBalanceCents,
     recentTransactions,
     reload,
     piggyBankBalanceCents,
-    totalBalanceCents,
     userName,
   } = useDashboardViewModel(selectedDate);
   const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(
@@ -113,7 +113,7 @@ export function DashboardView(_: DashboardViewProps) {
               incomeCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
               monthlyExpenseCents={insights.monthlyExpenseCents}
               piggyBankBalanceCents={piggyBankBalanceCents}
-              walletBalanceCents={totalBalanceCents}
+              walletBalanceCents={monthlyWalletBalanceCents}
             />
 
             {isPiggyBankEmpty ? (
@@ -204,7 +204,7 @@ function BalancePager({
         }}
       >
         <View style={[styles.summary, { width: cardWidth }]}>
-          <Text style={styles.summaryLabel}>CARTEIRA</Text>
+          <Text style={styles.summaryLabel}>NOSSA CARTEIRA ESSE MÊS</Text>
           <AnimatedCurrency style={styles.total} valueInCents={walletBalanceCents} />
           <View style={styles.summaryStats}>
             <Metric label="Entradas no mês" prefix="+ " valueInCents={incomeCents} />
@@ -212,7 +212,7 @@ function BalancePager({
           </View>
         </View>
         <View style={[styles.summary, styles.piggySummary, { width: cardWidth }]}>
-          <Text style={styles.piggyLabel}>COFRINHO</Text>
+          <Text style={styles.piggyLabel}>NOSSO COFRINHO ESSE MÊS</Text>
           <AnimatedCurrency style={styles.piggyTotal} valueInCents={piggyBankBalanceCents} />
           <Text style={styles.piggyHint}>Arraste para voltar à carteira</Text>
         </View>
