@@ -1,7 +1,7 @@
 import { format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
-import { Bell, CircleDollarSign, Send } from "lucide-react-native";
+import { Bell, Send, TrendingUp } from "lucide-react-native";
 import { useState } from "react";
 import {
   Pressable,
@@ -139,7 +139,7 @@ export function DashboardView(_: DashboardViewProps) {
                     {transaction.isExpense ? (
                       <Send color={colors.text} size={14} />
                     ) : (
-                      <CircleDollarSign color={colors.text} size={14} />
+                      <TrendingUp color={colors.text} size={14} />
                     )}
                   </View>
                   <View style={styles.transactionInfo}>
