@@ -7,7 +7,12 @@ import {
 import { buildDashboardInsights } from "@/src/features/dashboard/model/dashboard-insights";
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import {
+  filterTransactions,
+  mergeIncomeSourcesIntoTransactions,
+} from "@/src/features/transactions/model/transaction-list";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
+import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const session = useAuthStore((state) => state.session);
@@ -20,6 +25,16 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     0,
     incomeSources.totalCents - insights.monthlyExpenseCents,
   );
+  const recentTransactions = filterTransactions(
+    mergeIncomeSourcesIntoTransactions(transactions.transactions, incomeSources.sources),
+    "",
+  )
+    .slice(0, 3)
+    .map((transaction) => ({
+      ...transaction,
+      formattedAmount: formatCurrencyFromCents(transaction.amountCents),
+      isExpense: transaction.amountCents < 0,
+    }));
 
   const reload = async () => {
     await Promise.all([
@@ -35,7 +50,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     goals: goals.goals,
     greeting: getDashboardGreeting(),
     insights,
-    recentTransactions: transactions.transactions.slice(0, 3),
+    recentTransactions,
     totalBalance: incomeSources.formattedWalletBalance,
     totalBalanceCents: incomeSources.walletBalanceCents,
     monthlyWalletBalanceCents,

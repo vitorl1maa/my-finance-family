@@ -156,9 +156,7 @@ export function DashboardView(_: DashboardViewProps) {
                   >
                     {transaction.formattedAmount}
                   </Text>
-                  {transaction.isExpense ? (
-                    <TransactionCreatorAvatar transaction={transaction} />
-                  ) : null}
+                  <TransactionCreatorAvatar transaction={transaction} />
                 </View>
               ))}
             </View>
