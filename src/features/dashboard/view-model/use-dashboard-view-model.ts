@@ -34,6 +34,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
     recentTransactions: transactions.transactions.slice(0, 3),
     totalBalance: incomeSources.formattedWalletBalance,
     totalBalanceCents: incomeSources.walletBalanceCents,
+    piggyBankBalanceCents: incomeSources.piggyBankBalanceCents,
     incomeSourcesLoading: incomeSources.loading,
     incomeSources: incomeSources.sources,
     loading: incomeSources.loading || goals.loading || transactions.transactionsLoading,

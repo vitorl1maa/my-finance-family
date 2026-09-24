@@ -3,7 +3,15 @@ import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
 import { Bell, CircleDollarSign, Send } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
 import {
   getAvatarToken,
@@ -36,6 +44,7 @@ export function DashboardView(_: DashboardViewProps) {
     loading,
     recentTransactions,
     reload,
+    piggyBankBalanceCents,
     totalBalanceCents,
     userName,
   } = useDashboardViewModel(selectedDate);
@@ -99,28 +108,12 @@ export function DashboardView(_: DashboardViewProps) {
               />
             }
           >
-            {totalBalanceCents > 0 ? (
-              <View style={styles.summary}>
-                <Text style={styles.summaryLabel}>CARTEIRA</Text>
-                <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
-                <View style={styles.summaryStats}>
-                  <Metric
-                    label="Entradas no mês"
-                    prefix="+ "
-                    valueInCents={incomeSources.reduce(
-                      (total, source) => total + source.amountCents,
-                      0,
-                    )}
-                  />
-                  <Metric
-                    accent
-                    label="Despesas no mês"
-                    prefix="- "
-                    valueInCents={insights.monthlyExpenseCents}
-                  />
-                </View>
-              </View>
-            ) : null}
+            <BalancePager
+              incomeCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
+              monthlyExpenseCents={insights.monthlyExpenseCents}
+              piggyBankBalanceCents={piggyBankBalanceCents}
+              walletBalanceCents={totalBalanceCents}
+            />
 
             {isPiggyBankEmpty ? (
               <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
@@ -176,6 +169,56 @@ function formatTransactionDate(value: string): string {
   const date = new Date(value);
   if (isToday(date)) return `Hoje · ${format(date, "HH:mm")}`;
   return `${format(date, "dd MMM", { locale: ptBR })} · ${format(date, "HH:mm")}`;
+}
+
+function BalancePager({
+  incomeCents,
+  monthlyExpenseCents,
+  piggyBankBalanceCents,
+  walletBalanceCents,
+}: {
+  incomeCents: number;
+  monthlyExpenseCents: number;
+  piggyBankBalanceCents: number;
+  walletBalanceCents: number;
+}) {
+  const { width } = useWindowDimensions();
+  const [page, setPage] = useState(0);
+  const cardWidth = Math.max(0, width - 40);
+
+  return (
+    <View>
+      <ScrollView
+        contentContainerStyle={styles.balancePagerContent}
+        decelerationRate="fast"
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={cardWidth}
+        onMomentumScrollEnd={(event) => {
+          setPage(Math.round(event.nativeEvent.contentOffset.x / Math.max(cardWidth, 1)));
+        }}
+      >
+        <View style={[styles.summary, { width: cardWidth }]}>
+          <Text style={styles.summaryLabel}>CARTEIRA</Text>
+          <AnimatedCurrency style={styles.total} valueInCents={walletBalanceCents} />
+          <View style={styles.summaryStats}>
+            <Metric label="Entradas no mês" prefix="+ " valueInCents={incomeCents} />
+            <Metric accent label="Despesas no mês" prefix="- " valueInCents={monthlyExpenseCents} />
+          </View>
+        </View>
+        <View style={[styles.summary, styles.piggySummary, { width: cardWidth }]}>
+          <Text style={styles.summaryLabel}>COFRINHO</Text>
+          <AnimatedCurrency style={styles.total} valueInCents={piggyBankBalanceCents} />
+          <Text style={styles.piggyHint}>Arraste para voltar à carteira</Text>
+        </View>
+      </ScrollView>
+      <View style={styles.pagerDots}>
+        <View style={[styles.pagerDot, page === 0 && styles.pagerDotActive]} />
+        <View style={[styles.pagerDot, page === 1 && styles.pagerDotActive]} />
+      </View>
+    </View>
+  );
 }
 
 function Metric({
@@ -239,10 +282,22 @@ const styles = StyleSheet.create({
   profile: { alignItems: "center", flexDirection: "row", gap: 10 },
   greeting: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
   notification: { alignItems: "center", height: 42, justifyContent: "center", width: 34 },
+  balancePagerContent: { gap: 10 },
   summary: { backgroundColor: colors.text, borderRadius: 20, gap: 8, padding: 16 },
+  piggySummary: { backgroundColor: colors.darkPink },
   summaryLabel: { color: colors.accent, fontFamily: fonts.bold, fontSize: 12, letterSpacing: 0.3 },
   total: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -0.5 },
   summaryStats: { flexDirection: "row", gap: 160 },
+  piggyHint: { color: "#F6D8E4", fontSize: 12, marginTop: 4 },
+  pagerDots: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  pagerDot: { backgroundColor: colors.border, borderRadius: 4, height: 5, width: 5 },
+  pagerDotActive: { backgroundColor: colors.darkPink, width: 14 },
   metric: { flex: 1, gap: 3 },
   metricAmount: { alignItems: "center", flexDirection: "row" },
   metricLabel: { color: "#A3A3A3", fontSize: 12 },
