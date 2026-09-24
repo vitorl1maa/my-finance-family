@@ -141,6 +141,14 @@ export function IncomeSourcesView() {
         visible={drawerVisible}
       >
         <View style={styles.drawerBackdrop}>
+          <Pressable
+            accessibilityLabel="Fechar fonte de renda"
+            onPress={() => {
+              setDrawerVisible(false);
+              setSelectedSource(undefined);
+            }}
+            style={StyleSheet.absoluteFill}
+          />
           <View style={styles.drawer}>
             <IncomeSourceNewView
               initialSource={selectedSource}

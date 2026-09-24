@@ -14,9 +14,9 @@ export function FloatingBottomTabs({ state, descriptors, navigation }: BottomTab
       style={[styles.container, { bottom: Math.max(insets.bottom, 12) }]}
     >
       <View style={styles.bar}>
-        {state.routes.map((route, index) => {
+        {state.routes.filter((route) => route.name !== "goals").map((route) => {
           const { options } = descriptors[route.key];
-          const focused = state.index === index;
+          const focused = state.routes[state.index]?.key === route.key;
           const label =
             typeof options.tabBarLabel === "string"
               ? options.tabBarLabel
@@ -43,7 +43,7 @@ export function FloatingBottomTabs({ state, descriptors, navigation }: BottomTab
               accessibilityState={{ selected: focused }}
               key={route.key}
               onPress={onPress}
-              style={[styles.item, focused && styles.itemActive]}
+              style={styles.item}
             >
               {icon}
               <Text style={[styles.label, focused ? styles.labelActive : styles.labelInactive]}>
@@ -63,13 +63,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
     borderColor: "#E8E8E8",
-    borderRadius: 29,
+    borderRadius: 32,
     borderWidth: 1,
     elevation: 5,
     flexDirection: "row",
     gap: 4,
     minHeight: 58,
-    padding: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 8,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
@@ -84,7 +85,6 @@ const styles = StyleSheet.create({
     minHeight: 46,
     paddingHorizontal: 2,
   },
-  itemActive: { backgroundColor: "#F5F5F5" },
   label: { fontFamily: fonts.regular, fontSize: 10, textAlign: "center" },
   labelActive: { color: colors.text, fontFamily: fonts.bold },
   labelInactive: { color: colors.mutedLight },

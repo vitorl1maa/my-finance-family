@@ -6,13 +6,19 @@ import { useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
+import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
+import {
+  getAvatarToken,
+  type ProfileAvatarMetadata,
+} from "@/src/features/auth/model/profile-avatar";
+import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
-import { GradientAvatar } from "@/src/shared/components/base/gradient-avatar";
+import { SplitView } from "@/src/shared/components/base/split-view";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
@@ -20,6 +26,8 @@ type DashboardViewProps = Record<string, never>;
 
 export function DashboardView(_: DashboardViewProps) {
   const router = useRouter();
+  const session = useAuthStore((state) => state.session);
+  const [calendarExpanded, setCalendarExpanded] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const {
     greeting,
@@ -36,32 +44,20 @@ export function DashboardView(_: DashboardViewProps) {
     incomeSourcesLoading,
     incomeSources.length,
   );
+  const avatarMetadata = session?.user.user_metadata as ProfileAvatarMetadata | undefined;
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-      refreshControl={
-        <RefreshControl
-          colors={[colors.darkPink]}
-          onRefresh={reload}
-          refreshing={loading}
-          tintColor={colors.darkPink}
-        />
-      }
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profile}>
           <Pressable
             accessibilityLabel="Editar perfil"
             onPress={() => router.push("/edit-profile")}
           >
-            <GradientAvatar
-              palette={[colors.accent, colors.text, colors.surfaceMuted]}
-              sheen={false}
+            <ProfileAvatar
+              avatarUrl={avatarMetadata?.avatar_url}
               size={42}
-              token={userName}
+              token={getAvatarToken(avatarMetadata, userName)}
             />
           </Pressable>
           <Text style={styles.greeting}>
@@ -72,72 +68,105 @@ export function DashboardView(_: DashboardViewProps) {
           <Bell color={colors.text} size={22} strokeWidth={2} />
         </Pressable>
       </View>
+      <SplitView.Root
+        gap={20}
+        initialTopHeight={108}
+        minBottomHeight={180}
+        minTopHeight={108}
+        onHeightChange={(height) => setCalendarExpanded(height > 200)}
+        snapPoints={[108, 230, 340]}
+        style={styles.splitView}
+      >
+        <SplitView.Top style={styles.calendarPane}>
+          <WeeklyCalendar
+            nextExpense={insights.nextExpense}
+            scheduledExpenses={insights.scheduledExpenses}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            expanded={calendarExpanded}
+          />
+        </SplitView.Top>
+        <SplitView.Handle barStyle={styles.splitHandle} color={colors.border} />
+        <SplitView.Bottom style={styles.dashboardPane}>
+          <ScrollView
+            contentContainerStyle={styles.content}
+            contentInsetAdjustmentBehavior="automatic"
+            refreshControl={
+              <RefreshControl
+                colors={[colors.darkPink]}
+                onRefresh={reload}
+                refreshing={loading}
+                tintColor={colors.darkPink}
+              />
+            }
+          >
+            {totalBalanceCents > 0 ? (
+              <View style={styles.summary}>
+                <Text style={styles.summaryLabel}>COFRINHO</Text>
+                <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
+                <View style={styles.summaryStats}>
+                  <Metric
+                    label="Entradas no mês"
+                    prefix="+ "
+                    valueInCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
+                  />
+                  <Metric
+                    accent
+                    label="Despesas no mês"
+                    prefix="- "
+                    valueInCents={insights.monthlyExpenseCents}
+                  />
+                </View>
+              </View>
+            ) : null}
 
-      <WeeklyCalendar
-        nextExpense={insights.nextExpense}
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-      />
-      {totalBalanceCents > 0 ? (
-        <View style={styles.summary}>
-          <Text style={styles.summaryLabel}>COFRINHO</Text>
-          <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
-          <View style={styles.summaryStats}>
-            <Metric
-              label="Entradas no mês"
-              prefix="+ "
-              valueInCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
+            {isPiggyBankEmpty ? (
+              <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
+            ) : null}
+            <CashflowChart data={insights.weeklyCashflow} />
+            <SpendingBreakdown categories={insights.expenseByCategory} />
+
+            <SectionHeader
+              action="Ver todas"
+              title="Últimas transações"
+              onActionPress={() => router.push("/(tabs)/transactions")}
             />
-            <Metric
-              accent
-              label="Despesas no mês"
-              prefix="- "
-              valueInCents={insights.monthlyExpenseCents}
-            />
-          </View>
-        </View>
-      ) : null}
-
-      {isPiggyBankEmpty ? (
-        <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
-      ) : null}
-      <CashflowChart data={insights.weeklyCashflow} />
-      <SpendingBreakdown categories={insights.expenseByCategory} />
-
-      <SectionHeader action="Ver todas" title="Últimas transações" />
-      <View style={styles.transactions}>
-        {recentTransactions.map((transaction) => (
-          <View key={transaction.id} style={styles.transaction}>
-            <View
-              style={[
-                styles.transactionIcon,
-                transaction.isExpense ? styles.expenseIcon : styles.incomeIcon,
-              ]}
-            >
-              {transaction.isExpense ? (
-                <Send color={colors.text} size={14} />
-              ) : (
-                <CircleDollarSign color={colors.text} size={14} />
-              )}
+            <View style={styles.transactions}>
+              {recentTransactions.map((transaction) => (
+                <View key={transaction.id} style={styles.transaction}>
+                  <View
+                    style={[
+                      styles.transactionIcon,
+                      transaction.isExpense ? styles.expenseIcon : styles.incomeIcon,
+                    ]}
+                  >
+                    {transaction.isExpense ? (
+                      <Send color={colors.text} size={14} />
+                    ) : (
+                      <CircleDollarSign color={colors.text} size={14} />
+                    )}
+                  </View>
+                  <View style={styles.transactionInfo}>
+                    <Text style={styles.transactionTitle}>{transaction.title}</Text>
+                    <Text style={styles.transactionDate}>
+                      {transaction.category} · {formatTransactionDate(transaction.occurredAt)}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.transactionAmount,
+                      transaction.isExpense ? styles.expenseText : styles.incomeText,
+                    ]}
+                  >
+                    {transaction.formattedAmount}
+                  </Text>
+                </View>
+              ))}
             </View>
-            <View style={styles.transactionInfo}>
-              <Text style={styles.transactionTitle}>{transaction.title}</Text>
-              <Text style={styles.transactionDate}>
-                {transaction.category} · {formatTransactionDate(transaction.occurredAt)}
-              </Text>
-            </View>
-            <Text
-              style={[
-                styles.transactionAmount,
-                transaction.isExpense ? styles.expenseText : styles.incomeText,
-              ]}
-            >
-              {transaction.formattedAmount}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+          </ScrollView>
+        </SplitView.Bottom>
+      </SplitView.Root>
+    </View>
   );
 }
 
@@ -172,11 +201,19 @@ function Metric({
   );
 }
 
-function SectionHeader({ action, title }: { action: string; title: string }) {
+function SectionHeader({
+  action,
+  onActionPress,
+  title,
+}: {
+  action: string;
+  onActionPress: () => void;
+  title: string;
+}) {
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      <Pressable accessibilityRole="button">
+      <Pressable accessibilityLabel={action} accessibilityRole="button" onPress={onActionPress}>
         <Text style={styles.sectionAction}>{action} ›</Text>
       </Pressable>
     </View>
@@ -184,13 +221,18 @@ function SectionHeader({ action, title }: { action: string; title: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: colors.background },
-  content: { gap: 14, paddingBottom: 140, paddingHorizontal: 20, paddingTop: 60 },
+  container: { backgroundColor: colors.background, flex: 1, paddingTop: 60 },
+  splitView: { backgroundColor: colors.background, flex: 1 },
+  calendarPane: { backgroundColor: colors.background },
+  dashboardPane: { backgroundColor: colors.background },
+  splitHandle: { backgroundColor: colors.border },
+  content: { gap: 14, paddingBottom: 140, paddingHorizontal: 20, paddingTop: 10 },
   header: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 4,
+    paddingHorizontal: 20,
   },
   profile: { alignItems: "center", flexDirection: "row", gap: 10 },
   greeting: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },

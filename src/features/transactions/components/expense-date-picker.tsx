@@ -25,6 +25,11 @@ export function ExpenseDatePicker({ value, visible, onClose, onSelect }: Expense
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
+        <Pressable
+          accessibilityLabel="Fechar seletor de data"
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+        />
         <View style={styles.sheet}>
           <View style={styles.header}>
             <View>

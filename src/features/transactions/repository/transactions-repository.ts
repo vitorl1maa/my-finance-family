@@ -11,15 +11,16 @@ type TransactionRow = {
   category_id?: string;
   amount_cents: number;
   occurred_at: string;
+  registered_at?: string;
   recurrence_rule?: string;
   sync_status: Transaction["syncStatus"];
 };
 
 export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[]> {
   const rows = await db.getAllAsync<TransactionRow>(
-    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, recurrence_rule, sync_status
+    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, registered_at, recurrence_rule, sync_status
      FROM transactions
-     ORDER BY occurred_at DESC`,
+     ORDER BY registered_at DESC`,
   );
 
   return rows.map((row) => ({
@@ -31,6 +32,7 @@ export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[
     categoryId: row.category_id,
     amountCents: row.amount_cents,
     occurredAt: row.occurred_at,
+    registeredAt: row.registered_at ?? row.occurred_at,
     recurrenceRule: row.recurrence_rule,
     syncStatus: row.sync_status,
   }));
@@ -44,8 +46,8 @@ export async function upsertTransactions(
     await db.runAsync(
       `INSERT INTO transactions (
         id, account_id, family_id, title, category, category_id, amount_cents, occurred_at,
-        recurrence_rule, sync_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        registered_at, recurrence_rule, sync_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         account_id = excluded.account_id,
         family_id = excluded.family_id,
@@ -54,6 +56,7 @@ export async function upsertTransactions(
         category_id = excluded.category_id,
         amount_cents = excluded.amount_cents,
         occurred_at = excluded.occurred_at,
+        registered_at = excluded.registered_at,
         recurrence_rule = excluded.recurrence_rule,
         sync_status = excluded.sync_status`,
       transaction.id,
@@ -64,6 +67,7 @@ export async function upsertTransactions(
       transaction.categoryId ?? null,
       transaction.amountCents,
       transaction.occurredAt,
+      transaction.registeredAt ?? transaction.occurredAt,
       transaction.recurrenceRule ?? "none",
       transaction.syncStatus,
     );

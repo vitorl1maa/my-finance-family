@@ -4,13 +4,13 @@ import { mapRemoteTransaction, type RemoteTransactionRow } from "../model/remote
 import type { Transaction } from "../model/transaction";
 
 const transactionColumns =
-  "id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, recurrence_rule";
+  "id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, created_at, recurrence_rule";
 
 export async function listRemoteTransactions(): Promise<Transaction[]> {
   const { data, error } = await supabase
     .from("transactions")
     .select(transactionColumns)
-    .order("occurred_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 

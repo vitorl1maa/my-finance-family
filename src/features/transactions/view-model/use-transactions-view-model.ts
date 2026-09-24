@@ -5,7 +5,6 @@ import {
   defaultExpenseCategories,
   type ExpenseCategory,
 } from "@/src/features/categories/model/expense-category";
-import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import {
@@ -29,9 +28,7 @@ export function useTransactionsViewModel() {
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
   const session = useAuthStore((state) => state.session);
-  const [categories, setCategories] = useState<ExpenseCategory[]>(defaultExpenseCategories);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const categories: ExpenseCategory[] = defaultExpenseCategories;
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
@@ -72,25 +69,7 @@ export function useTransactionsViewModel() {
     void loadTransactions();
   }, [loadTransactions]);
 
-  const loadCategories = useCallback(async () => {
-    setCategoriesLoading(true);
-    setCategoriesError(null);
-
-    try {
-      const remoteCategories = await listFamilyCategories();
-
-      setCategories(remoteCategories.length > 0 ? remoteCategories : defaultExpenseCategories);
-    } catch {
-      setCategories(defaultExpenseCategories);
-      setCategoriesError(null);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadCategories();
-  }, [loadCategories]);
+  const reloadCategories = useCallback(() => undefined, []);
 
   const createExpense = useCallback(
     async (input: {
@@ -114,6 +93,7 @@ export function useTransactionsViewModel() {
           categoryId: input.categoryId,
           amountCents: -Math.abs(payload.amountCents),
           occurredAt: payload.occurredAt,
+          registeredAt: new Date().toISOString(),
           recurrenceRule: payload.recurrenceRule,
           syncStatus: "pending" as const,
         };
@@ -188,21 +168,18 @@ export function useTransactionsViewModel() {
       transactionsError,
       reloadTransactions: loadTransactions,
       categories,
-      categoriesLoading,
-      categoriesError,
-      reloadCategories: loadCategories,
+      categoriesLoading: false,
+      categoriesError: null,
+      reloadCategories,
       isSaving,
       saveError,
     }),
     [
-      categories,
-      categoriesError,
-      categoriesLoading,
       createExpense,
       updateExpense,
       removeExpense,
       isSaving,
-      loadCategories,
+      reloadCategories,
       loadTransactions,
       saveError,
       transactions,

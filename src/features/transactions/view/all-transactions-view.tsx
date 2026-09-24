@@ -2,9 +2,11 @@ import { Search, ShoppingCart, TrendingUp, WalletCards } from "lucide-react-nati
 import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import {
   filterTransactions,
   groupTransactionsByDay,
+  mergeIncomeSourcesIntoTransactions,
 } from "@/src/features/transactions/model/transaction-list";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -16,9 +18,14 @@ import { fonts } from "@/src/shared/theme/fonts";
 export function AllTransactionsView() {
   const [query, setQuery] = useState("");
   const viewModel = useTransactionsViewModel();
+  const incomeSources = useIncomeSourcesViewModel();
+  const transactions = useMemo(
+    () => mergeIncomeSourcesIntoTransactions(viewModel.transactions, incomeSources.sources),
+    [incomeSources.sources, viewModel.transactions],
+  );
   const groups = useMemo(
-    () => groupTransactionsByDay(filterTransactions(viewModel.transactions, query), new Date()),
-    [query, viewModel.transactions],
+    () => groupTransactionsByDay(filterTransactions(transactions, query), new Date()),
+    [query, transactions],
   );
 
   return (
@@ -27,8 +34,10 @@ export function AllTransactionsView() {
       refreshControl={
         <RefreshControl
           colors={[colors.darkPink]}
-          onRefresh={viewModel.reloadTransactions}
-          refreshing={viewModel.transactionsLoading}
+          onRefresh={() =>
+            void Promise.all([viewModel.reloadTransactions(), incomeSources.reload()])
+          }
+          refreshing={viewModel.transactionsLoading || incomeSources.loading}
           tintColor={colors.darkPink}
         />
       }
@@ -56,7 +65,7 @@ export function AllTransactionsView() {
           </Pressable>
         </View>
       ) : null}
-      {viewModel.transactionsLoading && viewModel.transactions.length === 0 ? (
+      {(viewModel.transactionsLoading || incomeSources.loading) && transactions.length === 0 ? (
         <LoadingShimmer rows={3} />
       ) : groups.length === 0 ? (
         <View style={styles.empty}>

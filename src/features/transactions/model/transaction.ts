@@ -9,6 +9,7 @@ export const transactionSchema = z.object({
   categoryId: z.string().optional(),
   amountCents: z.number().int(),
   occurredAt: z.string(),
+  registeredAt: z.string().optional(),
   recurrenceRule: z.string().optional(),
   syncStatus: z.enum(["pending", "synced", "failed"]),
 });

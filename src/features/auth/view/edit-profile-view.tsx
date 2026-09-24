@@ -1,28 +1,40 @@
-import { Eye, EyeOff, LockKeyhole, LogOut, Mail, Pencil, UserRound, X } from "lucide-react-native";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
+import { Eye, EyeOff, LockKeyhole, LogOut, Mail, Pencil, UserRound } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
+import {
+  getAvatarToken,
+  type ProfileAvatarMetadata,
+} from "@/src/features/auth/model/profile-avatar";
+import { uploadProfileAvatar } from "@/src/features/auth/repository/profile-avatar-repository";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { useAuthViewModel } from "@/src/features/auth/view-model/use-auth-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
 export function EditProfileView({
-  onBack,
+  onBack: _onBack,
   onFamilyMembers,
 }: {
   onBack: () => void;
   onFamilyMembers?: () => void;
 }) {
   const session = useAuthStore((state) => state.session);
-  const { errorMessage, isLoading, setError, signOut, updateProfile } = useAuthViewModel();
+  const { errorMessage, isLoading, setError, signOut, updateAvatar, updateProfile } =
+    useAuthViewModel();
   const metadata = session?.user.user_metadata as
-    | { first_name?: string; last_name?: string }
+    | (ProfileAvatarMetadata & { first_name?: string; last_name?: string })
     | undefined;
   const initialName = [metadata?.first_name, metadata?.last_name].filter(Boolean).join(" ");
   const initialEmail = session?.user.email ?? "";
+  const avatarToken = getAvatarToken(metadata, initialName || initialEmail || "user");
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
+  const [avatarUrl, setAvatarUrl] = useState(metadata?.avatar_url);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -44,6 +56,10 @@ export function EditProfileView({
     return () => clearTimeout(timeout);
   }, [dirty, email, name, password, updateProfile]);
 
+  useEffect(() => {
+    setAvatarUrl(metadata?.avatar_url);
+  }, [metadata?.avatar_url]);
+
   const change = (setter: (value: string) => void) => (value: string) => {
     setSaved(false);
     setError(null);
@@ -55,6 +71,38 @@ export function EditProfileView({
     void signOut();
   };
 
+  const handleAvatarPress = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setError("Permita o acesso às fotos para alterar seu avatar.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      mediaTypes: ["images"],
+      quality: 0.9,
+    });
+    if (result.canceled || !result.assets[0] || !session?.user.id) return;
+
+    setIsUploadingAvatar(true);
+    setError(null);
+    try {
+      const image = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 512 } }],
+        { compress: 0.72, format: ImageManipulator.SaveFormat.JPEG },
+      );
+      const nextAvatarUrl = await uploadProfileAvatar(session.user.id, image.uri);
+      if (await updateAvatar(nextAvatarUrl)) setAvatarUrl(nextAvatarUrl);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Não foi possível enviar a foto.");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   return (
     <ScrollView
       contentContainerStyle={styles.content}
@@ -62,9 +110,6 @@ export function EditProfileView({
       style={styles.screen}
     >
       <View style={styles.header}>
-        <Pressable accessibilityLabel="Fechar editar perfil" onPress={onBack} style={styles.close}>
-          <X color={colors.text} size={20} />
-        </Pressable>
         <View style={styles.headerCopy}>
           <Text style={styles.title}>Editar perfil</Text>
           <Text style={styles.subtitle}>Atualize seus dados pessoais</Text>
@@ -72,13 +117,26 @@ export function EditProfileView({
       </View>
 
       <View style={styles.photoSection}>
-        <View style={styles.avatar}>
-          <UserRound color={colors.text} size={40} />
+        <Pressable
+          accessibilityLabel="Alterar foto de perfil"
+          accessibilityRole="button"
+          disabled={isUploadingAvatar}
+          onPress={() => void handleAvatarPress()}
+          style={styles.avatar}
+        >
+          <ProfileAvatar
+            avatarUrl={avatarUrl}
+            label={initialName || initialEmail}
+            size={88}
+            token={avatarToken}
+          />
           <View style={styles.editBadge}>
-            <Pencil color={colors.surface} size={16} strokeWidth={2.5} />
+            <Pencil color={colors.surface} size={15} strokeWidth={2.5} />
           </View>
-        </View>
-        <Text style={styles.photoLabel}>Alterar foto</Text>
+        </Pressable>
+        <Text style={styles.photoLabel}>
+          {isUploadingAvatar ? "Enviando foto..." : "Alterar foto"}
+        </Text>
       </View>
 
       <View style={styles.form}>
@@ -182,7 +240,6 @@ const styles = StyleSheet.create({
   photoSection: { alignItems: "center", gap: 8, paddingVertical: 6 },
   avatar: {
     alignItems: "center",
-    backgroundColor: colors.accent,
     borderRadius: 48,
     height: 88,
     justifyContent: "center",
@@ -193,15 +250,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.text,
     borderColor: colors.surface,
-    borderRadius: 16,
-    borderWidth: 2,
-    bottom: -1,
-    height: 30,
+    borderRadius: 14,
+    borderWidth: 1,
+    bottom: -2,
+    elevation: 3,
+    height: 28,
     justifyContent: "center",
     position: "absolute",
-    right: -1,
-    transform: [{ rotate: "-45deg" }],
-    width: 30,
+    right: -2,
+    shadowColor: "#000000",
+    shadowOffset: { height: 1, width: 0 },
+    shadowOpacity: 0.14,
+    shadowRadius: 3,
+    width: 28,
   },
   photoLabel: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
   form: { gap: 10 },

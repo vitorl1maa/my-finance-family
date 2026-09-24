@@ -1,8 +1,8 @@
 import { type Href, Link, Stack, useRouter } from "expo-router";
-import { ArrowRight, Eye, EyeClosed, LockKeyhole, Mail, WalletCards } from "lucide-react-native";
+import { ArrowRight, Eye, EyeClosed, LockKeyhole, Mail } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   AuthScreen,
@@ -35,7 +35,11 @@ export default function LoginScreen() {
       <Stack.Screen options={{ title: "Entrar" }} />
       <View style={styles.brandRow}>
         <View style={styles.brandMark}>
-          <WalletCards color={colors.text} size={27} strokeWidth={2.1} />
+          <Image
+            accessibilityLabel="Ícone My Finance Family"
+            source={require("@/assets/images/icon-pencil.png")}
+            style={styles.brandImage}
+          />
         </View>
         <View style={styles.brandCopy}>
           <Text style={styles.brandName}>My Finance Family</Text>
@@ -170,12 +174,12 @@ const styles = StyleSheet.create({
   brandRow: { alignItems: "center", flexDirection: "row", gap: 12, marginTop: 52 },
   brandMark: {
     alignItems: "center",
-    backgroundColor: colors.accent,
     borderRadius: 18,
     height: 54,
     justifyContent: "center",
     width: 54,
   },
+  brandImage: { borderRadius: 18, height: 54, width: 54 },
   brandCopy: { gap: 3 },
   brandName: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18, fontWeight: "900" },
   brandSubtitle: { color: colors.muted, fontSize: 13 },

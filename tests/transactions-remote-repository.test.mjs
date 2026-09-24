@@ -14,6 +14,7 @@ test("maps a Supabase transaction row into the domain transaction", () => {
       category_id: "category-id",
       amount_cents: -7600,
       occurred_at: "2026-09-18T12:00:00.000Z",
+      created_at: "2026-09-17T16:45:00.000Z",
       recurrence_rule: "monthly",
     }),
     {
@@ -25,6 +26,7 @@ test("maps a Supabase transaction row into the domain transaction", () => {
       categoryId: "category-id",
       amountCents: -7600,
       occurredAt: "2026-09-18T12:00:00.000Z",
+      registeredAt: "2026-09-17T16:45:00.000Z",
       recurrenceRule: "monthly",
       syncStatus: "synced",
     },

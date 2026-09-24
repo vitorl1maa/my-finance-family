@@ -51,6 +51,11 @@ export function ExpenseRecurrencePicker({
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
+        <Pressable
+          accessibilityLabel="Fechar recorrência"
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+        />
         <View style={styles.sheet}>
           <View style={styles.header}>
             <View>

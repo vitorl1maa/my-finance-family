@@ -1,13 +1,22 @@
 import { CalendarDays, CircleCheck, Flag, Plus, Target, WalletCards } from "lucide-react-native";
 import { useState } from "react";
 import { Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
 import { GoalNewView } from "@/src/features/goals/view/goal-new-view";
 import { useGoalsViewModel } from "@/src/features/goals/view-model/use-goals-view-model";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
+import { unavailableTabRedirect } from "@/src/shared/navigation/available-tabs";
 
 export default function GoalsScreen() {
+  const redirect = unavailableTabRedirect("goals");
+  if (redirect) return <Redirect href={redirect} />;
+
+  return <GoalsContent />;
+}
+
+export function GoalsContent() {
   const [goalDrawerVisible, setGoalDrawerVisible] = useState(false);
   const { goals, loading, reload } = useGoalsViewModel();
   const totalTarget = goals.reduce((total, goal) => total + goal.targetCents, 0);
@@ -88,6 +97,11 @@ export default function GoalsScreen() {
         visible={goalDrawerVisible}
       >
         <View style={styles.drawerBackdrop}>
+          <Pressable
+            accessibilityLabel="Fechar nova meta"
+            onPress={() => setGoalDrawerVisible(false)}
+            style={StyleSheet.absoluteFill}
+          />
           <View style={styles.drawer}>
             <GoalNewView onBack={() => setGoalDrawerVisible(false)} />
           </View>

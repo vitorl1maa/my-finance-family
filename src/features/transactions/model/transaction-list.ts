@@ -1,6 +1,7 @@
 import { format, isSameDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 
 export type TransactionDayGroup = {
@@ -8,6 +9,26 @@ export type TransactionDayGroup = {
   label: string;
   transactions: Transaction[];
 };
+
+export function mergeIncomeSourcesIntoTransactions(
+  transactions: Transaction[],
+  incomeSources: IncomeSource[],
+): Transaction[] {
+  return [
+    ...transactions,
+    ...incomeSources.map((source) => ({
+      id: `income-source:${source.id}`,
+      accountId: "",
+      title: source.name,
+      category: "Cofrinho",
+      amountCents: source.amountCents,
+      occurredAt: source.updatedAt,
+      registeredAt: source.updatedAt,
+      recurrenceRule: "monthly",
+      syncStatus: source.syncStatus,
+    })),
+  ];
+}
 
 export function filterTransactions(transactions: Transaction[], query: string): Transaction[] {
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
@@ -29,7 +50,7 @@ export function groupTransactionsByDay(
   const groups = new Map<string, TransactionDayGroup>();
 
   for (const transaction of sortTransactions(transactions)) {
-    const date = new Date(transaction.occurredAt);
+    const date = getTransactionListDate(transaction);
     const id = format(date, "yyyy-MM-dd");
     const group = groups.get(id);
 
@@ -50,8 +71,13 @@ export function groupTransactionsByDay(
 
 function sortTransactions(transactions: Transaction[]): Transaction[] {
   return [...transactions].sort(
-    (left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
+    (left, right) =>
+      getTransactionListDate(right).getTime() - getTransactionListDate(left).getTime(),
   );
+}
+
+function getTransactionListDate(transaction: Transaction): Date {
+  return new Date(transaction.registeredAt ?? transaction.occurredAt);
 }
 
 function getTransactionDayLabel(date: Date, referenceDate: Date): string {

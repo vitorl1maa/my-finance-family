@@ -3,7 +3,6 @@ import {
   BanknoteArrowDown,
   Home,
   PiggyBank,
-  Target,
   TrendingUp,
   UsersRound,
 } from "lucide-react-native";
@@ -51,13 +50,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Metas ficará indisponível até a retomada da funcionalidade.
       <Tabs.Screen
         name="goals"
         options={{
+          href: isVisibleTab("goals") ? undefined : null,
           title: "Metas",
           tabBarIcon: ({ color }) => <Target color={color} size={22} strokeWidth={2.4} />,
         }}
-      />
+      /> */}
+      <Tabs.Screen name="goals" options={{ href: null }} />
       <Tabs.Screen
         name="transactions"
         options={{

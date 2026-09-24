@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "my-finance-family",
+    "name": "My Finance Family",
     "slug": "my-finance-family",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-pencil.png",
     "scheme": "myfinancefamily",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,10 +12,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#101010",
+        "foregroundImage": "./assets/images/android-icon-foreground-pencil.png",
+        "monochromeImage": "./assets/images/android-icon-foreground-pencil.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -29,7 +28,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-icon-pencil.png",
+          "imageWidth": 420,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
@@ -37,6 +37,12 @@
       "expo-status-bar",
       "expo-sqlite",
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita o acesso às suas fotos para escolher o avatar do perfil."
+        }
+      ],
       "expo-secure-store",
       [
         "expo-camera",

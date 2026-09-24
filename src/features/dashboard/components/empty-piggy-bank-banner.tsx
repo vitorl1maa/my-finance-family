@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   copy: { flex: 1, gap: 6 },
   heading: { alignItems: "center", flexDirection: "row", gap: 6 },
   title: { color: colors.darkPink, flexShrink: 1, fontFamily: fonts.extraBold, fontSize: 16 },
-  message: { color: "#71324A", fontSize: 11, lineHeight: 15 },
+  message: { color: "#71324A", fontSize: 12, lineHeight: 15 },
   action: {
     alignItems: "center",
     alignSelf: "flex-start",
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     gap: 5,
     minHeight: 32,
     paddingHorizontal: 10,
+    marginTop: 10,
   },
   actionText: { color: colors.text, fontFamily: fonts.bold, fontSize: 11 },
   image: { height: 130, width: 112 },

@@ -22,6 +22,7 @@ function createDatabase() {
           category_id: "food-id",
           amount_cents: -4500,
           occurred_at: "2026-09-18T12:00:00.000Z",
+          registered_at: "2026-09-17T16:45:00.000Z",
           recurrence_rule: "none",
           sync_status: "synced",
         },
@@ -45,6 +46,7 @@ const pendingTransaction = {
   categoryId: "food-id",
   amountCents: -4500,
   occurredAt: "2026-09-18T12:00:00.000Z",
+  registeredAt: "2026-09-17T16:45:00.000Z",
   recurrenceRule: "none",
   syncStatus: "pending",
 };
@@ -65,6 +67,7 @@ test("persists transactions with bound SQL parameters", async () => {
     "food-id",
     -4500,
     "2026-09-18T12:00:00.000Z",
+    "2026-09-17T16:45:00.000Z",
     "none",
     "pending",
   ]);

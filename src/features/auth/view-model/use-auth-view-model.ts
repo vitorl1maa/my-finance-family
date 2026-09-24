@@ -1,5 +1,6 @@
 import type { AuthError } from "@supabase/supabase-js";
 import type { AuthFormError, RegisterProfile } from "@/src/features/auth/model/auth";
+import { createAvatarSeed } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { supabase } from "@/src/shared/supabase/supabase-client";
 
@@ -78,6 +79,7 @@ export function useAuthViewModel() {
           first_name: profile.firstName.trim(),
           last_name: profile.lastName.trim(),
           phone: profile.phone.trim(),
+          avatar_seed: createAvatarSeed(),
         },
       },
     });
@@ -136,6 +138,20 @@ export function useAuthViewModel() {
     return true;
   };
 
+  const updateAvatar = async (avatarUrl: string) => {
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.updateUser({ data: { avatar_url: avatarUrl } });
+    setLoading(false);
+    if (error) {
+      setError(getAuthErrorMessage(error));
+      return false;
+    }
+
+    return true;
+  };
+
   return {
     errorMessage,
     isLoading,
@@ -145,6 +161,7 @@ export function useAuthViewModel() {
     signUpWithEmail,
     signOut,
     updateProfile,
+    updateAvatar,
   };
 }
 

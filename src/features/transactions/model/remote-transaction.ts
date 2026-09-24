@@ -9,6 +9,7 @@ export type RemoteTransactionRow = {
   category_id: string | null;
   amount_cents: number;
   occurred_at: string;
+  created_at?: string;
   recurrence_rule: string | null;
 };
 
@@ -22,6 +23,7 @@ export function mapRemoteTransaction(row: RemoteTransactionRow): Transaction {
     categoryId: row.category_id ?? undefined,
     amountCents: row.amount_cents,
     occurredAt: row.occurred_at,
+    registeredAt: row.created_at ?? row.occurred_at,
     recurrenceRule: row.recurrence_rule ?? "none",
     syncStatus: "synced",
   };

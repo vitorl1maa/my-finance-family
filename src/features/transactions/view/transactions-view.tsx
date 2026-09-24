@@ -157,6 +157,14 @@ export function TransactionsView() {
         visible={drawerVisible}
       >
         <View style={styles.drawerBackdrop}>
+          <Pressable
+            accessibilityLabel="Fechar despesa"
+            onPress={() => {
+              setDrawerVisible(false);
+              setSelectedExpense(undefined);
+            }}
+            style={StyleSheet.absoluteFill}
+          />
           <View style={styles.drawer}>
             <ExpenseNewView
               initialTransaction={selectedExpense}
