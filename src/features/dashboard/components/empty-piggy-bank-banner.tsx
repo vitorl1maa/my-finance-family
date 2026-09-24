@@ -1,28 +1,28 @@
-import { ArrowRight, PiggyBank } from "lucide-react-native";
+import { ArrowRight, WalletCards } from "lucide-react-native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
-export function EmptyPiggyBankBanner({ onPress }: { onPress: () => void }) {
+export function EmptyWalletBanner({ onPress }: { onPress: () => void }) {
   return (
     <View style={styles.banner}>
       <View style={styles.copy}>
         <View style={styles.heading}>
-          <PiggyBank color={colors.darkPink} size={19} strokeWidth={2.4} />
-          <Text style={styles.title}>Seu cofrinho está vazio</Text>
+          <WalletCards color={colors.walletDark} size={19} strokeWidth={2.4} />
+          <Text style={styles.title}>Sua carteira está vazia</Text>
         </View>
-        <Text style={styles.message}>Adicione uma fonte de renda para começar.</Text>
+        <Text style={styles.message}>Adicione uma renda para começar</Text>
         <Pressable accessibilityRole="button" onPress={onPress} style={styles.action}>
-          <Text style={styles.actionText}>Adicionar fonte</Text>
+          <Text style={styles.actionText}>Adicionar renda</Text>
           <ArrowRight color={colors.text} size={15} strokeWidth={2.5} />
         </Pressable>
       </View>
       <Image
         accessibilityIgnoresInvertColors
-        accessibilityLabel="Ilustração de um cofrinho vazio"
+        accessibilityLabel="Ilustração de uma carteira vazia"
         resizeMode="contain"
-        source={require("../../../../assets/images/piggy-bank.png")}
+        source={require("../../../../assets/images/wallet.png")}
         style={styles.image}
       />
     </View>
@@ -32,7 +32,7 @@ export function EmptyPiggyBankBanner({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   banner: {
     alignItems: "center",
-    backgroundColor: "#FFE7EF",
+    backgroundColor: "#E9F8C7",
     borderRadius: 18,
     flexDirection: "row",
     height: 142,
@@ -43,8 +43,8 @@ const styles = StyleSheet.create({
   },
   copy: { flex: 1, gap: 6 },
   heading: { alignItems: "center", flexDirection: "row", gap: 6 },
-  title: { color: colors.darkPink, flexShrink: 1, fontFamily: fonts.extraBold, fontSize: 16 },
-  message: { color: "#71324A", fontSize: 12, lineHeight: 15 },
+  title: { color: colors.walletDark, flexShrink: 1, fontFamily: fonts.extraBold, fontSize: 16 },
+  message: { color: "#47652B", fontSize: 12, lineHeight: 15 },
   action: {
     alignItems: "center",
     alignSelf: "flex-start",
@@ -57,5 +57,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   actionText: { color: colors.text, fontFamily: fonts.bold, fontSize: 11 },
-  image: { height: 130, width: 112 },
+  image: { height: 132, width: 128 },
 });

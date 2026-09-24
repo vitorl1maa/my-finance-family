@@ -19,7 +19,7 @@ import {
 } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
-import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
+import { EmptyWalletBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
@@ -116,7 +116,7 @@ export function DashboardView(_: DashboardViewProps) {
             />
 
             {isPiggyBankEmpty ? (
-              <EmptyPiggyBankBanner onPress={() => router.push("/(tabs)/cofrinho")} />
+              <EmptyWalletBanner onPress={() => router.push("/(tabs)/cofrinho")} />
             ) : null}
             <CashflowChart data={insights.weeklyCashflow} />
             <SpendingBreakdown categories={insights.expenseByCategory} />
