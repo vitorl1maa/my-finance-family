@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import {
   filterTransactions,
   groupTransactionsByDay,
@@ -96,6 +97,9 @@ export function AllTransactionsView() {
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
                   </Text>
                 </View>
+                {transaction.amountCents < 0 ? (
+                  <TransactionCreatorAvatar transaction={transaction} />
+                ) : null}
                 <AnimatedCurrency
                   style={[
                     styles.amount,

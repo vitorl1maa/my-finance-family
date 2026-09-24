@@ -3,14 +3,8 @@ import type { CreateExpensePayload } from "../model/expense-payload";
 import { mapRemoteTransaction, type RemoteTransactionRow } from "../model/remote-transaction";
 import type { Transaction } from "../model/transaction";
 
-const transactionColumns =
-  "id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, created_at, recurrence_rule";
-
 export async function listRemoteTransactions(): Promise<Transaction[]> {
-  const { data, error } = await supabase
-    .from("transactions")
-    .select(transactionColumns)
-    .order("created_at", { ascending: false });
+  const { data, error } = await supabase.rpc("list_family_transactions");
 
   if (error) throw error;
 
@@ -31,15 +25,11 @@ export async function createRemoteExpense(payload: CreateExpensePayload): Promis
   const result = Array.isArray(data) ? data[0] : data;
   if (!result?.transaction_id) throw new Error("Não foi possível confirmar a transação salva.");
 
-  const { data: transaction, error: transactionError } = await supabase
-    .from("transactions")
-    .select(transactionColumns)
-    .eq("id", result.transaction_id)
-    .single();
-
-  if (transactionError) throw transactionError;
-
-  return mapRemoteTransaction(transaction as RemoteTransactionRow);
+  const transaction = (await listRemoteTransactions()).find(
+    (item) => item.id === result.transaction_id,
+  );
+  if (!transaction) throw new Error("Não foi possível carregar a despesa salva.");
+  return transaction;
 }
 
 export async function syncRemoteExpense(transaction: Transaction): Promise<Transaction> {
@@ -68,13 +58,11 @@ export async function updateRemoteExpense(transaction: Transaction): Promise<Tra
   if (error) throw error;
   const result = Array.isArray(data) ? data[0] : data;
   if (!result?.transaction_id) throw new Error("Não foi possível confirmar a despesa atualizada.");
-  const { data: updated, error: updatedError } = await supabase
-    .from("transactions")
-    .select(transactionColumns)
-    .eq("id", result.transaction_id)
-    .single();
-  if (updatedError) throw updatedError;
-  return mapRemoteTransaction(updated as RemoteTransactionRow);
+  const updated = (await listRemoteTransactions()).find(
+    (item) => item.id === result.transaction_id,
+  );
+  if (!updated) throw new Error("Não foi possível carregar a despesa atualizada.");
+  return updated;
 }
 
 export async function deleteRemoteExpense(id: string): Promise<void> {

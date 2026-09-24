@@ -1,5 +1,6 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ProfileAvatarMetadata } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
   defaultExpenseCategories,
@@ -115,6 +116,12 @@ export function useTransactionsViewModel() {
           occurredAt: payload.occurredAt,
           registeredAt: new Date().toISOString(),
           recurrenceRule: payload.recurrenceRule,
+          creatorId: session?.user.id,
+          creatorName: getCreatorName(session?.user.user_metadata, session?.user.email),
+          creatorAvatarUrl: (session?.user.user_metadata as ProfileAvatarMetadata | undefined)
+            ?.avatar_url,
+          creatorAvatarSeed: (session?.user.user_metadata as ProfileAvatarMetadata | undefined)
+            ?.avatar_seed,
           syncStatus: "pending" as const,
         };
 
@@ -240,4 +247,9 @@ export function useTransactionsViewModel() {
       transactionsLoading,
     ],
   );
+}
+
+function getCreatorName(metadata: unknown, email: string | undefined): string | undefined {
+  const profile = metadata as { full_name?: string; name?: string } | undefined;
+  return profile?.full_name || profile?.name || email?.split("@")[0];
 }

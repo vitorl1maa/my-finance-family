@@ -16,6 +16,10 @@ test("maps a Supabase transaction row into the domain transaction", () => {
       occurred_at: "2026-09-18T12:00:00.000Z",
       created_at: "2026-09-17T16:45:00.000Z",
       recurrence_rule: "monthly",
+      created_by: "user-id",
+      creator_name: "Vitor",
+      creator_avatar_url: "https://example.com/avatar.jpg",
+      creator_avatar_seed: "vitor-seed",
     }),
     {
       id: "transaction-id",
@@ -28,6 +32,10 @@ test("maps a Supabase transaction row into the domain transaction", () => {
       occurredAt: "2026-09-18T12:00:00.000Z",
       registeredAt: "2026-09-17T16:45:00.000Z",
       recurrenceRule: "monthly",
+      creatorId: "user-id",
+      creatorName: "Vitor",
+      creatorAvatarUrl: "https://example.com/avatar.jpg",
+      creatorAvatarSeed: "vitor-seed",
       syncStatus: "synced",
     },
   );

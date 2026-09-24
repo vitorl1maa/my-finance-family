@@ -24,6 +24,7 @@ import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
+import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { SplitView } from "@/src/shared/components/base/split-view";
 import { colors } from "@/src/shared/theme/colors";
@@ -155,6 +156,9 @@ export function DashboardView(_: DashboardViewProps) {
                   >
                     {transaction.formattedAmount}
                   </Text>
+                  {transaction.isExpense ? (
+                    <TransactionCreatorAvatar transaction={transaction} />
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -284,18 +288,18 @@ const styles = StyleSheet.create({
   notification: { alignItems: "center", height: 42, justifyContent: "center", width: 34 },
   balancePagerContent: { gap: 10 },
   summary: { backgroundColor: colors.text, borderRadius: 20, gap: 8, padding: 16 },
-  piggySummary: { backgroundColor: "#AD1457", minHeight: 170 },
+  piggySummary: { backgroundColor: "#FFE7EF", minHeight: 170 },
   summaryLabel: { color: colors.accent, fontFamily: fonts.bold, fontSize: 12, letterSpacing: 0.3 },
   total: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -0.5 },
-  piggyLabel: { color: "#E7D64A", fontFamily: fonts.bold, fontSize: 13, letterSpacing: 0.3 },
+  piggyLabel: { color: "#9D174D", fontFamily: fonts.bold, fontSize: 13, letterSpacing: 0.3 },
   piggyTotal: {
-    color: colors.surface,
+    color: "#9D174D",
     fontFamily: fonts.extraBold,
     fontSize: 36,
     letterSpacing: -0.5,
   },
   summaryStats: { flexDirection: "row", gap: 160 },
-  piggyHint: { color: "#FFFFFFD9", fontSize: 12, marginTop: 4 },
+  piggyHint: { color: colors.darkPink, fontSize: 12, marginTop: 4 },
   pagerDots: {
     alignItems: "center",
     flexDirection: "row",

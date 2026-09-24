@@ -11,10 +11,14 @@ export type RemoteTransactionRow = {
   occurred_at: string;
   created_at?: string;
   recurrence_rule: string | null;
+  created_by?: string | null;
+  creator_name?: string | null;
+  creator_avatar_url?: string | null;
+  creator_avatar_seed?: string | null;
 };
 
 export function mapRemoteTransaction(row: RemoteTransactionRow): Transaction {
-  return {
+  const transaction: Transaction = {
     id: row.id,
     accountId: row.account_id,
     familyId: row.family_id,
@@ -27,4 +31,11 @@ export function mapRemoteTransaction(row: RemoteTransactionRow): Transaction {
     recurrenceRule: row.recurrence_rule ?? "none",
     syncStatus: "synced",
   };
+
+  if (row.created_by) transaction.creatorId = row.created_by;
+  if (row.creator_name) transaction.creatorName = row.creator_name;
+  if (row.creator_avatar_url) transaction.creatorAvatarUrl = row.creator_avatar_url;
+  if (row.creator_avatar_seed) transaction.creatorAvatarSeed = row.creator_avatar_seed;
+
+  return transaction;
 }

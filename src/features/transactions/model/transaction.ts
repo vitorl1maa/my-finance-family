@@ -11,6 +11,10 @@ export const transactionSchema = z.object({
   occurredAt: z.string(),
   registeredAt: z.string().optional(),
   recurrenceRule: z.string().optional(),
+  creatorId: z.string().optional(),
+  creatorName: z.string().optional(),
+  creatorAvatarUrl: z.string().optional(),
+  creatorAvatarSeed: z.string().optional(),
   syncStatus: z.enum(["pending", "synced", "failed"]),
 });
 

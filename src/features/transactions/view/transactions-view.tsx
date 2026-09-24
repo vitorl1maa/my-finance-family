@@ -18,6 +18,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
@@ -139,6 +140,9 @@ export function TransactionsView() {
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
                   </Text>
                 </View>
+                {transaction.amountCents < 0 ? (
+                  <TransactionCreatorAvatar transaction={transaction} />
+                ) : null}
                 <AnimatedCurrency
                   style={[
                     styles.amount,
