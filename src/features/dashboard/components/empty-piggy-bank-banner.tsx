@@ -1,4 +1,4 @@
-import { ArrowRight, WalletCards } from "lucide-react-native";
+import { ArrowRight } from "lucide-react-native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/src/shared/theme/colors";
@@ -9,7 +9,6 @@ export function EmptyWalletBanner({ onPress }: { onPress: () => void }) {
     <View style={styles.banner}>
       <View style={styles.copy}>
         <View style={styles.heading}>
-          <WalletCards color={colors.walletDark} size={19} strokeWidth={2.4} />
           <Text style={styles.title}>Sua carteira está vazia</Text>
         </View>
         <Text style={styles.message}>Adicione uma renda para começar</Text>
@@ -32,7 +31,7 @@ export function EmptyWalletBanner({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   banner: {
     alignItems: "center",
-    backgroundColor: "#E9F8C7",
+    backgroundColor: "#E7F8C4",
     borderRadius: 18,
     flexDirection: "row",
     height: 142,
