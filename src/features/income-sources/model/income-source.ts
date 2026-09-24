@@ -6,6 +6,10 @@ export const incomeSourceSchema = z.object({
   kind: z.enum(["salary", "investment", "other"]),
   amountCents: z.number().int().positive(),
   updatedAt: z.string(),
+  creatorId: z.string().optional(),
+  creatorName: z.string().optional(),
+  creatorAvatarUrl: z.string().optional(),
+  creatorAvatarSeed: z.string().optional(),
   syncStatus: z.enum(["pending", "synced", "failed"]),
 });
 

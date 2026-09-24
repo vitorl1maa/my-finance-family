@@ -14,6 +14,7 @@ import type { IncomeSource } from "@/src/features/income-sources/model/income-so
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
+import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import { WalletBanner } from "@/src/features/wallet/view/wallet-banner";
 import { WalletTransferView } from "@/src/features/wallet/view/wallet-transfer-view";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -123,6 +124,23 @@ export function IncomeSourcesView() {
               <Text style={styles.sourceMeta}>{incomeSourceKindLabel(source.kind)}</Text>
             </View>
             <AnimatedCurrency style={styles.sourceAmount} valueInCents={source.amountCents} />
+            <TransactionCreatorAvatar
+              transaction={{
+                id: `income-source:${source.id}`,
+                accountId: "",
+                title: source.name,
+                category: incomeSourceKindLabel(source.kind),
+                amountCents: source.amountCents,
+                occurredAt: source.updatedAt,
+                registeredAt: source.updatedAt,
+                recurrenceRule: "monthly",
+                creatorId: source.creatorId,
+                creatorName: source.creatorName,
+                creatorAvatarUrl: source.creatorAvatarUrl,
+                creatorAvatarSeed: source.creatorAvatarSeed,
+                syncStatus: source.syncStatus,
+              }}
+            />
           </Pressable>
         ))
       )}

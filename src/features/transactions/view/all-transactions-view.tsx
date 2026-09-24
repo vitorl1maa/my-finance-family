@@ -104,9 +104,7 @@ export function AllTransactionsView() {
                   ]}
                   valueInCents={transaction.amountCents}
                 />
-                {transaction.amountCents < 0 ? (
-                  <TransactionCreatorAvatar transaction={transaction} />
-                ) : null}
+                <TransactionCreatorAvatar transaction={transaction} />
               </View>
             ))}
           </View>

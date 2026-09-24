@@ -16,17 +16,24 @@ export function mergeIncomeSourcesIntoTransactions(
 ): Transaction[] {
   return [
     ...transactions,
-    ...incomeSources.map((source) => ({
-      id: `income-source:${source.id}`,
-      accountId: "",
-      title: source.name,
-      category: "Cofrinho",
-      amountCents: source.amountCents,
-      occurredAt: source.updatedAt,
-      registeredAt: source.updatedAt,
-      recurrenceRule: "monthly",
-      syncStatus: source.syncStatus,
-    })),
+    ...incomeSources.map((source) => {
+      const transaction: Transaction = {
+        id: `income-source:${source.id}`,
+        accountId: "",
+        title: source.name,
+        category: "Cofrinho",
+        amountCents: source.amountCents,
+        occurredAt: source.updatedAt,
+        registeredAt: source.updatedAt,
+        recurrenceRule: "monthly",
+        syncStatus: source.syncStatus,
+      };
+      if (source.creatorId) transaction.creatorId = source.creatorId;
+      if (source.creatorName) transaction.creatorName = source.creatorName;
+      if (source.creatorAvatarUrl) transaction.creatorAvatarUrl = source.creatorAvatarUrl;
+      if (source.creatorAvatarSeed) transaction.creatorAvatarSeed = source.creatorAvatarSeed;
+      return transaction;
+    }),
   ];
 }
 

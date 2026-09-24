@@ -15,11 +15,16 @@ type IncomeSourceRow = {
   amount_cents: number;
   updated_at: string;
   sync_status: IncomeSource["syncStatus"];
+  creator_id?: string;
+  creator_name?: string;
+  creator_avatar_url?: string;
+  creator_avatar_seed?: string;
 };
 
 export async function listIncomeSources(db: SQLiteDatabase): Promise<IncomeSource[]> {
   const rows = await db.getAllAsync<IncomeSourceRow>(
-    `SELECT id, name, kind, amount_cents, updated_at, sync_status
+    `SELECT id, name, kind, amount_cents, updated_at, sync_status,
+       creator_id, creator_name, creator_avatar_url, creator_avatar_seed
      FROM income_sources
      ORDER BY name ASC`,
   );
@@ -30,14 +35,19 @@ export async function listIncomeSources(db: SQLiteDatabase): Promise<IncomeSourc
 export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource): Promise<void> {
   await db.runAsync(
     `INSERT OR REPLACE INTO income_sources
-      (id, name, kind, amount_cents, updated_at, sync_status)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+      (id, name, kind, amount_cents, updated_at, sync_status,
+       creator_id, creator_name, creator_avatar_url, creator_avatar_seed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     source.id,
     source.name,
     source.kind,
     source.amountCents,
     source.updatedAt,
     source.syncStatus,
+    source.creatorId ?? null,
+    source.creatorName ?? null,
+    source.creatorAvatarUrl ?? null,
+    source.creatorAvatarSeed ?? null,
   );
 }
 
@@ -81,7 +91,7 @@ export async function savePiggyBankSettings(
 }
 
 function toIncomeSource(row: IncomeSourceRow): IncomeSource {
-  return {
+  const source: IncomeSource = {
     id: row.id,
     name: row.name,
     kind: row.kind,
@@ -89,4 +99,9 @@ function toIncomeSource(row: IncomeSourceRow): IncomeSource {
     updatedAt: row.updated_at,
     syncStatus: row.sync_status,
   };
+  if (row.creator_id) source.creatorId = row.creator_id;
+  if (row.creator_name) source.creatorName = row.creator_name;
+  if (row.creator_avatar_url) source.creatorAvatarUrl = row.creator_avatar_url;
+  if (row.creator_avatar_seed) source.creatorAvatarSeed = row.creator_avatar_seed;
+  return source;
 }
