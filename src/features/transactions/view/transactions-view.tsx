@@ -140,9 +140,6 @@ export function TransactionsView() {
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
                   </Text>
                 </View>
-                {transaction.amountCents < 0 ? (
-                  <TransactionCreatorAvatar transaction={transaction} />
-                ) : null}
                 <AnimatedCurrency
                   style={[
                     styles.amount,
@@ -150,6 +147,9 @@ export function TransactionsView() {
                   ]}
                   valueInCents={transaction.amountCents}
                 />
+                {transaction.amountCents < 0 ? (
+                  <TransactionCreatorAvatar transaction={transaction} />
+                ) : null}
               </Pressable>
             ))}
         </View>

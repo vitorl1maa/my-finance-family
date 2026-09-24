@@ -97,9 +97,6 @@ export function AllTransactionsView() {
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
                   </Text>
                 </View>
-                {transaction.amountCents < 0 ? (
-                  <TransactionCreatorAvatar transaction={transaction} />
-                ) : null}
                 <AnimatedCurrency
                   style={[
                     styles.amount,
@@ -107,6 +104,9 @@ export function AllTransactionsView() {
                   ]}
                   valueInCents={transaction.amountCents}
                 />
+                {transaction.amountCents < 0 ? (
+                  <TransactionCreatorAvatar transaction={transaction} />
+                ) : null}
               </View>
             ))}
           </View>
