@@ -208,8 +208,8 @@ function BalancePager({
           </View>
         </View>
         <View style={[styles.summary, styles.piggySummary, { width: cardWidth }]}>
-          <Text style={styles.summaryLabel}>COFRINHO</Text>
-          <AnimatedCurrency style={styles.total} valueInCents={piggyBankBalanceCents} />
+          <Text style={styles.piggyLabel}>COFRINHO</Text>
+          <AnimatedCurrency style={styles.piggyTotal} valueInCents={piggyBankBalanceCents} />
           <Text style={styles.piggyHint}>Arraste para voltar à carteira</Text>
         </View>
       </ScrollView>
@@ -284,11 +284,18 @@ const styles = StyleSheet.create({
   notification: { alignItems: "center", height: 42, justifyContent: "center", width: 34 },
   balancePagerContent: { gap: 10 },
   summary: { backgroundColor: colors.text, borderRadius: 20, gap: 8, padding: 16 },
-  piggySummary: { backgroundColor: "#AD1457" },
+  piggySummary: { backgroundColor: "#AD1457", minHeight: 170 },
   summaryLabel: { color: colors.accent, fontFamily: fonts.bold, fontSize: 12, letterSpacing: 0.3 },
   total: { color: colors.surface, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -0.5 },
+  piggyLabel: { color: "#E7D64A", fontFamily: fonts.bold, fontSize: 13, letterSpacing: 0.3 },
+  piggyTotal: {
+    color: colors.surface,
+    fontFamily: fonts.extraBold,
+    fontSize: 36,
+    letterSpacing: -0.5,
+  },
   summaryStats: { flexDirection: "row", gap: 160 },
-  piggyHint: { color: "#F6D8E4", fontSize: 12, marginTop: 4 },
+  piggyHint: { color: "#FFFFFFD9", fontSize: 12, marginTop: 4 },
   pagerDots: {
     alignItems: "center",
     flexDirection: "row",
