@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowDownToLine, ArrowUpFromLine, X } from "lucide-react-native";
+import { ArrowDownToLine, ArrowRight, ArrowUpFromLine, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -38,18 +38,28 @@ export function WalletTransferView({
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>{isSaving ? "Guardar no cofrinho" : "Resgatar do cofrinho"}</Text>
-          <Text style={styles.headerSubtitle}>{isSaving ? "Separe uma parte do seu saldo" : "Traga o valor de volta para a carteira"}</Text>
+          <Text style={styles.headerTitle}>
+            {isSaving ? "Guardar no cofrinho" : "Resgatar do cofrinho"}
+          </Text>
+          <Text style={styles.headerSubtitle}>
+            {isSaving ? "Separe uma parte do seu saldo" : "Traga o valor de volta para a carteira"}
+          </Text>
         </View>
         <Pressable accessibilityLabel="Fechar transferência" onPress={onBack} style={styles.close}>
           <X color={colors.text} size={20} />
         </Pressable>
       </View>
       <View style={styles.iconCircle}>
-        {isSaving ? <ArrowDownToLine color={colors.walletDark} size={28} /> : <ArrowUpFromLine color={colors.walletDark} size={28} />}
+        {isSaving ? (
+          <ArrowDownToLine color={colors.walletDark} size={28} />
+        ) : (
+          <ArrowUpFromLine color={colors.walletDark} size={28} />
+        )}
       </View>
       <Text style={styles.title}>Quanto você quer {isSaving ? "guardar" : "resgatar"}?</Text>
-      <Text style={styles.description}>A transferência acontece entre sua carteira e o cofrinho.</Text>
+      <Text style={styles.description}>
+        A transferência acontece entre sua carteira e o cofrinho.
+      </Text>
       <View style={styles.field}>
         <Text style={styles.label}>Valor</Text>
         <SmoothTextInput
@@ -73,18 +83,57 @@ export function WalletTransferView({
 }
 
 const styles = StyleSheet.create({
-  content: { backgroundColor: colors.background, flexGrow: 1, gap: 14, padding: 20, paddingBottom: 32, paddingTop: 20 },
+  content: {
+    backgroundColor: colors.background,
+    flexGrow: 1,
+    gap: 14,
+    padding: 20,
+    paddingBottom: 32,
+    paddingTop: 20,
+  },
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   headerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 20 },
   headerSubtitle: { color: colors.muted, fontSize: 12, marginTop: 4 },
-  close: { alignItems: "center", backgroundColor: colors.surfaceMuted, borderRadius: 21, height: 42, justifyContent: "center", width: 42 },
-  iconCircle: { alignItems: "center", backgroundColor: colors.accent, borderRadius: 28, height: 56, justifyContent: "center", marginTop: 16, width: 56 },
+  close: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 21,
+    height: 42,
+    justifyContent: "center",
+    width: 42,
+  },
+  iconCircle: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 28,
+    height: 56,
+    justifyContent: "center",
+    marginTop: 16,
+    width: 56,
+  },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 27, marginTop: 4 },
   description: { color: colors.muted, fontSize: 14, lineHeight: 20, marginBottom: 8 },
-  field: { borderColor: colors.border, borderRadius: 16, borderWidth: 1, gap: 2, minHeight: 70, paddingHorizontal: 14, paddingVertical: 11 },
+  field: {
+    borderColor: colors.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 2,
+    minHeight: 70,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
   label: { color: colors.mutedLight, fontSize: 11, fontWeight: "800" },
   input: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 24, padding: 0 },
   error: { color: colors.negative, fontSize: 12 },
-  primary: { alignItems: "center", backgroundColor: colors.accent, borderRadius: 16, flexDirection: "row", gap: 10, justifyContent: "center", marginTop: 14, minHeight: 58 },
+  primary: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 16,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    marginTop: 14,
+    minHeight: 58,
+  },
   primaryText: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 15 },
 });

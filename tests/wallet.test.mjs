@@ -22,10 +22,13 @@ test("applies income and expense deltas without allowing a negative wallet", () 
 });
 
 test("transfers money between wallet and piggy bank atomically", () => {
-  assert.deepEqual(transferBetweenBalances({ walletBalanceCents: 10000, piggyBankBalanceCents: 0 }, 4000), {
-    walletBalanceCents: 6000,
-    piggyBankBalanceCents: 4000,
-  });
+  assert.deepEqual(
+    transferBetweenBalances({ walletBalanceCents: 10000, piggyBankBalanceCents: 0 }, 4000),
+    {
+      walletBalanceCents: 6000,
+      piggyBankBalanceCents: 4000,
+    },
+  );
   assert.throws(
     () => transferBetweenBalances({ walletBalanceCents: 1000, piggyBankBalanceCents: 4000 }, 2000),
     /Saldo insuficiente/,

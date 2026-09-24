@@ -19,18 +19,21 @@ import {
   saveIncomeSource,
   savePiggyBankSettings,
 } from "@/src/features/income-sources/repository/income-sources-repository";
-import {
-  getRemoteWalletSettings,
-  transferRemoteWallet,
-} from "@/src/features/wallet/repository/wallet-remote-repository";
+import { useIncomeSourcesStore } from "@/src/features/income-sources/store/income-sources-store";
 import {
   applyWalletDelta,
   getIncomeSourceWalletDelta,
   transferBetweenBalances,
 } from "@/src/features/wallet/model/wallet";
-import { getWalletSettings, saveWalletSettings } from "@/src/features/wallet/repository/wallet-repository";
+import {
+  getRemoteWalletSettings,
+  transferRemoteWallet,
+} from "@/src/features/wallet/repository/wallet-remote-repository";
+import {
+  getWalletSettings,
+  saveWalletSettings,
+} from "@/src/features/wallet/repository/wallet-repository";
 import { useWalletStore } from "@/src/features/wallet/store/wallet-store";
-import { useIncomeSourcesStore } from "@/src/features/income-sources/store/income-sources-store";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 export function useIncomeSourcesViewModel() {
@@ -112,7 +115,7 @@ export function useIncomeSourcesViewModel() {
       setLoading(false);
       setBalanceLoading(false);
     }
-  }, [db, session, setSources]);
+  }, [db, session, setBalances, setSources, setWalletBalance]);
 
   useEffect(() => {
     void loadSources();

@@ -21,12 +21,12 @@ import {
   upsertTransactions,
 } from "@/src/features/transactions/repository/transactions-repository";
 import { useTransactionsStore } from "@/src/features/transactions/store/transactions-store";
+import { applyWalletDelta, getExpenseWalletDelta } from "@/src/features/wallet/model/wallet";
 import { getRemoteWalletSettings } from "@/src/features/wallet/repository/wallet-remote-repository";
 import {
-  applyWalletDelta,
-  getExpenseWalletDelta,
-} from "@/src/features/wallet/model/wallet";
-import { getWalletSettings, saveWalletSettings } from "@/src/features/wallet/repository/wallet-repository";
+  getWalletSettings,
+  saveWalletSettings,
+} from "@/src/features/wallet/repository/wallet-repository";
 import { useWalletStore } from "@/src/features/wallet/store/wallet-store";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
@@ -83,7 +83,7 @@ export function useTransactionsViewModel() {
     } finally {
       setTransactionsLoading(false);
     }
-  }, [db, session, setTransactions]);
+  }, [db, session, setTransactions, setWalletBalance]);
 
   useEffect(() => {
     void loadTransactions();

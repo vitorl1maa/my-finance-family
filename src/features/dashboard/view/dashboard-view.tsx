@@ -4,14 +4,13 @@ import { useRouter } from "expo-router";
 import { Bell, CircleDollarSign, Send } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
-
-import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
 import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
 import {
   getAvatarToken,
   type ProfileAvatarMetadata,
 } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
+import { CashflowChart } from "@/src/features/dashboard/components/cashflow-chart";
 import { EmptyPiggyBankBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
@@ -108,7 +107,10 @@ export function DashboardView(_: DashboardViewProps) {
                   <Metric
                     label="Entradas no mês"
                     prefix="+ "
-                    valueInCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
+                    valueInCents={incomeSources.reduce(
+                      (total, source) => total + source.amountCents,
+                      0,
+                    )}
                   />
                   <Metric
                     accent
