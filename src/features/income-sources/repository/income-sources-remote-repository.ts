@@ -35,7 +35,7 @@ export async function upsertRemoteIncomeSource(source: IncomeSource): Promise<In
 }
 
 export async function deleteRemoteIncomeSource(id: string): Promise<void> {
-  const { error } = await supabase.from("income_sources").delete().eq("id", id);
+  const { error } = await supabase.rpc("delete_family_income_source", { client_id: id });
   if (error) throw error;
 }
 

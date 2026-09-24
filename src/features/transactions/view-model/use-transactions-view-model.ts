@@ -21,6 +21,13 @@ import {
   upsertTransactions,
 } from "@/src/features/transactions/repository/transactions-repository";
 import { useTransactionsStore } from "@/src/features/transactions/store/transactions-store";
+import { getRemoteWalletSettings } from "@/src/features/wallet/repository/wallet-remote-repository";
+import {
+  applyWalletDelta,
+  getExpenseWalletDelta,
+} from "@/src/features/wallet/model/wallet";
+import { getWalletSettings, saveWalletSettings } from "@/src/features/wallet/repository/wallet-repository";
+import { useWalletStore } from "@/src/features/wallet/store/wallet-store";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 export function useTransactionsViewModel() {
@@ -28,6 +35,8 @@ export function useTransactionsViewModel() {
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
   const session = useAuthStore((state) => state.session);
+  const walletBalanceCents = useWalletStore((state) => state.walletBalanceCents);
+  const setWalletBalance = useWalletStore((state) => state.setWalletBalance);
   const categories: ExpenseCategory[] = defaultExpenseCategories;
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -41,6 +50,8 @@ export function useTransactionsViewModel() {
     try {
       const localTransactions = await listTransactions(db);
       setTransactions(localTransactions);
+      const localWallet = await getWalletSettings(db);
+      setWalletBalance(localWallet?.balanceCents ?? 0);
       if (localTransactions.length === 0) setTransactionsLoading(false);
 
       if (!session) return;
@@ -57,6 +68,15 @@ export function useTransactionsViewModel() {
 
       const remoteTransactions = await listRemoteTransactions();
       await upsertTransactions(db, remoteTransactions);
+      const remoteWallet = await getRemoteWalletSettings();
+      if (remoteWallet) {
+        await saveWalletSettings(db, {
+          balanceCents: remoteWallet.balance_cents,
+          updatedAt: remoteWallet.updated_at,
+          syncStatus: "synced",
+        });
+        setWalletBalance(remoteWallet.balance_cents);
+      }
       setTransactions(await listTransactions(db));
     } catch {
       setTransactionsError("Não foi possível atualizar as transações agora.");
@@ -98,7 +118,18 @@ export function useTransactionsViewModel() {
           syncStatus: "pending" as const,
         };
 
+        const nextWalletBalance = applyWalletDelta(
+          walletBalanceCents,
+          getExpenseWalletDelta(undefined, pendingTransaction.amountCents),
+        );
+
         await upsertTransactions(db, [pendingTransaction]);
+        await saveWalletSettings(db, {
+          balanceCents: nextWalletBalance,
+          updatedAt: new Date().toISOString(),
+          syncStatus: "pending",
+        });
+        setWalletBalance(nextWalletBalance);
         setTransactions(await listTransactions(db));
 
         if (!session) return;
@@ -119,13 +150,24 @@ export function useTransactionsViewModel() {
         setIsSaving(false);
       }
     },
-    [db, session, setTransactions],
+    [db, session, setTransactions, setWalletBalance, walletBalanceCents],
   );
 
   const updateExpense = useCallback(
     async (transaction: Transaction) => {
+      const previousTransaction = transactions.find((item) => item.id === transaction.id);
       const pending = { ...transaction, syncStatus: "pending" as const };
+      const nextWalletBalance = applyWalletDelta(
+        walletBalanceCents,
+        getExpenseWalletDelta(previousTransaction?.amountCents, transaction.amountCents),
+      );
       await upsertTransactions(db, [pending]);
+      await saveWalletSettings(db, {
+        balanceCents: nextWalletBalance,
+        updatedAt: new Date().toISOString(),
+        syncStatus: "pending",
+      });
+      setWalletBalance(nextWalletBalance);
       setTransactions(await listTransactions(db));
       if (!session) return;
       try {
@@ -137,12 +179,23 @@ export function useTransactionsViewModel() {
         );
       }
     },
-    [db, session, setTransactions],
+    [db, session, setTransactions, setWalletBalance, transactions, walletBalanceCents],
   );
 
   const removeExpense = useCallback(
     async (id: string) => {
+      const previousTransaction = transactions.find((item) => item.id === id);
       await deleteTransaction(db, id);
+      const nextWalletBalance = applyWalletDelta(
+        walletBalanceCents,
+        getExpenseWalletDelta(previousTransaction?.amountCents, undefined),
+      );
+      await saveWalletSettings(db, {
+        balanceCents: nextWalletBalance,
+        updatedAt: new Date().toISOString(),
+        syncStatus: "pending",
+      });
+      setWalletBalance(nextWalletBalance);
       setTransactions(await listTransactions(db));
       if (!session) return;
       try {
@@ -151,7 +204,7 @@ export function useTransactionsViewModel() {
         setTransactionsError("Despesa removida do dispositivo, mas não foi possível sincronizar.");
       }
     },
-    [db, session, setTransactions],
+    [db, session, setTransactions, setWalletBalance, transactions, walletBalanceCents],
   );
 
   return useMemo(

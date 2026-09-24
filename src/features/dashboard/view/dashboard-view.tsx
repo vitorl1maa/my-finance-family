@@ -102,7 +102,7 @@ export function DashboardView(_: DashboardViewProps) {
           >
             {totalBalanceCents > 0 ? (
               <View style={styles.summary}>
-                <Text style={styles.summaryLabel}>COFRINHO</Text>
+                <Text style={styles.summaryLabel}>CARTEIRA</Text>
                 <AnimatedCurrency style={styles.total} valueInCents={totalBalanceCents} />
                 <View style={styles.summaryStats}>
                   <Metric

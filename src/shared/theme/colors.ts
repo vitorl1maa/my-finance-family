@@ -10,4 +10,5 @@ export const colors = {
   positive: "#16A34A",
   negative: "#DC2626",
   darkPink: "#9D174D",
+  walletDark: "#315D16",
 };

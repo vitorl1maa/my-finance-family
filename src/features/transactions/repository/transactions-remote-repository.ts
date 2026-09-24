@@ -57,24 +57,27 @@ export async function syncRemoteExpense(transaction: Transaction): Promise<Trans
 }
 
 export async function updateRemoteExpense(transaction: Transaction): Promise<Transaction> {
-  const { data, error } = await supabase
-    .from("transactions")
-    .update({
-      title: transaction.title,
-      category: transaction.category,
-      category_id: transaction.categoryId,
-      amount_cents: transaction.amountCents,
-      occurred_at: transaction.occurredAt,
-      recurrence_rule: transaction.recurrenceRule ?? "none",
-    })
-    .eq("id", transaction.id)
-    .select(transactionColumns)
-    .single();
+  const { data, error } = await supabase.rpc("update_family_expense", {
+    expense_id: transaction.id,
+    expense_title: transaction.title,
+    expense_category_id: transaction.categoryId,
+    expense_amount_cents: Math.abs(transaction.amountCents),
+    expense_occurred_at: transaction.occurredAt,
+    expense_recurrence_rule: transaction.recurrenceRule ?? "none",
+  });
   if (error) throw error;
-  return mapRemoteTransaction(data as RemoteTransactionRow);
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result?.transaction_id) throw new Error("Não foi possível confirmar a despesa atualizada.");
+  const { data: updated, error: updatedError } = await supabase
+    .from("transactions")
+    .select(transactionColumns)
+    .eq("id", result.transaction_id)
+    .single();
+  if (updatedError) throw updatedError;
+  return mapRemoteTransaction(updated as RemoteTransactionRow);
 }
 
 export async function deleteRemoteExpense(id: string): Promise<void> {
-  const { error } = await supabase.from("transactions").delete().eq("id", id);
+  const { error } = await supabase.rpc("delete_family_expense", { expense_id: id });
   if (error) throw error;
 }

@@ -123,6 +123,16 @@ export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
         updated_at TEXT NOT NULL,
         sync_status TEXT NOT NULL DEFAULT 'pending'
       );
+      INSERT OR IGNORE INTO wallet_settings (id, balance_cents, updated_at, sync_status)
+      SELECT
+        'default',
+        MAX(
+          0,
+          COALESCE((SELECT SUM(amount_cents) FROM income_sources), 0) -
+          COALESCE((SELECT SUM(ABS(amount_cents)) FROM transactions WHERE amount_cents < 0), 0)
+        ),
+        datetime('now'),
+        'pending';
       PRAGMA user_version = ${databaseVersion};
     `);
   }

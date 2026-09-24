@@ -14,7 +14,8 @@ import type { IncomeSource } from "@/src/features/income-sources/model/income-so
 import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
-import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
+import { WalletBanner } from "@/src/features/wallet/view/wallet-banner";
+import { WalletTransferView } from "@/src/features/wallet/view/wallet-transfer-view";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { LoadingShimmer } from "@/src/shared/components/loading-shimmer";
 import { colors } from "@/src/shared/theme/colors";
@@ -22,22 +23,11 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export function IncomeSourcesView() {
   const viewModel = useIncomeSourcesViewModel();
-  const transactions = useTransactionsViewModel();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedSource, setSelectedSource] = useState<IncomeSource | undefined>();
-  const balanceCents =
-    viewModel.totalCents -
-    transactions.transactions.reduce(
-      (total, transaction) =>
-        total + (transaction.isExpense ? Math.abs(transaction.amountCents) : 0),
-      0,
-    );
-  const incomeCents = viewModel.totalCents;
-  const expenseCents = transactions.transactions.reduce(
-    (total, transaction) =>
-      total + (transaction.amountCents < 0 ? Math.abs(transaction.amountCents) : 0),
-    0,
-  );
+  const [transferDirection, setTransferDirection] = useState<
+    "to_piggy_bank" | "from_piggy_bank" | null
+  >(null);
 
   return (
     <ScrollView
@@ -54,10 +44,22 @@ export function IncomeSourcesView() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Cofrinho</Text>
+          <Text style={styles.title}>Carteira e Cofrinho</Text>
           <Text style={styles.subtitle}>Registre e acompanhe suas finanças</Text>
         </View>
       </View>
+
+      <WalletBanner
+        balanceCents={viewModel.walletBalanceCents}
+        onSave={() => {
+          setTransferDirection("to_piggy_bank");
+          setDrawerVisible(true);
+        }}
+        onWithdraw={() => {
+          setTransferDirection("from_piggy_bank");
+          setDrawerVisible(true);
+        }}
+      />
 
       <View style={styles.balanceCard}>
         <Image
@@ -71,19 +73,8 @@ export function IncomeSourcesView() {
           <AnimatedCurrency
             accessibilityLabel="Saldo do cofrinho"
             style={styles.balanceInput}
-            valueInCents={balanceCents}
+            valueInCents={viewModel.balanceCents}
           />
-          <View style={styles.balanceStats}>
-            <View style={styles.balanceStat}>
-              <Text style={styles.balanceStatLabel}>Entradas</Text>
-              <AnimatedCurrency style={styles.incomeAmount} valueInCents={incomeCents} />
-            </View>
-            <View style={styles.balanceDivider} />
-            <View style={styles.balanceStat}>
-              <Text style={styles.balanceStatLabel}>Saídas</Text>
-              <AnimatedCurrency style={styles.expenseAmount} valueInCents={-expenseCents} />
-            </View>
-          </View>
         </View>
       </View>
 
@@ -97,6 +88,7 @@ export function IncomeSourcesView() {
           accessibilityRole="button"
           onPress={() => {
             setSelectedSource(undefined);
+            setTransferDirection(null);
             setDrawerVisible(true);
           }}
           style={styles.addButton}
@@ -118,6 +110,7 @@ export function IncomeSourcesView() {
             key={source.id}
             onPress={() => {
               setSelectedSource(source);
+              setTransferDirection(null);
               setDrawerVisible(true);
             }}
             style={styles.sourceRow}
@@ -146,23 +139,35 @@ export function IncomeSourcesView() {
             onPress={() => {
               setDrawerVisible(false);
               setSelectedSource(undefined);
+              setTransferDirection(null);
             }}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.drawer}>
-            <IncomeSourceNewView
-              initialSource={selectedSource}
-              onBack={() => {
-                setDrawerVisible(false);
-                setSelectedSource(undefined);
-              }}
-              onSave={(name, amountCents, kind) =>
-                selectedSource
-                  ? viewModel.updateSource({ ...selectedSource, name, amountCents, kind })
-                  : viewModel.createSource(name, amountCents, kind)
-              }
-              onDelete={viewModel.removeSource}
-            />
+            {transferDirection ? (
+              <WalletTransferView
+                direction={transferDirection}
+                onBack={() => {
+                  setDrawerVisible(false);
+                  setTransferDirection(null);
+                }}
+                onTransfer={(amountCents) => viewModel.transfer(transferDirection, amountCents)}
+              />
+            ) : (
+              <IncomeSourceNewView
+                initialSource={selectedSource}
+                onBack={() => {
+                  setDrawerVisible(false);
+                  setSelectedSource(undefined);
+                }}
+                onSave={(name, amountCents, kind) =>
+                  selectedSource
+                    ? viewModel.updateSource({ ...selectedSource, name, amountCents, kind })
+                    : viewModel.createSource(name, amountCents, kind)
+                }
+                onDelete={viewModel.removeSource}
+              />
+            )}
           </View>
         </View>
       </Modal>
@@ -224,12 +229,6 @@ const styles = StyleSheet.create({
     padding: 0,
     textAlign: "center",
   },
-  balanceStats: { alignItems: "center", flexDirection: "row", gap: 18, marginTop: 12 },
-  balanceStat: { alignItems: "center", gap: 2, minWidth: 100 },
-  balanceStatLabel: { color: colors.darkPink, fontFamily: fonts.bold, fontSize: 11 },
-  incomeAmount: { color: colors.positive, fontFamily: fonts.bold, fontSize: 14 },
-  expenseAmount: { color: colors.negative, fontFamily: fonts.bold, fontSize: 14 },
-  balanceDivider: { backgroundColor: colors.darkPink, height: 30, opacity: 0.28, width: 1 },
   sectionHeader: {
     alignItems: "center",
     flexDirection: "row",
