@@ -19,6 +19,13 @@ export const defaultExpenseCategories: ExpenseCategory[] = [
   { id: "lazer", familyId: "local", name: "Lazer", slug: "lazer", isActive: true },
 ];
 
+export function resolveExpenseCategories(
+  hasAuthenticatedFamily: boolean,
+  remoteCategories: ExpenseCategory[],
+): ExpenseCategory[] {
+  return hasAuthenticatedFamily ? remoteCategories : defaultExpenseCategories;
+}
+
 const categoryOrder = ["moradia", "alimentacao", "saude", "lazer"];
 
 export function orderExpenseCategories(categories: ExpenseCategory[]): ExpenseCategory[] {

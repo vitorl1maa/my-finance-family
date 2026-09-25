@@ -30,3 +30,15 @@ export async function transferRemoteWallet(
   if (!row) throw new Error("Não foi possível confirmar a transferência.");
   return row as RemoteTransferRow;
 }
+
+export async function resetRemoteWalletBalance(
+  target: "wallet" | "piggy_bank",
+): Promise<RemoteTransferRow> {
+  const { data, error } = await supabase.rpc("reset_family_wallet_balance", {
+    balance_target: target,
+  });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) throw new Error("Não foi possível confirmar o saldo zerado.");
+  return row as RemoteTransferRow;
+}

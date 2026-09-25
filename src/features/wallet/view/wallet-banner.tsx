@@ -1,4 +1,4 @@
-import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react-native";
+import { ArrowDownToLine, ArrowUpFromLine, Trash2 } from "lucide-react-native";
 import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -7,10 +7,12 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export function WalletBanner({
   balanceCents,
+  onReset,
   onSave,
   onWithdraw,
 }: {
   balanceCents: number;
+  onReset: () => void;
   onSave: () => void;
   onWithdraw: () => void;
 }) {
@@ -26,7 +28,16 @@ export function WalletBanner({
         <View style={styles.heading}>
           <Text style={styles.eyebrow}>SALDO DA CARTEIRA</Text>
         </View>
-        <AnimatedCurrency style={styles.balance} valueInCents={balanceCents} />
+        <View style={styles.balanceRow}>
+          <AnimatedCurrency style={styles.balance} valueInCents={balanceCents} />
+          <Pressable
+            accessibilityLabel="Zerar saldo da carteira"
+            onPress={onReset}
+            style={styles.reset}
+          >
+            <Trash2 color={colors.walletDark} size={16} />
+          </Pressable>
+        </View>
         <Text style={styles.description}>Disponível para suas despesas</Text>
         <View style={styles.actions}>
           <Action
@@ -75,8 +86,17 @@ const styles = StyleSheet.create({
   },
   content: { alignItems: "center", flex: 1, justifyContent: "center", padding: 18 },
   heading: { alignItems: "center", flexDirection: "row", gap: 7 },
+  balanceRow: { alignItems: "center", flexDirection: "row", gap: 8, marginTop: 3 },
+  reset: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFFB8",
+    borderRadius: 14,
+    height: 28,
+    justifyContent: "center",
+    width: 28,
+  },
   eyebrow: { color: colors.walletDark, fontFamily: fonts.bold, fontSize: 14, letterSpacing: 0.35 },
-  balance: { color: colors.walletDark, fontFamily: fonts.extraBold, fontSize: 38, marginTop: 3 },
+  balance: { color: colors.walletDark, fontFamily: fonts.extraBold, fontSize: 38 },
   description: { color: colors.walletDark, fontSize: 12, opacity: 0.85 },
   actions: { flexDirection: "row", gap: 10, marginTop: 13 },
   action: {

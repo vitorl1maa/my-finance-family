@@ -3,9 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ProfileAvatarMetadata } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
-  defaultExpenseCategories,
   type ExpenseCategory,
+  resolveExpenseCategories,
 } from "@/src/features/categories/model/expense-category";
+import { listFamilyCategories } from "@/src/features/categories/repository/categories-repository";
 import { buildCreateExpensePayload } from "@/src/features/transactions/model/expense-payload";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import {
@@ -38,11 +39,14 @@ export function useTransactionsViewModel() {
   const session = useAuthStore((state) => state.session);
   const walletBalanceCents = useWalletStore((state) => state.walletBalanceCents);
   const setWalletBalance = useWalletStore((state) => state.setWalletBalance);
-  const categories: ExpenseCategory[] = defaultExpenseCategories;
+  const [remoteCategories, setRemoteCategories] = useState<ExpenseCategory[]>([]);
+  const categories = resolveExpenseCategories(Boolean(session), remoteCategories);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [transactionsError, setTransactionsError] = useState<string | null>(null);
+  const [categoriesLoading, setCategoriesLoading] = useState(Boolean(session));
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   const loadTransactions = useCallback(async () => {
     setTransactionsLoading(true);
@@ -90,7 +94,29 @@ export function useTransactionsViewModel() {
     void loadTransactions();
   }, [loadTransactions]);
 
-  const reloadCategories = useCallback(() => undefined, []);
+  const reloadCategories = useCallback(async () => {
+    if (!session) {
+      setRemoteCategories([]);
+      setCategoriesError(null);
+      setCategoriesLoading(false);
+      return;
+    }
+
+    setCategoriesLoading(true);
+    setCategoriesError(null);
+    try {
+      setRemoteCategories(await listFamilyCategories());
+    } catch {
+      setRemoteCategories([]);
+      setCategoriesError("Não foi possível carregar as categorias da família.");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    void reloadCategories();
+  }, [reloadCategories]);
 
   const createExpense = useCallback(
     async (input: {
@@ -230,8 +256,8 @@ export function useTransactionsViewModel() {
       transactionsError,
       reloadTransactions: loadTransactions,
       categories,
-      categoriesLoading: false,
-      categoriesError: null,
+      categoriesLoading,
+      categoriesError,
       reloadCategories,
       isSaving,
       saveError,
@@ -240,6 +266,9 @@ export function useTransactionsViewModel() {
       createExpense,
       updateExpense,
       removeExpense,
+      categories,
+      categoriesError,
+      categoriesLoading,
       isSaving,
       reloadCategories,
       loadTransactions,

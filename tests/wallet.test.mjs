@@ -6,6 +6,7 @@ import {
   createEmptyWallet,
   getExpenseWalletDelta,
   getIncomeSourceWalletDelta,
+  resetWalletBalance,
   transferBetweenBalances,
 } from "../src/features/wallet/model/wallet.ts";
 
@@ -53,4 +54,17 @@ test("calculates expense deltas from the signed transaction values", () => {
   assert.equal(getExpenseWalletDelta(undefined, -1000), -1000);
   assert.equal(getExpenseWalletDelta(-1000, -1500), -500);
   assert.equal(getExpenseWalletDelta(-1500, undefined), 1500);
+});
+
+test("resets only the requested wallet balance", () => {
+  const balances = { walletBalanceCents: 10000, piggyBankBalanceCents: 3500 };
+
+  assert.deepEqual(resetWalletBalance(balances, "wallet"), {
+    walletBalanceCents: 0,
+    piggyBankBalanceCents: 3500,
+  });
+  assert.deepEqual(resetWalletBalance(balances, "piggy_bank"), {
+    walletBalanceCents: 10000,
+    piggyBankBalanceCents: 0,
+  });
 });

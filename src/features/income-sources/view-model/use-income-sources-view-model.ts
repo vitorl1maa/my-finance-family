@@ -24,10 +24,12 @@ import { useIncomeSourcesStore } from "@/src/features/income-sources/store/incom
 import {
   applyWalletDelta,
   getIncomeSourceWalletDelta,
+  resetWalletBalance,
   transferBetweenBalances,
 } from "@/src/features/wallet/model/wallet";
 import {
   getRemoteWalletSettings,
+  resetRemoteWalletBalance,
   transferRemoteWallet,
 } from "@/src/features/wallet/repository/wallet-remote-repository";
 import {
@@ -284,6 +286,50 @@ export function useIncomeSourcesViewModel() {
     [db, piggyBankBalanceCents, session, setBalances, walletBalanceCents],
   );
 
+  const resetBalance = useCallback(
+    async (target: "wallet" | "piggy_bank") => {
+      const nextBalances = resetWalletBalance(
+        { walletBalanceCents, piggyBankBalanceCents },
+        target,
+      );
+      const now = new Date().toISOString();
+      await saveWalletSettings(db, {
+        balanceCents: nextBalances.walletBalanceCents,
+        updatedAt: now,
+        syncStatus: "pending",
+      });
+      await savePiggyBankSettings(db, {
+        balanceCents: nextBalances.piggyBankBalanceCents,
+        updatedAt: now,
+        syncStatus: "pending",
+      });
+      setBalances(nextBalances.walletBalanceCents, nextBalances.piggyBankBalanceCents);
+      setBalanceCents(nextBalances.piggyBankBalanceCents);
+
+      if (!session) return;
+
+      try {
+        const synced = await resetRemoteWalletBalance(target);
+        const syncedAt = new Date().toISOString();
+        await saveWalletSettings(db, {
+          balanceCents: synced.wallet_balance_cents,
+          updatedAt: syncedAt,
+          syncStatus: "synced",
+        });
+        await savePiggyBankSettings(db, {
+          balanceCents: synced.piggy_bank_balance_cents,
+          updatedAt: syncedAt,
+          syncStatus: "synced",
+        });
+        setBalances(synced.wallet_balance_cents, synced.piggy_bank_balance_cents);
+        setBalanceCents(synced.piggy_bank_balance_cents);
+      } catch {
+        setError("Saldo zerado no dispositivo. A sincronização será tentada depois.");
+      }
+    },
+    [db, piggyBankBalanceCents, session, setBalances, walletBalanceCents],
+  );
+
   const totalCents = useMemo(() => totalIncomeSources(sources), [sources]);
 
   return {
@@ -302,6 +348,7 @@ export function useIncomeSourcesViewModel() {
     removeSource,
     saveBalance,
     transfer,
+    resetBalance,
     reload: loadSources,
   };
 }

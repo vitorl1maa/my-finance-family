@@ -54,3 +54,12 @@ export function transferBetweenBalances(
     piggyBankBalanceCents: applyWalletDelta(balances.piggyBankBalanceCents, -amountCents),
   };
 }
+
+export function resetWalletBalance(
+  balances: WalletBalances,
+  target: "wallet" | "piggy_bank",
+): WalletBalances {
+  return target === "wallet"
+    ? { ...balances, walletBalanceCents: 0 }
+    : { ...balances, piggyBankBalanceCents: 0 };
+}

@@ -1,4 +1,11 @@
-import { Banknote, ChartNoAxesCombined, PiggyBank, Plus, Shapes } from "lucide-react-native";
+import {
+  Banknote,
+  ChartNoAxesCombined,
+  PiggyBank,
+  Plus,
+  Shapes,
+  Trash2,
+} from "lucide-react-native";
 import { useState } from "react";
 import {
   Image,
@@ -15,6 +22,7 @@ import { incomeSourceKindLabel } from "@/src/features/income-sources/model/incom
 import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
+import { BalanceResetConfirmationModal } from "@/src/features/wallet/components/balance-reset-confirmation-modal";
 import { WalletBanner } from "@/src/features/wallet/view/wallet-banner";
 import { WalletTransferView } from "@/src/features/wallet/view/wallet-transfer-view";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -29,6 +37,7 @@ export function IncomeSourcesView() {
   const [transferDirection, setTransferDirection] = useState<
     "to_piggy_bank" | "from_piggy_bank" | null
   >(null);
+  const [resetTarget, setResetTarget] = useState<"wallet" | "piggy_bank" | null>(null);
 
   return (
     <ScrollView
@@ -52,6 +61,7 @@ export function IncomeSourcesView() {
 
       <WalletBanner
         balanceCents={viewModel.walletBalanceCents}
+        onReset={() => setResetTarget("wallet")}
         onSave={() => {
           setTransferDirection("to_piggy_bank");
           setDrawerVisible(true);
@@ -70,12 +80,23 @@ export function IncomeSourcesView() {
         />
         <View style={styles.cardOverlay} />
         <View style={styles.balanceContent}>
-          <Text style={styles.balanceEyebrow}>SALDO DO COFRINHO</Text>
-          <AnimatedCurrency
-            accessibilityLabel="Saldo do cofrinho"
-            style={styles.balanceInput}
-            valueInCents={viewModel.balanceCents}
-          />
+          <View style={styles.piggyHeading}>
+            <Text style={styles.balanceEyebrow}>SALDO DO COFRINHO</Text>
+          </View>
+          <View style={styles.piggyBalanceRow}>
+            <AnimatedCurrency
+              accessibilityLabel="Saldo do cofrinho"
+              style={styles.balanceInput}
+              valueInCents={viewModel.balanceCents}
+            />
+            <Pressable
+              accessibilityLabel="Zerar saldo do cofrinho"
+              onPress={() => setResetTarget("piggy_bank")}
+              style={styles.resetButton}
+            >
+              <Trash2 color={colors.darkPink} size={16} />
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -189,6 +210,15 @@ export function IncomeSourcesView() {
           </View>
         </View>
       </Modal>
+      <BalanceResetConfirmationModal
+        target={resetTarget}
+        onCancel={() => setResetTarget(null)}
+        onConfirm={() => {
+          if (!resetTarget) return;
+          void viewModel.resetBalance(resetTarget);
+          setResetTarget(null);
+        }}
+      />
     </ScrollView>
   );
 }
@@ -239,11 +269,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.4,
   },
+  piggyHeading: { alignItems: "center", flexDirection: "row", gap: 7 },
+  piggyBalanceRow: { alignItems: "center", flexDirection: "row", gap: 8, marginTop: 3 },
+  resetButton: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFFB8",
+    borderRadius: 14,
+    height: 28,
+    justifyContent: "center",
+    width: 28,
+  },
   balanceInput: {
     color: colors.darkPink,
     fontFamily: fonts.extraBold,
     fontSize: 38,
-    marginTop: 3,
     padding: 0,
     textAlign: "center",
   },

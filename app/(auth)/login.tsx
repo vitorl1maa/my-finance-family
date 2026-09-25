@@ -115,7 +115,7 @@ export default function LoginScreen() {
       >
         <Text style={styles.secondaryText}>Criar conta</Text>
       </Pressable>
-      <View style={styles.divider}>
+      {/* <View style={styles.divider}>
         <View style={styles.line} />
         <Text style={styles.or}>ou continue com</Text>
         <View style={styles.line} />
@@ -126,7 +126,7 @@ export default function LoginScreen() {
       </View>
       <Text style={styles.terms}>
         Ao continuar, você concorda com os Termos e a Política de Privacidade.
-      </Text>
+      </Text> */}
     </AuthScreen>
   );
 }
