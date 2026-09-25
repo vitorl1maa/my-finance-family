@@ -7,6 +7,7 @@ export type ExpensePayloadInput = {
   amount: string;
   occurredAt: string;
   recurrenceRule: string;
+  paymentMethod: "credit_card" | "debit_card" | "pix" | "cash";
 };
 
 export type CreateExpensePayload = {
@@ -15,6 +16,7 @@ export type CreateExpensePayload = {
   amountCents: number;
   occurredAt: string;
   recurrenceRule: string;
+  paymentMethod: "credit_card" | "debit_card" | "pix" | "cash";
 };
 
 export function buildCreateExpensePayload(input: ExpensePayloadInput): CreateExpensePayload {
@@ -24,5 +26,6 @@ export function buildCreateExpensePayload(input: ExpensePayloadInput): CreateExp
     amountCents: parseBrlInputToCents(input.amount),
     occurredAt: input.occurredAt,
     recurrenceRule: input.recurrenceRule,
+    paymentMethod: input.paymentMethod,
   };
 }

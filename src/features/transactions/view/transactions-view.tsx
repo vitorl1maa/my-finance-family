@@ -19,7 +19,11 @@ import {
   View,
 } from "react-native";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
-import type { Transaction } from "@/src/features/transactions/model/transaction";
+import {
+  getPaymentMethodLabel,
+  type Transaction,
+} from "@/src/features/transactions/model/transaction";
+import { getExpenseCategoryIcon } from "@/src/features/transactions/model/transaction-icon";
 import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -138,6 +142,9 @@ export function TransactionsView() {
                   <Text style={styles.name}>{transaction.title}</Text>
                   <Text style={styles.meta}>
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
+                    {transaction.amountCents < 0 && getPaymentMethodLabel(transaction.paymentMethod)
+                      ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
+                      : ""}
                   </Text>
                 </View>
                 <AnimatedCurrency
@@ -185,16 +192,13 @@ export function TransactionsView() {
 }
 
 function TransactionIcon({ category }: { category: string }) {
-  const Icon =
-    category === "Moradia"
-      ? House
-      : category === "Alimentação"
-        ? Utensils
-        : category === "Saúde"
-          ? Stethoscope
-          : category === "Lazer"
-            ? Gamepad2
-            : ShoppingCart;
+  const Icon = {
+    house: House,
+    utensils: Utensils,
+    stethoscope: Stethoscope,
+    "gamepad-2": Gamepad2,
+    "shopping-cart": ShoppingCart,
+  }[getExpenseCategoryIcon(category)];
   return <Icon color={colors.muted} size={20} />;
 }
 

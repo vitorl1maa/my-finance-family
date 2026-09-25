@@ -11,6 +11,7 @@ export const transactionSchema = z.object({
   occurredAt: z.string(),
   registeredAt: z.string().optional(),
   recurrenceRule: z.string().optional(),
+  paymentMethod: z.enum(["credit_card", "debit_card", "pix", "cash"]).optional(),
   creatorId: z.string().optional(),
   creatorName: z.string().optional(),
   creatorAvatarUrl: z.string().optional(),
@@ -19,3 +20,18 @@ export const transactionSchema = z.object({
 });
 
 export type Transaction = z.infer<typeof transactionSchema>;
+
+export function getPaymentMethodLabel(paymentMethod: Transaction["paymentMethod"]) {
+  switch (paymentMethod) {
+    case "credit_card":
+      return "Cartão de crédito";
+    case "debit_card":
+      return "Cartão de débito";
+    case "pix":
+      return "PIX";
+    case "cash":
+      return "Dinheiro";
+    default:
+      return null;
+  }
+}

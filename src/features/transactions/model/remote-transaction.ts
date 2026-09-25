@@ -11,6 +11,7 @@ export type RemoteTransactionRow = {
   occurred_at: string;
   created_at?: string;
   recurrence_rule: string | null;
+  payment_method: Transaction["paymentMethod"] | null;
   created_by?: string | null;
   creator_name?: string | null;
   creator_avatar_url?: string | null;
@@ -32,6 +33,7 @@ export function mapRemoteTransaction(row: RemoteTransactionRow): Transaction {
     syncStatus: "synced",
   };
 
+  if (row.payment_method) transaction.paymentMethod = row.payment_method;
   if (row.created_by) transaction.creatorId = row.created_by;
   if (row.creator_name) transaction.creatorName = row.creator_name;
   if (row.creator_avatar_url) transaction.creatorAvatarUrl = row.creator_avatar_url;

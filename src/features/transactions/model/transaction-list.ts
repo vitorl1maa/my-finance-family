@@ -2,6 +2,7 @@ import { format, isSameDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
+import { incomeSourceKindLabel } from "@/src/features/income-sources/model/income-source";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 
 export type TransactionDayGroup = {
@@ -21,7 +22,7 @@ export function mergeIncomeSourcesIntoTransactions(
         id: `income-source:${source.id}`,
         accountId: "",
         title: source.name,
-        category: "Cofrinho",
+        category: incomeSourceKindLabel(source.kind),
         amountCents: source.amountCents,
         occurredAt: source.updatedAt,
         registeredAt: source.updatedAt,

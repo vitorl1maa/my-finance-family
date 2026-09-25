@@ -1,9 +1,24 @@
-import { Search, ShoppingCart, TrendingUp, WalletCards } from "lucide-react-native";
+import {
+  Gamepad2,
+  House,
+  Search,
+  ShoppingCart,
+  Stethoscope,
+  TrendingUp,
+  Utensils,
+  WalletCards,
+} from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
+import { TransactionDetailModal } from "@/src/features/transactions/components/transaction-detail-modal";
+import {
+  getPaymentMethodLabel,
+  type Transaction,
+} from "@/src/features/transactions/model/transaction";
+import { getExpenseCategoryIcon } from "@/src/features/transactions/model/transaction-icon";
 import {
   filterTransactions,
   groupTransactionsByDay,
@@ -18,6 +33,7 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export function AllTransactionsView() {
   const [query, setQuery] = useState("");
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
   const viewModel = useTransactionsViewModel();
   const incomeSources = useIncomeSourcesViewModel();
   const transactions = useMemo(
@@ -83,10 +99,14 @@ export function AllTransactionsView() {
           <View key={group.id} style={styles.group}>
             <Text style={styles.day}>{group.label}</Text>
             {group.transactions.map((transaction) => (
-              <View key={transaction.id} style={styles.transaction}>
+              <Pressable
+                key={transaction.id}
+                onPress={() => setSelectedTransaction(transaction)}
+                style={styles.transaction}
+              >
                 <View style={styles.icon}>
                   {transaction.amountCents < 0 ? (
-                    <ShoppingCart color={colors.muted} size={20} />
+                    <ExpenseTransactionIcon category={transaction.category} />
                   ) : (
                     <WalletCards color={colors.muted} size={20} />
                   )}
@@ -95,6 +115,9 @@ export function AllTransactionsView() {
                   <Text style={styles.name}>{transaction.title}</Text>
                   <Text style={styles.meta}>
                     {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
+                    {transaction.amountCents < 0 && getPaymentMethodLabel(transaction.paymentMethod)
+                      ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
+                      : ""}
                   </Text>
                 </View>
                 <AnimatedCurrency
@@ -105,13 +128,28 @@ export function AllTransactionsView() {
                   valueInCents={transaction.amountCents}
                 />
                 <TransactionCreatorAvatar transaction={transaction} />
-              </View>
+              </Pressable>
             ))}
           </View>
         ))
       )}
+      <TransactionDetailModal
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(undefined)}
+      />
     </ScrollView>
   );
+}
+
+function ExpenseTransactionIcon({ category }: { category: string }) {
+  const Icon = {
+    house: House,
+    utensils: Utensils,
+    stethoscope: Stethoscope,
+    "gamepad-2": Gamepad2,
+    "shopping-cart": ShoppingCart,
+  }[getExpenseCategoryIcon(category)];
+  return <Icon color={colors.muted} size={20} />;
 }
 
 const styles = StyleSheet.create({

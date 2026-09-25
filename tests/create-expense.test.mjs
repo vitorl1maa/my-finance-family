@@ -10,6 +10,7 @@ test("builds an expense payload in cents without account or family input", () =>
     amount: "R$ 40,00",
     occurredAt: "2026-09-18T12:00:00.000Z",
     recurrenceRule: "monthly",
+    paymentMethod: "credit_card",
   });
 
   assert.deepEqual(payload, {
@@ -18,6 +19,7 @@ test("builds an expense payload in cents without account or family input", () =>
     amountCents: 4000,
     occurredAt: "2026-09-18T12:00:00.000Z",
     recurrenceRule: "monthly",
+    paymentMethod: "credit_card",
   });
   assert.equal("accountId" in payload, false);
   assert.equal("familyId" in payload, false);

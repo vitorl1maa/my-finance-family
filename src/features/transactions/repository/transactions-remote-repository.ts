@@ -18,6 +18,7 @@ export async function createRemoteExpense(payload: CreateExpensePayload): Promis
     expense_amount_cents: payload.amountCents,
     expense_occurred_at: payload.occurredAt,
     expense_recurrence_rule: payload.recurrenceRule,
+    expense_payment_method: payload.paymentMethod,
   });
 
   if (error) throw error;
@@ -43,6 +44,7 @@ export async function syncRemoteExpense(transaction: Transaction): Promise<Trans
     amountCents: Math.abs(transaction.amountCents),
     occurredAt: transaction.occurredAt,
     recurrenceRule: transaction.recurrenceRule ?? "none",
+    paymentMethod: transaction.paymentMethod ?? "pix",
   });
 }
 
@@ -54,6 +56,7 @@ export async function updateRemoteExpense(transaction: Transaction): Promise<Tra
     expense_amount_cents: Math.abs(transaction.amountCents),
     expense_occurred_at: transaction.occurredAt,
     expense_recurrence_rule: transaction.recurrenceRule ?? "none",
+    expense_payment_method: transaction.paymentMethod,
   });
   if (error) throw error;
   const result = Array.isArray(data) ? data[0] : data;

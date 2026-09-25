@@ -11,6 +11,8 @@ import {
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
   type FamilyInvitation,
+  type FamilyInvitationConfirmation,
+  getFamilyInvitationConfirmation,
   getInvitationProgress,
   getRemainingInvitationSeconds,
   parseFamilyInvitationToken,
@@ -31,6 +33,7 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
   const [manualToken, setManualToken] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [confirmation, setConfirmation] = useState<FamilyInvitationConfirmation | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const isOwner = vm.membership?.role === "owner";
   const canJoin = vm.membership?.isBootstrap === true;
@@ -71,6 +74,7 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
     setJoinVisible(false);
     setScanning(false);
     setManualToken("");
+    setConfirmation(null);
     vm.clearFeedback();
   }, [vm]);
   const openInvite = () => {
@@ -81,17 +85,31 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
     setInvitationVisible(true);
     void generate();
   };
-  const accept = useCallback(
+  const openConfirmation = useCallback(
     async (value: string) => {
       const token = parseFamilyInvitationToken(value);
-      if (!token || vm.accepting) return;
-      const joined = await vm.acceptInvitation(token);
-      if (!mounted.current || !joined) return;
-      closeJoin();
-      setNotice("Você entrou na família com sucesso.");
+      if (!token || vm.previewing) return;
+      setScanning(false);
+      const preview = await vm.previewInvitation(token);
+      const nextConfirmation = preview
+        ? getFamilyInvitationConfirmation(token, preview.administratorName)
+        : null;
+      if (mounted.current) setConfirmation(nextConfirmation);
     },
-    [closeJoin, vm],
+    [vm],
   );
+  const accept = useCallback(async () => {
+    if (!confirmation || vm.accepting) return;
+    const joined = await vm.acceptInvitation(confirmation.token);
+    if (!mounted.current || !joined) return;
+    closeJoin();
+    setNotice("Você entrou na família com sucesso.");
+  }, [closeJoin, confirmation, vm]);
+  const cancelConfirmation = useCallback(() => {
+    setConfirmation(null);
+    setScanning(true);
+    vm.clearFeedback();
+  }, [vm]);
   const openCamera = useCallback(async () => {
     const result = permission?.granted ? permission : await requestPermission();
     if (mounted.current) setScanning(result.granted);
@@ -219,7 +237,7 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
                   barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
                   onBarcodeScanned={({ data }) => {
                     setScanning(false);
-                    void accept(data);
+                    void openConfirmation(data);
                   }}
                   style={styles.camera}
                 />
@@ -247,18 +265,56 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
             />
             {vm.error ? <Text style={styles.error}>{vm.error}</Text> : null}
             <Pressable
-              disabled={vm.accepting || !parseFamilyInvitationToken(manualToken)}
-              onPress={() => void accept(manualToken)}
+              disabled={vm.previewing || !parseFamilyInvitationToken(manualToken)}
+              onPress={() => void openConfirmation(manualToken)}
               style={[
                 styles.primary,
-                (vm.accepting || !parseFamilyInvitationToken(manualToken)) && styles.disabled,
+                (vm.previewing || !parseFamilyInvitationToken(manualToken)) && styles.disabled,
               ]}
+            >
+              <Text style={styles.primaryText}>
+                {vm.previewing ? "Verificando..." : "Continuar"}
+              </Text>
+            </Pressable>
+          </ScrollView>
+        </View>
+      </Modal>
+      <Modal
+        animationType="fade"
+        onRequestClose={cancelConfirmation}
+        transparent
+        visible={confirmation !== null}
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.confirmationCard}>
+            <View style={styles.confirmationIcon}>
+              <QrCode color={colors.text} size={24} />
+            </View>
+            <Text style={styles.confirmationTitle}>Fazer parte desta família?</Text>
+            <Text style={styles.confirmationText}>
+              Você deseja entrar na família de{" "}
+              <Text style={styles.confirmationName}>{confirmation?.administratorName}</Text>?
+              {"\n\n"}
+              Ao confirmar, você poderá visualizar e registrar as finanças compartilhadas.
+            </Text>
+            {vm.error ? <Text style={styles.error}>{vm.error}</Text> : null}
+            <Pressable
+              disabled={vm.accepting}
+              onPress={() => void accept()}
+              style={[styles.primary, vm.accepting && styles.disabled]}
             >
               <Text style={styles.primaryText}>
                 {vm.accepting ? "Entrando..." : "Entrar na família"}
               </Text>
             </Pressable>
-          </ScrollView>
+            <Pressable
+              disabled={vm.accepting}
+              onPress={cancelConfirmation}
+              style={styles.cancelButton}
+            >
+              <Text style={styles.cancelText}>Cancelar</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
     </ScrollView>
@@ -424,6 +480,33 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
+  confirmationCard: {
+    alignItems: "center",
+    backgroundColor: colors.background,
+    borderRadius: 28,
+    gap: 16,
+    maxWidth: 390,
+    padding: 24,
+    width: "100%",
+  },
+  confirmationIcon: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 28,
+    height: 56,
+    justifyContent: "center",
+    width: 56,
+  },
+  confirmationTitle: {
+    color: colors.text,
+    fontFamily: fonts.extraBold,
+    fontSize: 22,
+    textAlign: "center",
+  },
+  confirmationText: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: "center" },
+  confirmationName: { color: colors.text, fontFamily: fonts.bold },
+  cancelButton: { minHeight: 34, paddingHorizontal: 16, justifyContent: "center" },
+  cancelText: { color: colors.muted, fontFamily: fonts.bold, fontSize: 14 },
   drawer: { gap: 18, padding: 20, paddingBottom: 28 },
   drawerHeader: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   drawerTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 23 },

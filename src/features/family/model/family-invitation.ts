@@ -17,6 +17,14 @@ export type FamilyInvitation = {
   expiresAt: string;
 };
 
+export type FamilyInvitationPreview = {
+  administratorName: string;
+};
+
+export type FamilyInvitationConfirmation = FamilyInvitationPreview & {
+  token: string;
+};
+
 export type FamilyMembership = {
   role: "owner" | "member";
   isBootstrap: boolean;
@@ -31,7 +39,8 @@ export function normalizeInvitationTimestamp(value: string) {
 }
 
 export function getRemainingInvitationSeconds(expiresAt: string, now: Date = new Date()) {
-  const remainingMilliseconds = new Date(normalizeInvitationTimestamp(expiresAt)).getTime() - now.getTime();
+  const remainingMilliseconds =
+    new Date(normalizeInvitationTimestamp(expiresAt)).getTime() - now.getTime();
 
   if (!Number.isFinite(remainingMilliseconds)) return 0;
 
@@ -45,6 +54,19 @@ export function getInvitationProgress(remainingSeconds: number) {
 export function parseFamilyInvitationToken(value: string) {
   const normalized = value.trim().toLowerCase();
   return /^[a-f0-9]{64}$/.test(normalized) ? normalized : null;
+}
+
+export function getFamilyInvitationConfirmation(
+  value: string,
+  administratorName: string,
+): FamilyInvitationConfirmation | null {
+  const token = parseFamilyInvitationToken(value);
+  if (!token) return null;
+
+  return {
+    token,
+    administratorName: administratorName.trim() || "administrador",
+  };
 }
 
 export function getFamilyInvitationErrorMessage(error: unknown) {

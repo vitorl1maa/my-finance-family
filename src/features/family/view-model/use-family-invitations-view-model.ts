@@ -9,6 +9,7 @@ import {
   acceptFamilyQrInvitation,
   createFamilyQrInvitation,
   getCurrentFamilyMembership,
+  previewFamilyQrInvitation,
 } from "@/src/features/family/repository/family-invitations-remote-repository";
 
 export function useFamilyInvitationsViewModel() {
@@ -17,6 +18,7 @@ export function useFamilyInvitationsViewModel() {
   const createRequest = useRef<Promise<FamilyInvitation | null> | null>(null);
   const acceptRequest = useRef<Promise<boolean> | null>(null);
   const [creating, setCreating] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -111,6 +113,22 @@ export function useFamilyInvitationsViewModel() {
     [reloadMembership],
   );
 
+  const previewInvitation = useCallback(async (token: string) => {
+    if (isMounted.current) {
+      setPreviewing(true);
+      setError(null);
+    }
+
+    try {
+      return await previewFamilyQrInvitation(token);
+    } catch (nextError) {
+      if (isMounted.current) setError(getFamilyInvitationErrorMessage(nextError));
+      return null;
+    } finally {
+      if (isMounted.current) setPreviewing(false);
+    }
+  }, []);
+
   const clearFeedback = useCallback(() => {
     if (!isMounted.current) return;
     setError(null);
@@ -127,6 +145,8 @@ export function useFamilyInvitationsViewModel() {
       error,
       membership,
       membershipLoading,
+      previewInvitation,
+      previewing,
       acceptInvitation,
       reloadMembership,
     }),
@@ -140,6 +160,8 @@ export function useFamilyInvitationsViewModel() {
       error,
       membership,
       membershipLoading,
+      previewInvitation,
+      previewing,
       reloadMembership,
     ],
   );

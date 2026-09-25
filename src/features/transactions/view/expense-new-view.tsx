@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, Repeat2, Tags, X } from "lucide-react-native";
+import { ArrowRight, CreditCard, FileText, Repeat2, Tags, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -25,6 +25,7 @@ type ExpenseForm = {
   amount: string;
   categoryId: string;
   recurrence: string;
+  paymentMethod: "credit_card" | "debit_card" | "pix" | "cash";
 };
 type FieldProps = {
   label: string;
@@ -80,6 +81,7 @@ export function ExpenseNewView({
         : "",
       categoryId: initialTransaction?.categoryId ?? "",
       recurrence: recurrenceLabel((initialTransaction?.recurrenceRule as RecurrenceRule) ?? "none"),
+      paymentMethod: initialTransaction?.paymentMethod ?? "pix",
     },
   });
   useEffect(() => {
@@ -91,7 +93,7 @@ export function ExpenseNewView({
       setValue("categoryId", categories[0].id);
     }
   }, [categories, selectedCategoryId, setValue]);
-  const onSubmit = async ({ title, categoryId, amount }: ExpenseForm) => {
+  const onSubmit = async ({ title, categoryId, amount, paymentMethod }: ExpenseForm) => {
     const category = categories.find((item) => item.id === categoryId);
 
     if (!category) return;
@@ -106,6 +108,7 @@ export function ExpenseNewView({
           amountCents: -Math.abs(parseBrlInputToCents(amount)),
           occurredAt: toExpenseIso(selectedDate),
           recurrenceRule: selectedRecurrence,
+          paymentMethod,
         });
       } else
         await createExpense({
@@ -115,6 +118,7 @@ export function ExpenseNewView({
           amount,
           occurredAt: toExpenseIso(selectedDate),
           recurrenceRule: selectedRecurrence,
+          paymentMethod,
         });
       onBack();
     } catch {
@@ -194,6 +198,44 @@ export function ExpenseNewView({
           )}
         />
       </View>
+      <Controller
+        control={control}
+        name="paymentMethod"
+        rules={{ required: "Informe a origem do pagamento." }}
+        render={({ field: { onChange, value } }) => (
+          <View style={styles.fieldGroup}>
+            <Text style={styles.detailsLabel}>Origem do pagamento</Text>
+            <View style={styles.paymentMethods}>
+              {PAYMENT_METHODS.map((method) => (
+                <Pressable
+                  key={method.value}
+                  onPress={() => onChange(method.value)}
+                  style={[
+                    styles.paymentMethod,
+                    value === method.value && styles.paymentMethodSelected,
+                  ]}
+                >
+                  <CreditCard
+                    color={value === method.value ? colors.text : colors.muted}
+                    size={16}
+                  />
+                  <Text
+                    style={[
+                      styles.paymentMethodText,
+                      value === method.value && styles.paymentMethodTextSelected,
+                    ]}
+                  >
+                    {method.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {errors.paymentMethod ? (
+              <Text style={styles.error}>{errors.paymentMethod.message}</Text>
+            ) : null}
+          </View>
+        )}
+      />
       <View style={styles.row}>
         <Controller
           control={control}
@@ -272,6 +314,13 @@ export function ExpenseNewView({
   );
 }
 
+const PAYMENT_METHODS = [
+  { label: "Cartão de crédito", value: "credit_card" },
+  { label: "Cartão de débito", value: "debit_card" },
+  { label: "PIX", value: "pix" },
+  { label: "Dinheiro", value: "cash" },
+] as const;
+
 function Field({
   compact,
   error,
@@ -341,6 +390,20 @@ const styles = StyleSheet.create({
   fieldGroup: {},
   compactField: { flex: 1 },
   row: { flexDirection: "row", gap: 10 },
+  paymentMethods: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
+  paymentMethod: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 7,
+    minHeight: 42,
+    paddingHorizontal: 12,
+  },
+  paymentMethodSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
+  paymentMethodText: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
+  paymentMethodTextSelected: { color: colors.text },
   field: {
     alignItems: "center",
     borderColor: colors.border,

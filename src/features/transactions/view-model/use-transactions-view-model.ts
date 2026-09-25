@@ -100,6 +100,7 @@ export function useTransactionsViewModel() {
       amount: string;
       occurredAt: string;
       recurrenceRule: string;
+      paymentMethod: "credit_card" | "debit_card" | "pix" | "cash";
     }) => {
       setIsSaving(true);
       setSaveError(null);
@@ -116,6 +117,7 @@ export function useTransactionsViewModel() {
           occurredAt: payload.occurredAt,
           registeredAt: new Date().toISOString(),
           recurrenceRule: payload.recurrenceRule,
+          paymentMethod: payload.paymentMethod,
           creatorId: session?.user.id,
           creatorName: getCreatorName(session?.user.user_metadata, session?.user.email),
           creatorAvatarUrl: (session?.user.user_metadata as ProfileAvatarMetadata | undefined)

@@ -1,4 +1,4 @@
-import { ArrowDownToLine, ArrowUpFromLine, WalletCards } from "lucide-react-native";
+import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react-native";
 import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -24,7 +24,6 @@ export function WalletBanner({
       <View style={styles.overlay} />
       <View style={styles.content}>
         <View style={styles.heading}>
-          <WalletCards color={colors.walletDark} size={19} />
           <Text style={styles.eyebrow}>SALDO DA CARTEIRA</Text>
         </View>
         <AnimatedCurrency style={styles.balance} valueInCents={balanceCents} />
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
   },
   content: { alignItems: "center", flex: 1, justifyContent: "center", padding: 18 },
   heading: { alignItems: "center", flexDirection: "row", gap: 7 },
-  eyebrow: { color: colors.walletDark, fontFamily: fonts.bold, fontSize: 13, letterSpacing: 0.35 },
+  eyebrow: { color: colors.walletDark, fontFamily: fonts.bold, fontSize: 14, letterSpacing: 0.35 },
   balance: { color: colors.walletDark, fontFamily: fonts.extraBold, fontSize: 38, marginTop: 3 },
   description: { color: colors.walletDark, fontSize: 12, opacity: 0.85 },
   actions: { flexDirection: "row", gap: 10, marginTop: 13 },
