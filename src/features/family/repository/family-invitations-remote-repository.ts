@@ -2,17 +2,14 @@ import type {
   FamilyInvitation,
   FamilyInvitationPreview,
   FamilyMembership,
+  FamilyMembershipRow,
 } from "@/src/features/family/model/family-invitation";
+import { mapFamilyMembership } from "@/src/features/family/model/family-invitation";
 import { supabase } from "@/src/shared/supabase/supabase-client";
 
 type InvitationRpcRow = {
   expires_at: string;
   token: string;
-};
-
-type MembershipRow = {
-  family: Array<{ created_by: string; is_bootstrap: boolean }> | null;
-  role: "owner" | "member";
 };
 
 type InvitationPreviewRow = {
@@ -61,11 +58,5 @@ export async function getCurrentFamilyMembership(userId: string): Promise<Family
   if (error) throw error;
   if (!data) return null;
 
-  const membership = data as MembershipRow;
-  const family = membership.family?.[0];
-  return {
-    role: membership.role,
-    isBootstrap: family?.is_bootstrap === true,
-    createdByCurrentUser: family?.created_by === userId,
-  };
+  return mapFamilyMembership(data as FamilyMembershipRow, userId);
 }

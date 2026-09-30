@@ -31,6 +31,29 @@ export type FamilyMembership = {
   createdByCurrentUser: boolean;
 };
 
+type FamilyRelationship = {
+  created_by: string;
+  is_bootstrap: boolean;
+};
+
+export type FamilyMembershipRow = {
+  family: FamilyRelationship | FamilyRelationship[] | null;
+  role: FamilyMembership["role"];
+};
+
+export function mapFamilyMembership(
+  membership: FamilyMembershipRow,
+  userId: string,
+): FamilyMembership {
+  const family = Array.isArray(membership.family) ? membership.family[0] : membership.family;
+
+  return {
+    role: membership.role,
+    isBootstrap: family?.is_bootstrap === true,
+    createdByCurrentUser: family?.created_by === userId,
+  };
+}
+
 export function normalizeInvitationTimestamp(value: string) {
   return value
     .trim()

@@ -6,6 +6,26 @@ import * as familyInvitation from "../src/features/family/model/family-invitatio
 
 const { isInvitationAcceptable } = familyInvitation;
 
+test("maps a single Supabase family relationship as an eligible bootstrap membership", () => {
+  assert.deepEqual(
+    familyInvitation.mapFamilyMembership(
+      {
+        role: "owner",
+        family: {
+          created_by: "maria-user-id",
+          is_bootstrap: true,
+        },
+      },
+      "maria-user-id",
+    ),
+    {
+      role: "owner",
+      isBootstrap: true,
+      createdByCurrentUser: true,
+    },
+  );
+});
+
 test("acceptance rejects expired, consumed, and already-associated users", () => {
   const past = new Date("1970-01-01T00:00:00.000Z");
   const now = new Date("2026-09-22T12:00:00.000Z");
