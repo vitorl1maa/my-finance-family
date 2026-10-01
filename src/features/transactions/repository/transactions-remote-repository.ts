@@ -68,6 +68,20 @@ export async function updateRemoteExpense(transaction: Transaction): Promise<Tra
   return updated;
 }
 
+export async function markRemoteExpensePaid(id: string): Promise<Transaction> {
+  const { data, error } = await supabase.rpc("mark_family_expense_paid", { expense_id: id });
+  if (error) throw error;
+
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result?.transaction_id) throw new Error("Não foi possível confirmar o pagamento.");
+
+  const transaction = (await listRemoteTransactions()).find(
+    (item) => item.id === result.transaction_id,
+  );
+  if (!transaction) throw new Error("Não foi possível carregar a despesa paga.");
+  return transaction;
+}
+
 export async function deleteRemoteExpense(id: string): Promise<void> {
   const { error } = await supabase.rpc("delete_family_expense", { expense_id: id });
   if (error) throw error;

@@ -133,10 +133,20 @@ export function ExpenseNewView({
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Nova despesa</Text>
-          <Text style={styles.headerSubtitle}>Registre uma nova despesa</Text>
+          <Text style={styles.headerTitle}>
+            {initialTransaction ? "Editar despesa" : "Nova despesa"}
+          </Text>
+          <Text style={styles.headerSubtitle}>
+            {initialTransaction ? "Atualize os dados da despesa" : "Registre uma nova despesa"}
+          </Text>
         </View>
-        <Pressable accessibilityLabel="Fechar nova despesa" onPress={onBack} style={styles.close}>
+        <Pressable
+          accessibilityLabel={
+            initialTransaction ? "Fechar edição da despesa" : "Fechar nova despesa"
+          }
+          onPress={onBack}
+          style={styles.close}
+        >
           <X color={colors.text} size={20} />
         </Pressable>
       </View>

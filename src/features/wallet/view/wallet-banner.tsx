@@ -1,6 +1,6 @@
 import { ArrowDownToLine, ArrowUpFromLine, Trash2 } from "lucide-react-native";
 import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
-
+import { getBalanceMonthLabel } from "@/src/features/wallet/model/balance-label";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
@@ -16,6 +16,8 @@ export function WalletBanner({
   onSave: () => void;
   onWithdraw: () => void;
 }) {
+  const label = getBalanceMonthLabel("wallet");
+
   return (
     <ImageBackground
       accessibilityLabel="Saldo da carteira"
@@ -26,7 +28,7 @@ export function WalletBanner({
       <View style={styles.overlay} />
       <View style={styles.content}>
         <View style={styles.heading}>
-          <Text style={styles.eyebrow}>SALDO DA CARTEIRA</Text>
+          <Text style={styles.eyebrow}>{label}</Text>
         </View>
         <View style={styles.balanceRow}>
           <AnimatedCurrency style={styles.balance} valueInCents={balanceCents} />

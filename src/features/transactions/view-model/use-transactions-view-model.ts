@@ -13,6 +13,7 @@ import {
   createRemoteExpense,
   deleteRemoteExpense,
   listRemoteTransactions,
+  markRemoteExpensePaid,
   syncRemoteExpense,
   updateRemoteExpense,
 } from "@/src/features/transactions/repository/transactions-remote-repository";
@@ -65,7 +66,13 @@ export function useTransactionsViewModel() {
         (item) => item.syncStatus !== "synced" && item.amountCents < 0 && item.categoryId,
       )) {
         try {
-          await replaceTransaction(db, transaction.id, await syncRemoteExpense(transaction));
+          if (transaction.syncOperation === "mark_paid") {
+            await upsertTransactions(db, [await markRemoteExpensePaid(transaction.id)]);
+          } else if (transaction.syncOperation === "update") {
+            await upsertTransactions(db, [await updateRemoteExpense(transaction)]);
+          } else {
+            await replaceTransaction(db, transaction.id, await syncRemoteExpense(transaction));
+          }
         } catch {
           // Keep the local expense pending so a later refresh can retry it.
         }
@@ -144,6 +151,8 @@ export function useTransactionsViewModel() {
           registeredAt: new Date().toISOString(),
           recurrenceRule: payload.recurrenceRule,
           paymentMethod: payload.paymentMethod,
+          paymentStatus: "pending" as const,
+          syncOperation: "create" as const,
           creatorId: session?.user.id,
           creatorName: getCreatorName(session?.user.user_metadata, session?.user.email),
           creatorAvatarUrl: (session?.user.user_metadata as ProfileAvatarMetadata | undefined)
@@ -192,7 +201,11 @@ export function useTransactionsViewModel() {
   const updateExpense = useCallback(
     async (transaction: Transaction) => {
       const previousTransaction = transactions.find((item) => item.id === transaction.id);
-      const pending = { ...transaction, syncStatus: "pending" as const };
+      const pending = {
+        ...transaction,
+        syncOperation: "update" as const,
+        syncStatus: "pending" as const,
+      };
       const nextWalletBalance = applyWalletDelta(
         walletBalanceCents,
         getExpenseWalletDelta(previousTransaction, transaction),
@@ -243,6 +256,43 @@ export function useTransactionsViewModel() {
     [db, session, setTransactions, setWalletBalance, transactions, walletBalanceCents],
   );
 
+  const markExpenseAsPaid = useCallback(
+    async (transaction: Transaction) => {
+      if (transaction.paymentStatus === "paid") return true;
+      const pending = {
+        ...transaction,
+        paidAt: new Date().toISOString(),
+        paymentStatus: "paid" as const,
+        syncOperation: "mark_paid" as const,
+        syncStatus: "pending" as const,
+      };
+      try {
+        const nextWalletBalance = applyWalletDelta(
+          walletBalanceCents,
+          getExpenseWalletDelta(transaction, pending),
+        );
+        await upsertTransactions(db, [pending]);
+        await saveWalletSettings(db, {
+          balanceCents: nextWalletBalance,
+          updatedAt: new Date().toISOString(),
+          syncStatus: "pending",
+        });
+        setWalletBalance(nextWalletBalance);
+        setTransactions(await listTransactions(db));
+        if (!session) return true;
+        await upsertTransactions(db, [await markRemoteExpensePaid(transaction.id)]);
+        setTransactions(await listTransactions(db));
+        return true;
+      } catch (error) {
+        setSaveError(
+          error instanceof Error ? error.message : "Não foi possível marcar a despesa como paga.",
+        );
+        return false;
+      }
+    },
+    [db, session, setTransactions, setWalletBalance, walletBalanceCents],
+  );
+
   return useMemo(
     () => ({
       transactions: transactions.map((transaction) => ({
@@ -253,6 +303,7 @@ export function useTransactionsViewModel() {
       createExpense,
       updateExpense,
       removeExpense,
+      markExpenseAsPaid,
       transactionsLoading,
       transactionsError,
       reloadTransactions: loadTransactions,
@@ -267,6 +318,7 @@ export function useTransactionsViewModel() {
       createExpense,
       updateExpense,
       removeExpense,
+      markExpenseAsPaid,
       categories,
       categoriesError,
       categoriesLoading,

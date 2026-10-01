@@ -1,8 +1,8 @@
 import { CalendarDays, Repeat2, Tags, WalletCards, X } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { getTransactionDetail } from "@/src/features/transactions/model/transaction-detail";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
+import { getTransactionDetail } from "@/src/features/transactions/model/transaction-detail";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 import { formatCurrencyFromCents } from "@/src/shared/utils/money";
@@ -10,9 +10,11 @@ import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 export function TransactionDetailModal({
   transaction,
   onClose,
+  onMarkPaid,
 }: {
   transaction?: Transaction;
   onClose: () => void;
+  onMarkPaid?: (transaction: Transaction) => Promise<boolean>;
 }) {
   const detail = transaction ? getTransactionDetail(transaction) : null;
   const expense = detail?.kind === "expense";
@@ -56,6 +58,11 @@ export function TransactionDetailModal({
             {expense ? "− " : ""}
             {transaction ? formatCurrencyFromCents(Math.abs(transaction.amountCents)) : ""}
           </Text>
+          {expense ? (
+            <Text style={styles.status}>
+              {transaction?.paymentStatus === "paid" ? "Pago" : "Pendete"}
+            </Text>
+          ) : null}
           <View style={styles.fields}>
             {fields.map(([label, value, Icon]) => (
               <View key={String(label)} style={styles.row}>
@@ -67,6 +74,18 @@ export function TransactionDetailModal({
               </View>
             ))}
           </View>
+          {expense && transaction?.paymentStatus !== "paid" && onMarkPaid ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={async () => {
+                const selectedTransaction = transaction;
+                if (selectedTransaction && (await onMarkPaid(selectedTransaction))) onClose();
+              }}
+              style={styles.payButton}
+            >
+              <Text style={styles.payButtonText}>Marcar como paga</Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
     </Modal>
@@ -103,6 +122,15 @@ const styles = StyleSheet.create({
   icon: { alignItems: "center", borderRadius: 30, height: 60, justifyContent: "center", width: 60 },
   title: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 23 },
   amount: { fontFamily: fonts.extraBold, fontSize: 30 },
+  status: {
+    backgroundColor: "#FFF0B8",
+    borderRadius: 10,
+    color: "#8A5A00",
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   fields: {
     backgroundColor: colors.surfaceMuted,
     borderRadius: 18,
@@ -119,4 +147,12 @@ const styles = StyleSheet.create({
   label: { alignItems: "center", flexDirection: "row", gap: 8 },
   labelText: { color: colors.muted, fontSize: 12 },
   value: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
+  payButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: "100%",
+  },
+  payButtonText: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
 });

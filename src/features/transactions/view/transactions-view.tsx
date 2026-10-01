@@ -2,6 +2,7 @@ import {
   BanknoteArrowDown,
   Gamepad2,
   House,
+  Pencil,
   Plus,
   ShoppingCart,
   Stethoscope,
@@ -19,6 +20,11 @@ import {
   View,
 } from "react-native";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
+import { TransactionDetailModal } from "@/src/features/transactions/components/transaction-detail-modal";
+import {
+  getExpenseMonthLabel,
+  getExpenseTotalForMonth,
+} from "@/src/features/transactions/model/expense-summary";
 import {
   getPaymentMethodLabel,
   type Transaction,
@@ -34,7 +40,11 @@ import { fonts } from "@/src/shared/theme/fonts";
 export function TransactionsView() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Transaction | undefined>();
+  const [detailExpense, setDetailExpense] = useState<Transaction | undefined>();
   const viewModel = useTransactionsViewModel();
+  const referenceDate = new Date();
+  const expenseMonthLabel = getExpenseMonthLabel(referenceDate);
+  const monthlyExpenseCents = getExpenseTotalForMonth(viewModel.transactions, referenceDate);
 
   return (
     <ScrollView
@@ -63,17 +73,8 @@ export function TransactionsView() {
         />
         <View style={styles.summaryOverlay} />
         <View style={styles.summaryContent}>
-          <Text style={styles.summaryLabel}>SALDO DE DESPESAS</Text>
-          <AnimatedCurrency
-            style={styles.summaryValue}
-            valueInCents={
-              -viewModel.transactions.reduce(
-                (total, transaction) =>
-                  total + (transaction.amountCents < 0 ? Math.abs(transaction.amountCents) : 0),
-                0,
-              )
-            }
-          />
+          <Text style={styles.summaryLabel}>{expenseMonthLabel}</Text>
+          <AnimatedCurrency style={styles.summaryValue} valueInCents={-monthlyExpenseCents} />
         </View>
       </View>
       {viewModel.transactionsError ? (
@@ -91,7 +92,7 @@ export function TransactionsView() {
           <View style={styles.expenseHeader}>
             <View>
               <Text style={styles.expenseTitle}>Suas despesas</Text>
-              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu</Text>
+              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu esse mês</Text>
             </View>
             <Pressable
               accessibilityLabel="Adicionar nova despesa"
@@ -113,7 +114,7 @@ export function TransactionsView() {
           <View style={styles.expenseHeader}>
             <View>
               <Text style={styles.expenseTitle}>Suas despesas</Text>
-              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu</Text>
+              <Text style={styles.expenseSubtitle}>Acompanhe tudo que saiu esse mês</Text>
             </View>
             <Pressable
               accessibilityLabel="Adicionar nova despesa"
@@ -127,37 +128,48 @@ export function TransactionsView() {
           {viewModel.transactions
             .filter((transaction) => transaction.amountCents < 0)
             .map((transaction) => (
-              <Pressable
-                key={transaction.id}
-                onPress={() => {
-                  setSelectedExpense(transaction);
-                  setDrawerVisible(true);
-                }}
-                style={styles.transaction}
-              >
-                <View style={styles.icon}>
-                  <TransactionIcon category={transaction.category} />
-                </View>
-                <View style={styles.info}>
-                  <Text style={styles.name}>{transaction.title}</Text>
-                  <Text style={styles.meta}>
-                    {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
-                    {transaction.amountCents < 0 && getPaymentMethodLabel(transaction.paymentMethod)
-                      ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
-                      : ""}
-                  </Text>
-                </View>
-                <AnimatedCurrency
-                  style={[
-                    styles.amount,
-                    transaction.amountCents < 0 ? styles.expense : styles.income,
-                  ]}
-                  valueInCents={transaction.amountCents}
-                />
-                {transaction.amountCents < 0 ? (
-                  <TransactionCreatorAvatar transaction={transaction} />
-                ) : null}
-              </Pressable>
+              <View key={transaction.id} style={styles.transactionRow}>
+                <Pressable onPress={() => setDetailExpense(transaction)} style={styles.transaction}>
+                  <View style={styles.icon}>
+                    <TransactionIcon category={transaction.category} />
+                  </View>
+                  <View style={styles.info}>
+                    <Text numberOfLines={1} style={styles.name}>
+                      {transaction.title}
+                    </Text>
+                    <Text numberOfLines={1} style={styles.meta}>
+                      Despesa · {transaction.category}
+                      {getPaymentMethodLabel(transaction.paymentMethod)
+                        ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
+                        : ""}
+                    </Text>
+                    <Text
+                      style={
+                        transaction.paymentStatus === "paid" ? styles.paidTag : styles.pendingTag
+                      }
+                    >
+                      {transaction.paymentStatus === "paid" ? "Pago" : "Pendete"}
+                    </Text>
+                  </View>
+                  <View style={styles.transactionValue}>
+                    <AnimatedCurrency
+                      style={[styles.amount, styles.expense]}
+                      valueInCents={transaction.amountCents}
+                    />
+                    <TransactionCreatorAvatar transaction={transaction} />
+                  </View>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel={`Editar ${transaction.title}`}
+                  onPress={() => {
+                    setSelectedExpense(transaction);
+                    setDrawerVisible(true);
+                  }}
+                  style={styles.editButton}
+                >
+                  <Pencil color={colors.muted} size={16} />
+                </Pressable>
+              </View>
             ))}
         </View>
       )}
@@ -187,6 +199,11 @@ export function TransactionsView() {
           </View>
         </View>
       </Modal>
+      <TransactionDetailModal
+        transaction={detailExpense}
+        onClose={() => setDetailExpense(undefined)}
+        onMarkPaid={viewModel.markExpenseAsPaid}
+      />
     </ScrollView>
   );
 }
@@ -237,6 +254,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
+  transactionRow: { alignItems: "center", flexDirection: "row", gap: 8 },
+  pendingTag: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FFF0B8",
+    borderRadius: 6,
+    color: "#8A5A00",
+    fontFamily: fonts.bold,
+    fontSize: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  paidTag: {
+    alignSelf: "flex-start",
+    backgroundColor: "#E0F6D5",
+    borderRadius: 6,
+    color: colors.positive,
+    fontFamily: fonts.bold,
+    fontSize: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  editButton: { alignItems: "center", height: 40, justifyContent: "center", width: 40 },
   expenseTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 18 },
   expenseSubtitle: { color: colors.muted, fontSize: 13, marginTop: 4 },
   addExpenseButton: {
@@ -253,14 +292,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     flexDirection: "row",
-    minHeight: 64,
+    flex: 1,
+    minHeight: 84,
     paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  icon: { width: 38 },
-  info: { flex: 1, gap: 2 },
+  icon: { width: 36 },
+  info: { flex: 1, gap: 4, minWidth: 0 },
   name: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
   meta: { color: colors.muted, fontSize: 12 },
-  amount: { fontFamily: fonts.bold, fontSize: 14 },
+  transactionValue: { alignItems: "flex-end", gap: 8, marginLeft: 8, width: 90 },
+  amount: { fontFamily: fonts.bold, fontSize: 13 },
   expense: { color: colors.negative },
   income: { color: colors.positive },
   drawerBackdrop: { backgroundColor: "#00000055", flex: 1, justifyContent: "flex-end" },

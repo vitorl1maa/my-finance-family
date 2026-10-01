@@ -1,7 +1,7 @@
 import { format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
-import { Bell, Send, TrendingUp } from "lucide-react-native";
+import { Bell, TrendingUp } from "lucide-react-native";
 import { useState } from "react";
 import {
   Pressable,
@@ -43,10 +43,10 @@ export function DashboardView(_: DashboardViewProps) {
     incomeSourcesLoading,
     insights,
     loading,
-    monthlyWalletBalanceCents,
     recentTransactions,
     reload,
     piggyBankBalanceCents,
+    totalBalanceCents,
     userName,
   } = useDashboardViewModel(selectedDate);
   const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(
@@ -113,7 +113,7 @@ export function DashboardView(_: DashboardViewProps) {
               incomeCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
               monthlyExpenseCents={insights.monthlyExpenseCents}
               piggyBankBalanceCents={piggyBankBalanceCents}
-              walletBalanceCents={monthlyWalletBalanceCents}
+              walletBalanceCents={totalBalanceCents}
             />
 
             {isPiggyBankEmpty ? (
@@ -136,11 +136,7 @@ export function DashboardView(_: DashboardViewProps) {
                       transaction.isExpense ? styles.expenseIcon : styles.incomeIcon,
                     ]}
                   >
-                    {transaction.isExpense ? (
-                      <Send color={colors.text} size={14} />
-                    ) : (
-                      <TrendingUp color={colors.text} size={14} />
-                    )}
+                    <TrendingUp color={colors.text} size={14} />
                   </View>
                   <View style={styles.transactionInfo}>
                     <Text style={styles.transactionTitle}>{transaction.title}</Text>

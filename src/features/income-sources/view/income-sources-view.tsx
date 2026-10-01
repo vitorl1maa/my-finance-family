@@ -23,6 +23,7 @@ import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-s
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import { BalanceResetConfirmationModal } from "@/src/features/wallet/components/balance-reset-confirmation-modal";
+import { getBalanceMonthLabel } from "@/src/features/wallet/model/balance-label";
 import { WalletBanner } from "@/src/features/wallet/view/wallet-banner";
 import { WalletTransferView } from "@/src/features/wallet/view/wallet-transfer-view";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
@@ -32,6 +33,7 @@ import { fonts } from "@/src/shared/theme/fonts";
 
 export function IncomeSourcesView() {
   const viewModel = useIncomeSourcesViewModel();
+  const piggyBankLabel = getBalanceMonthLabel("piggy_bank");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedSource, setSelectedSource] = useState<IncomeSource | undefined>();
   const [transferDirection, setTransferDirection] = useState<
@@ -81,7 +83,7 @@ export function IncomeSourcesView() {
         <View style={styles.cardOverlay} />
         <View style={styles.balanceContent}>
           <View style={styles.piggyHeading}>
-            <Text style={styles.balanceEyebrow}>SALDO DO COFRINHO</Text>
+            <Text style={styles.balanceEyebrow}>{piggyBankLabel}</Text>
           </View>
           <View style={styles.piggyBalanceRow}>
             <AnimatedCurrency
@@ -103,7 +105,7 @@ export function IncomeSourcesView() {
       <View style={styles.sectionHeader}>
         <View>
           <Text style={styles.sectionTitle}>Fontes de renda</Text>
-          <Text style={styles.sectionSubtitle}>De onde vem o seu dinheiro</Text>
+          <Text style={styles.sectionSubtitle}>De onde veio seu dinheiro esse mês</Text>
         </View>
         <Pressable
           accessibilityLabel="Adicionar fonte de renda"
