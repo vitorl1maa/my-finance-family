@@ -14,6 +14,9 @@ type TransactionRow = {
   registered_at?: string;
   recurrence_rule?: string;
   payment_method?: Transaction["paymentMethod"];
+  payment_status?: Transaction["paymentStatus"];
+  paid_at?: string;
+  sync_operation?: Transaction["syncOperation"];
   creator_id?: string;
   creator_name?: string;
   creator_avatar_url?: string;
@@ -23,7 +26,7 @@ type TransactionRow = {
 
 export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[]> {
   const rows = await db.getAllAsync<TransactionRow>(
-    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, registered_at, recurrence_rule, payment_method, sync_status,
+    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, registered_at, recurrence_rule, payment_method, payment_status, paid_at, sync_operation, sync_status,
        creator_id, creator_name, creator_avatar_url, creator_avatar_seed
      FROM transactions
      ORDER BY registered_at DESC`,
@@ -42,8 +45,11 @@ export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[
       registeredAt: row.registered_at ?? row.occurred_at,
       recurrenceRule: row.recurrence_rule,
       paymentMethod: row.payment_method,
+      paymentStatus: row.payment_status ?? "pending",
+      syncOperation: row.sync_operation,
       syncStatus: row.sync_status,
     };
+    if (row.paid_at) transaction.paidAt = row.paid_at;
     if (row.creator_id) transaction.creatorId = row.creator_id;
     if (row.creator_name) transaction.creatorName = row.creator_name;
     if (row.creator_avatar_url) transaction.creatorAvatarUrl = row.creator_avatar_url;
@@ -60,9 +66,9 @@ export async function upsertTransactions(
     await db.runAsync(
       `INSERT INTO transactions (
         id, account_id, family_id, title, category, category_id, amount_cents, occurred_at,
-        registered_at, recurrence_rule, payment_method, sync_status
+        registered_at, recurrence_rule, payment_method, payment_status, paid_at, sync_operation, sync_status
         , creator_id, creator_name, creator_avatar_url, creator_avatar_seed
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         account_id = excluded.account_id,
         family_id = excluded.family_id,
@@ -74,6 +80,9 @@ export async function upsertTransactions(
         registered_at = excluded.registered_at,
         recurrence_rule = excluded.recurrence_rule,
         payment_method = excluded.payment_method,
+        payment_status = excluded.payment_status,
+        paid_at = excluded.paid_at,
+        sync_operation = excluded.sync_operation,
         creator_id = excluded.creator_id,
         creator_name = excluded.creator_name,
         creator_avatar_url = excluded.creator_avatar_url,
@@ -90,6 +99,9 @@ export async function upsertTransactions(
       transaction.registeredAt ?? transaction.occurredAt,
       transaction.recurrenceRule ?? "none",
       transaction.paymentMethod ?? null,
+      transaction.paymentStatus ?? "pending",
+      transaction.paidAt ?? null,
+      transaction.syncOperation ?? null,
       transaction.syncStatus,
       transaction.creatorId ?? null,
       transaction.creatorName ?? null,

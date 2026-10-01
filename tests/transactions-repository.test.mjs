@@ -25,6 +25,9 @@ function createDatabase() {
           registered_at: "2026-09-17T16:45:00.000Z",
           recurrence_rule: "none",
           payment_method: "pix",
+          payment_status: "pending",
+          paid_at: null,
+          sync_operation: "mark_paid",
           sync_status: "synced",
         },
       ];
@@ -50,6 +53,8 @@ const pendingTransaction = {
   registeredAt: "2026-09-17T16:45:00.000Z",
   recurrenceRule: "none",
   paymentMethod: "pix",
+  paymentStatus: "pending",
+  syncOperation: "mark_paid",
   syncStatus: "pending",
 };
 
@@ -72,6 +77,9 @@ test("persists transactions with bound SQL parameters", async () => {
     "2026-09-17T16:45:00.000Z",
     "none",
     "pix",
+    "pending",
+    null,
+    "mark_paid",
     "pending",
     null,
     null,

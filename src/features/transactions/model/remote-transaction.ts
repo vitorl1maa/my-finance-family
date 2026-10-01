@@ -12,6 +12,8 @@ export type RemoteTransactionRow = {
   created_at?: string;
   recurrence_rule: string | null;
   payment_method: Transaction["paymentMethod"] | null;
+  payment_status: NonNullable<Transaction["paymentStatus"]> | null;
+  paid_at: string | null;
   created_by?: string | null;
   creator_name?: string | null;
   creator_avatar_url?: string | null;
@@ -30,6 +32,8 @@ export function mapRemoteTransaction(row: RemoteTransactionRow): Transaction {
     occurredAt: row.occurred_at,
     registeredAt: row.created_at ?? row.occurred_at,
     recurrenceRule: row.recurrence_rule ?? "none",
+    paymentStatus: row.payment_status ?? "pending",
+    paidAt: row.paid_at ?? undefined,
     syncStatus: "synced",
   };
 
