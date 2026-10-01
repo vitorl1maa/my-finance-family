@@ -31,6 +31,10 @@ export type FamilyMembership = {
   createdByCurrentUser: boolean;
 };
 
+export function canLeaveCurrentFamily(role: FamilyMembership["role"] | undefined) {
+  return role === "member";
+}
+
 type FamilyRelationship = {
   created_by: string;
   is_bootstrap: boolean;
@@ -104,6 +108,12 @@ export function getFamilyInvitationErrorMessage(error: unknown) {
   }
   if (message.includes("user_already_associated")) {
     return "Você já participa de uma família e não pode aceitar outro convite.";
+  }
+  if (message.includes("leave_current_family_first")) {
+    return "Saia da família atual antes de aceitar outro convite.";
+  }
+  if (message.includes("family_owner_cannot_leave")) {
+    return "Administradores não podem sair da família atual.";
   }
   if (message.includes("family_owner_required")) {
     return "Somente administradores podem gerar um QR Code de convite.";

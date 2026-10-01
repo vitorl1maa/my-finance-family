@@ -6,6 +6,11 @@ import * as familyInvitation from "../src/features/family/model/family-invitatio
 
 const { isInvitationAcceptable } = familyInvitation;
 
+test("allows members, but not administrators, to leave their current family", () => {
+  assert.equal(familyInvitation.canLeaveCurrentFamily("member"), true);
+  assert.equal(familyInvitation.canLeaveCurrentFamily("owner"), false);
+});
+
 test("maps a single Supabase family relationship as an eligible bootstrap membership", () => {
   assert.deepEqual(
     familyInvitation.mapFamilyMembership(
@@ -179,7 +184,7 @@ test("maps known invitation RPC failures to actionable Portuguese messages", () 
 test("explains when the family invitation migration has not been applied", () => {
   assert.equal(
     familyInvitation.getFamilyInvitationErrorMessage(
-      new Error('column families.is_bootstrap does not exist'),
+      new Error("column families.is_bootstrap does not exist"),
     ),
     "A atualização de famílias ainda não foi aplicada no servidor. Tente novamente após sincronizar o banco.",
   );

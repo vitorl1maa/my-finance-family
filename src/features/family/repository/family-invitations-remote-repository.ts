@@ -35,6 +35,11 @@ export async function acceptFamilyQrInvitation(token: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function leaveCurrentFamily(): Promise<void> {
+  const { error } = await supabase.rpc("leave_current_family");
+  if (error) throw error;
+}
+
 export async function previewFamilyQrInvitation(token: string): Promise<FamilyInvitationPreview> {
   const { data, error } = await supabase.rpc("preview_family_qr_invitation", { raw_token: token });
 

@@ -1,7 +1,16 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { Camera, QrCode, RefreshCw, ScanLine, X } from "lucide-react-native";
+import { Camera, LogOut, QrCode, RefreshCw, ScanLine, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
 import {
@@ -10,6 +19,7 @@ import {
 } from "@/src/features/auth/model/profile-avatar";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
+  canLeaveCurrentFamily,
   type FamilyInvitation,
   type FamilyInvitationConfirmation,
   getFamilyInvitationConfirmation,
@@ -36,7 +46,7 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
   const [confirmation, setConfirmation] = useState<FamilyInvitationConfirmation | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const isOwner = vm.membership?.role === "owner";
-  const canJoin = vm.membership?.isBootstrap === true;
+  const canLeave = canLeaveCurrentFamily(vm.membership?.role);
   const name = String(session?.user.user_metadata?.first_name ?? "Você");
   const avatar = getProfileAvatarPresentation(
     session?.user.user_metadata as ProfileAvatarMetadata | undefined,
@@ -114,6 +124,16 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
     const result = permission?.granted ? permission : await requestPermission();
     if (mounted.current) setScanning(result.granted);
   }, [permission, requestPermission]);
+  const leaveFamily = () => {
+    Alert.alert(
+      "Sair da família?",
+      "Você deixará de ver as finanças compartilhadas e criará sua própria família.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Sair", style: "destructive", onPress: () => void vm.leaveFamily() },
+      ],
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -147,15 +167,19 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
           </Pressable>
         </View>
       ) : null}
-      {canJoin ? (
-        <View style={styles.joinCard}>
-          <Text style={styles.cardTitle}>Entrar em uma família</Text>
-          <Text style={styles.cardText}>Leia o QR Code gerado pelo administrador.</Text>
-          <Pressable onPress={() => setJoinVisible(true)} style={styles.secondary}>
-            <ScanLine color={colors.text} size={18} />
-            <Text style={styles.primaryText}>Ler QR Code</Text>
-          </Pressable>
-        </View>
+      <View style={styles.joinCard}>
+        <Text style={styles.cardTitle}>Entrar em uma família</Text>
+        <Text style={styles.cardText}>Leia o QR Code gerado pelo administrador.</Text>
+        <Pressable onPress={() => setJoinVisible(true)} style={styles.secondary}>
+          <ScanLine color={colors.text} size={18} />
+          <Text style={styles.primaryText}>Ler QR Code</Text>
+        </Pressable>
+      </View>
+      {canLeave ? (
+        <Pressable disabled={vm.leaving} onPress={leaveFamily} style={styles.leaveButton}>
+          <LogOut color={colors.negative} size={18} />
+          <Text style={styles.leaveText}>{vm.leaving ? "Saindo..." : "Sair da família"}</Text>
+        </Pressable>
       ) : null}
       <Text style={styles.sectionTitle}>Membros</Text>
       <MemberRow
@@ -547,6 +571,14 @@ const styles = StyleSheet.create({
   },
   cameraFrame: { borderRadius: 18, height: 260, overflow: "hidden" },
   camera: { flex: 1 },
+  leaveButton: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    padding: 12,
+  },
+  leaveText: { color: colors.negative, fontFamily: fonts.bold, fontSize: 14 },
   manualLabel: { color: colors.text, fontFamily: fonts.bold, fontSize: 13 },
   input: {
     borderColor: colors.border,
