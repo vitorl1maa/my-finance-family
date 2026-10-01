@@ -167,7 +167,7 @@ export function useTransactionsViewModel() {
         setWalletBalance(nextWalletBalance);
         setTransactions(await listTransactions(db));
 
-        if (!session) return;
+        if (!session) return true;
 
         try {
           const syncedTransaction = await createRemoteExpense(payload);
@@ -178,9 +178,10 @@ export function useTransactionsViewModel() {
             "Despesa salva no dispositivo. A sincronização será tentada depois.",
           );
         }
+        return true;
       } catch (error) {
         setSaveError(error instanceof Error ? error.message : "Não foi possível salvar a despesa.");
-        throw error;
+        return false;
       } finally {
         setIsSaving(false);
       }

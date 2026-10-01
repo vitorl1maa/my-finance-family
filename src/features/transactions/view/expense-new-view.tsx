@@ -99,28 +99,27 @@ export function ExpenseNewView({
     if (!category) return;
 
     try {
-      if (initialTransaction) {
-        await updateExpense({
-          ...initialTransaction,
-          title: title.trim(),
-          categoryId,
-          category: category.name,
-          amountCents: -Math.abs(parseBrlInputToCents(amount)),
-          occurredAt: toExpenseIso(selectedDate),
-          recurrenceRule: selectedRecurrence,
-          paymentMethod,
-        });
-      } else
-        await createExpense({
-          title,
-          categoryId,
-          categoryName: category.name,
-          amount,
-          occurredAt: toExpenseIso(selectedDate),
-          recurrenceRule: selectedRecurrence,
-          paymentMethod,
-        });
-      onBack();
+      const saved = initialTransaction
+        ? await updateExpense({
+            ...initialTransaction,
+            title: title.trim(),
+            categoryId,
+            category: category.name,
+            amountCents: -Math.abs(parseBrlInputToCents(amount)),
+            occurredAt: toExpenseIso(selectedDate),
+            recurrenceRule: selectedRecurrence,
+            paymentMethod,
+          })
+        : await createExpense({
+            title,
+            categoryId,
+            categoryName: category.name,
+            amount,
+            occurredAt: toExpenseIso(selectedDate),
+            recurrenceRule: selectedRecurrence,
+            paymentMethod,
+          });
+      if (saved !== false) onBack();
     } catch {
       // The view-model exposes the error while preserving the form values.
     }
