@@ -14,11 +14,6 @@ import {
 
 import { ProfileAvatar } from "@/src/features/auth/components/profile-avatar";
 import {
-  getProfileAvatarPresentation,
-  type ProfileAvatarMetadata,
-} from "@/src/features/auth/model/profile-avatar";
-import { useAuthStore } from "@/src/features/auth/store/auth-store";
-import {
   canLeaveCurrentFamily,
   type FamilyInvitation,
   type FamilyInvitationConfirmation,
@@ -33,7 +28,6 @@ import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
 export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
-  const session = useAuthStore((state) => state.session);
   const vm = useFamilyInvitationsViewModel();
   const mounted = useRef(true);
   const [invitationVisible, setInvitationVisible] = useState(false);
@@ -41,17 +35,11 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
   const [invitation, setInvitation] = useState<FamilyInvitation | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [manualToken, setManualToken] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [confirmation, setConfirmation] = useState<FamilyInvitationConfirmation | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const isOwner = vm.membership?.role === "owner";
   const canLeave = canLeaveCurrentFamily(vm.membership?.role);
-  const name = String(session?.user.user_metadata?.first_name ?? "Você");
-  const avatar = getProfileAvatarPresentation(
-    session?.user.user_metadata as ProfileAvatarMetadata | undefined,
-    name,
-  );
 
   useEffect(
     () => () => {
@@ -88,7 +76,6 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
     vm.clearFeedback();
   }, [vm]);
   const openInvite = () => {
-    setNotice(null);
     setInvitation(null);
     setSeconds(0);
     vm.clearFeedback();
@@ -113,7 +100,6 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
     const joined = await vm.acceptInvitation(confirmation.token);
     if (!mounted.current || !joined) return;
     closeJoin();
-    setNotice("Você entrou na família com sucesso.");
   }, [closeJoin, confirmation, vm]);
   const cancelConfirmation = useCallback(() => {
     setConfirmation(null);
@@ -143,7 +129,6 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
           <Text style={styles.subtitle}>Gerencie quem participa das suas finanças</Text>
         </View>
       </View>
-      {notice ? <Text style={styles.success}>{notice}</Text> : null}
       {vm.error && !invitationVisible && !joinVisible ? (
         <Text style={styles.error}>{vm.error}</Text>
       ) : null}
@@ -182,13 +167,16 @@ export function FamilyMembersView({ onBack: _onBack }: { onBack: () => void }) {
         </Pressable>
       ) : null}
       <Text style={styles.sectionTitle}>Membros</Text>
-      <MemberRow
-        avatarUrl={avatar.avatarUrl}
-        avatarToken={avatar.token}
-        name={name}
-        email={session?.user.email ?? "Conta principal"}
-        memberRole={isOwner ? "Administrador" : "Membro"}
-      />
+      {vm.members.map((member) => (
+        <MemberRow
+          avatarUrl={member.avatarUrl}
+          avatarToken={member.id}
+          email={member.email}
+          key={member.id}
+          memberRole={member.role === "owner" ? "Administrador" : "Membro"}
+          name={member.name}
+        />
+      ))}
       <Modal
         animationType="fade"
         onRequestClose={closeInvite}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/store/auth-store";
 import {
   type FamilyInvitation,
+  type FamilyMember,
   type FamilyMembership,
   getFamilyInvitationErrorMessage,
 } from "@/src/features/family/model/family-invitation";
@@ -10,6 +11,7 @@ import {
   createFamilyQrInvitation,
   getCurrentFamilyMembership,
   leaveCurrentFamily,
+  listFamilyMembers,
   previewFamilyQrInvitation,
 } from "@/src/features/family/repository/family-invitations-remote-repository";
 
@@ -25,6 +27,7 @@ export function useFamilyInvitationsViewModel() {
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [membership, setMembership] = useState<FamilyMembership | null>(null);
+  const [members, setMembers] = useState<FamilyMember[]>([]);
   const [membershipLoading, setMembershipLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export function useFamilyInvitationsViewModel() {
     if (!userId) {
       if (isMounted.current) {
         setMembership(null);
+        setMembers([]);
         setMembershipLoading(false);
       }
       return;
@@ -47,8 +51,14 @@ export function useFamilyInvitationsViewModel() {
     if (isMounted.current) setMembershipLoading(true);
 
     try {
-      const nextMembership = await getCurrentFamilyMembership(userId);
-      if (isMounted.current) setMembership(nextMembership);
+      const [nextMembership, nextMembers] = await Promise.all([
+        getCurrentFamilyMembership(userId),
+        listFamilyMembers(),
+      ]);
+      if (isMounted.current) {
+        setMembership(nextMembership);
+        setMembers(nextMembers);
+      }
     } catch (nextError) {
       if (isMounted.current) setError(getFamilyInvitationErrorMessage(nextError));
     } finally {
@@ -163,6 +173,7 @@ export function useFamilyInvitationsViewModel() {
       creating,
       error,
       membership,
+      members,
       membershipLoading,
       leaving,
       leaveFamily,
@@ -180,6 +191,7 @@ export function useFamilyInvitationsViewModel() {
       creating,
       error,
       membership,
+      members,
       membershipLoading,
       leaving,
       leaveFamily,

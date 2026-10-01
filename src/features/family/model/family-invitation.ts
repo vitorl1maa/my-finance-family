@@ -31,6 +31,14 @@ export type FamilyMembership = {
   createdByCurrentUser: boolean;
 };
 
+export type FamilyMember = {
+  avatarUrl?: string;
+  email: string;
+  id: string;
+  name: string;
+  role: FamilyMembership["role"];
+};
+
 export function canLeaveCurrentFamily(role: FamilyMembership["role"] | undefined) {
   return role === "member";
 }

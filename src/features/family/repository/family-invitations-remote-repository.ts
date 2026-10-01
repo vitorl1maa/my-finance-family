@@ -1,6 +1,7 @@
 import type {
   FamilyInvitation,
   FamilyInvitationPreview,
+  FamilyMember,
   FamilyMembership,
   FamilyMembershipRow,
 } from "@/src/features/family/model/family-invitation";
@@ -38,6 +39,27 @@ export async function acceptFamilyQrInvitation(token: string): Promise<void> {
 export async function leaveCurrentFamily(): Promise<void> {
   const { error } = await supabase.rpc("leave_current_family");
   if (error) throw error;
+}
+
+export async function listFamilyMembers(): Promise<FamilyMember[]> {
+  const { data, error } = await supabase.rpc("list_family_members");
+  if (error) throw error;
+  return (
+    (data ?? []) as Array<{
+      avatar_url: string | null;
+      email: string;
+      first_name: string | null;
+      last_name: string | null;
+      role: FamilyMember["role"];
+      user_id: string;
+    }>
+  ).map((member) => ({
+    avatarUrl: member.avatar_url ?? undefined,
+    email: member.email,
+    id: member.user_id,
+    name: [member.first_name, member.last_name].filter(Boolean).join(" ") || member.email,
+    role: member.role,
+  }));
 }
 
 export async function previewFamilyQrInvitation(token: string): Promise<FamilyInvitationPreview> {
