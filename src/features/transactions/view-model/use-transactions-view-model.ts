@@ -155,7 +155,7 @@ export function useTransactionsViewModel() {
 
         const nextWalletBalance = applyWalletDelta(
           walletBalanceCents,
-          getExpenseWalletDelta(undefined, pendingTransaction.amountCents),
+          getExpenseWalletDelta(undefined, pendingTransaction),
         );
 
         await upsertTransactions(db, [pendingTransaction]);
@@ -195,7 +195,7 @@ export function useTransactionsViewModel() {
       const pending = { ...transaction, syncStatus: "pending" as const };
       const nextWalletBalance = applyWalletDelta(
         walletBalanceCents,
-        getExpenseWalletDelta(previousTransaction?.amountCents, transaction.amountCents),
+        getExpenseWalletDelta(previousTransaction, transaction),
       );
       await upsertTransactions(db, [pending]);
       await saveWalletSettings(db, {
@@ -224,7 +224,7 @@ export function useTransactionsViewModel() {
       await deleteTransaction(db, id);
       const nextWalletBalance = applyWalletDelta(
         walletBalanceCents,
-        getExpenseWalletDelta(previousTransaction?.amountCents, undefined),
+        getExpenseWalletDelta(previousTransaction, undefined),
       );
       await saveWalletSettings(db, {
         balanceCents: nextWalletBalance,

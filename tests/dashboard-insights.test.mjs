@@ -39,6 +39,8 @@ test("summarizes monthly cash flow, categories and financial health", () => {
         category: "Receita",
         amountCents: 580000,
         occurredAt: "2026-09-12T08:00:00.000Z",
+        paymentStatus: "paid",
+        paidAt: "2026-09-12T08:00:00.000Z",
         syncStatus: "synced",
       },
       {
@@ -48,6 +50,8 @@ test("summarizes monthly cash flow, categories and financial health", () => {
         category: "Casa",
         amountCents: -23890,
         occurredAt: "2026-09-18T10:32:00.000Z",
+        paymentStatus: "paid",
+        paidAt: "2026-09-18T10:32:00.000Z",
         syncStatus: "pending",
       },
     ],
@@ -65,5 +69,39 @@ test("summarizes monthly cash flow, categories and financial health", () => {
     title: "Supermercado",
     amountCents: -23890,
   });
-  assert.deepEqual(insights.scheduledExpenses.map((expense) => expense.dateKey), ["2026-09-18"]);
+  assert.deepEqual(
+    insights.scheduledExpenses.map((expense) => expense.dateKey),
+    ["2026-09-18"],
+  );
+});
+
+test("counts paid expenses in their payment month and ignores pending expenses", () => {
+  const insights = buildDashboardInsights(
+    [
+      {
+        id: "paid-late",
+        accountId: "main-account",
+        title: "Fatura",
+        category: "Lazer",
+        amountCents: -10000,
+        occurredAt: "2026-09-30T12:00:00.000Z",
+        paidAt: "2026-10-02T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+      {
+        id: "pending",
+        accountId: "main-account",
+        title: "Internet",
+        category: "Moradia",
+        amountCents: -5000,
+        occurredAt: "2026-10-03T12:00:00.000Z",
+        paymentStatus: "pending",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 9, 1),
+  );
+
+  assert.equal(insights.monthlyExpenseCents, 10000);
 });

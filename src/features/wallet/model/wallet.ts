@@ -27,10 +27,14 @@ export function getIncomeSourceWalletDelta(
 }
 
 export function getExpenseWalletDelta(
-  previousAmountCents: number | undefined,
-  nextAmountCents: number | undefined,
+  previousTransaction: Transaction | undefined,
+  nextTransaction: Transaction | undefined,
 ): number {
-  return (nextAmountCents ?? 0) - (previousAmountCents ?? 0);
+  const previousAmount =
+    previousTransaction?.paymentStatus === "paid" ? previousTransaction.amountCents : 0;
+  const nextAmount = nextTransaction?.paymentStatus === "paid" ? nextTransaction.amountCents : 0;
+
+  return nextAmount - previousAmount;
 }
 
 export function transferBetweenBalances(
@@ -63,3 +67,5 @@ export function resetWalletBalance(
     ? { ...balances, walletBalanceCents: 0 }
     : { ...balances, piggyBankBalanceCents: 0 };
 }
+
+import type { Transaction } from "@/src/features/transactions/model/transaction";

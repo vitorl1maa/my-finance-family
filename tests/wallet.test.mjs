@@ -50,10 +50,15 @@ test("calculates only the delta when an income source changes", () => {
   assert.equal(getIncomeSourceWalletDelta(6500, undefined), -6500);
 });
 
-test("calculates expense deltas from the signed transaction values", () => {
-  assert.equal(getExpenseWalletDelta(undefined, -1000), -1000);
-  assert.equal(getExpenseWalletDelta(-1000, -1500), -500);
-  assert.equal(getExpenseWalletDelta(-1500, undefined), 1500);
+test("calculates expense deltas only for paid expenses", () => {
+  const pendingExpense = { amountCents: -1000, paymentStatus: "pending" };
+  const paidExpense = { amountCents: -1000, paymentStatus: "paid" };
+  const updatedPaidExpense = { amountCents: -1500, paymentStatus: "paid" };
+
+  assert.equal(getExpenseWalletDelta(undefined, pendingExpense), 0);
+  assert.equal(getExpenseWalletDelta(pendingExpense, paidExpense), -1000);
+  assert.equal(getExpenseWalletDelta(paidExpense, updatedPaidExpense), -500);
+  assert.equal(getExpenseWalletDelta(paidExpense, undefined), 1000);
 });
 
 test("resets only the requested wallet balance", () => {

@@ -1,8 +1,8 @@
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import {
+  type ExpenseOccurrence,
   getExpenseOccurrencesForMonth,
   getNextExpenseOccurrence,
-  type ExpenseOccurrence,
   // @ts-expect-error Node's native TypeScript test runner requires the source extension here.
 } from "./expense-occurrences.ts";
 
@@ -84,16 +84,24 @@ export function getCalendarWeeks(selectedDate: Date): WeekDay[][] {
     });
   }
 
-  return Array.from({ length: days.length / 7 }, (_, index) => days.slice(index * 7, index * 7 + 7));
+  return Array.from({ length: days.length / 7 }, (_, index) =>
+    days.slice(index * 7, index * 7 + 7),
+  );
 }
 
 export function buildDashboardInsights(
   transactions: Transaction[],
   referenceDate: Date = new Date(),
 ): DashboardInsights {
-  const monthTransactions = transactions.filter((transaction) =>
-    isSameMonth(new Date(transaction.occurredAt), referenceDate),
-  );
+  const monthTransactions = transactions.filter((transaction) => {
+    if (transaction.amountCents < 0 && transaction.paymentStatus !== "paid") return false;
+
+    const referenceTransactionDate =
+      transaction.amountCents < 0 ? transaction.paidAt : transaction.occurredAt;
+    return referenceTransactionDate
+      ? isSameMonth(new Date(referenceTransactionDate), referenceDate)
+      : false;
+  });
   const categoryTotals = new Map<string, number>();
   const weeklyTotals = Array.from({ length: 5 }, (_, index) => ({
     label: String(index * 7 + 1).padStart(2, "0"),
