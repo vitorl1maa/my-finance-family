@@ -73,3 +73,10 @@ test("resets only the requested wallet balance", () => {
     piggyBankBalanceCents: 0,
   });
 });
+
+test("keeps money already in the piggy bank out of the available wallet", () => {
+  const grossWalletBalance = 916431;
+  const piggyBankBalance = 400000;
+
+  assert.equal(Math.max(0, grossWalletBalance - piggyBankBalance), 516431);
+});

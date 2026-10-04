@@ -200,10 +200,14 @@ export function useIncomeSourcesViewModel() {
     async (id: string) => {
       const previousSource = sources.find((item) => item.id === id);
       await deleteIncomeSource(db, id);
-      setSources(await listIncomeSources(db));
-      const nextWalletBalance = applyWalletDelta(
-        walletBalanceCents,
-        getIncomeSourceWalletDelta(previousSource?.amountCents, undefined),
+      const remainingSources = await listIncomeSources(db);
+      setSources(remainingSources);
+      // A source may already have been moved to the piggy bank. Removing it
+      // must not make the available wallet negative; the saved balance stays untouched.
+      const nextWalletBalance = Math.max(
+        0,
+        walletBalanceCents +
+          getIncomeSourceWalletDelta(previousSource?.amountCents, undefined),
       );
       await saveWalletSettings(db, {
         balanceCents: nextWalletBalance,

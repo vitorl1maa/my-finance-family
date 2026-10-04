@@ -37,6 +37,7 @@ export function useTransactionsViewModel() {
   const db = useSQLiteContext();
   const transactions = useTransactionsStore((state) => state.transactions);
   const setTransactions = useTransactionsStore((state) => state.setTransactions);
+  const updateTransaction = useTransactionsStore((state) => state.updateTransaction);
   const session = useAuthStore((state) => state.session);
   const walletBalanceCents = useWalletStore((state) => state.walletBalanceCents);
   const setWalletBalance = useWalletStore((state) => state.setWalletBalance);
@@ -217,18 +218,26 @@ export function useTransactionsViewModel() {
         syncStatus: "pending",
       });
       setWalletBalance(nextWalletBalance);
-      setTransactions(await listTransactions(db));
+      updateTransaction(pending);
       if (!session) return;
       try {
-        await replaceTransaction(db, transaction.id, await updateRemoteExpense(transaction));
-        setTransactions(await listTransactions(db));
+        const syncedTransaction = await updateRemoteExpense(transaction);
+        await replaceTransaction(db, transaction.id, syncedTransaction);
+        updateTransaction(syncedTransaction);
       } catch {
         setTransactionsError(
           "Despesa atualizada no dispositivo. A sincronização será tentada depois.",
         );
       }
     },
-    [db, session, setTransactions, setWalletBalance, transactions, walletBalanceCents],
+    [
+      db,
+      session,
+      setWalletBalance,
+      transactions,
+      updateTransaction,
+      walletBalanceCents,
+    ],
   );
 
   const removeExpense = useCallback(

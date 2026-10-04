@@ -88,6 +88,9 @@ export function WeeklyCalendar({
               const isScheduledExpenseDay = scheduledExpenses.some(
                 (expense) => expense.dateKey === day.isoDate,
               );
+              const isPaidExpenseDay = scheduledExpenses.some(
+                (expense) => expense.dateKey === day.isoDate && expense.paymentStatus === "paid",
+              );
 
               return (
                 <Pressable
@@ -100,6 +103,7 @@ export function WeeklyCalendar({
                     isScheduledExpenseDay && styles.scheduledExpenseDay,
                     isNextExpenseDay && styles.nextExpenseDay,
                     day.isSelected && styles.selectedDay,
+                    isPaidExpenseDay && styles.paidExpenseDay,
                   ]}
                 >
                   <View style={styles.dateContent}>
@@ -114,7 +118,7 @@ export function WeeklyCalendar({
                     </Text>
                     {isScheduledExpenseDay ? (
                       <BanknoteArrowDown
-                        color={day.isSelected ? colors.text : colors.darkPink}
+                        color={isPaidExpenseDay ? colors.positive : day.isSelected ? colors.text : colors.darkPink}
                         size={12}
                         strokeWidth={2.4}
                       />
@@ -135,10 +139,22 @@ export function WeeklyCalendar({
               style={styles.selectedExpense}
             >
               <View style={styles.selectedExpenseInfo}>
-                <BanknoteArrowDown color={colors.darkPink} size={15} strokeWidth={2.4} />
-                <Text style={styles.selectedExpenseTitle}>{expense.title}</Text>
+                <BanknoteArrowDown
+                  color={expense.paymentStatus === "paid" ? colors.positive : colors.darkPink}
+                  size={15}
+                  strokeWidth={2.4}
+                />
+                <Text style={styles.selectedExpenseTitle}>
+                  {expense.title}
+                  {expense.paymentStatus === "paid" ? " · Pago" : ""}
+                </Text>
               </View>
-              <Text style={styles.selectedExpenseAmount}>
+              <Text
+                style={[
+                  styles.selectedExpenseAmount,
+                  expense.paymentStatus === "paid" && styles.paidExpenseText,
+                ]}
+              >
                 - {formatCurrencyFromCents(Math.abs(expense.amountCents))}
               </Text>
             </View>
@@ -174,6 +190,7 @@ const styles = StyleSheet.create({
   selectedDay: { backgroundColor: colors.accent },
   scheduledExpenseDay: { backgroundColor: "#FFF1F5" },
   nextExpenseDay: { backgroundColor: "#FCE7F3" },
+  paidExpenseDay: { backgroundColor: "#DCFCE7" },
   weekday: {
     color: colors.muted,
     flex: 1,
@@ -202,4 +219,5 @@ const styles = StyleSheet.create({
   selectedExpenseInfo: { alignItems: "center", flex: 1, flexDirection: "row", gap: 6 },
   selectedExpenseTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
   selectedExpenseAmount: { color: colors.negative, fontFamily: fonts.bold, fontSize: 12 },
+  paidExpenseText: { color: colors.positive },
 });

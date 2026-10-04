@@ -20,11 +20,12 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
   const transactions = useTransactionsViewModel();
   const goals = useGoalsViewModel();
   const incomeSources = useIncomeSourcesViewModel();
-  const insights = buildDashboardInsights(transactions.transactions, selectedDate);
-  const recentTransactions = filterTransactions(
-    mergeIncomeSourcesIntoTransactions(transactions.transactions, incomeSources.sources),
-    "",
-  )
+  const allTransactions = mergeIncomeSourcesIntoTransactions(
+    transactions.transactions,
+    incomeSources.sources,
+  );
+  const insights = buildDashboardInsights(allTransactions, selectedDate);
+  const recentTransactions = filterTransactions(allTransactions, "")
     .slice(0, 3)
     .map((transaction) => ({
       ...transaction,

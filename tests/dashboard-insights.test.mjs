@@ -68,6 +68,7 @@ test("summarizes monthly cash flow, categories and financial health", () => {
     transactionId: "market",
     title: "Supermercado",
     amountCents: -23890,
+    paymentStatus: "paid",
   });
   assert.deepEqual(
     insights.scheduledExpenses.map((expense) => expense.dateKey),
@@ -104,4 +105,26 @@ test("counts paid expenses in their payment month and ignores pending expenses",
   );
 
   assert.equal(insights.monthlyExpenseCents, 10000);
+});
+
+test("includes income sources in the weekly cashflow", () => {
+  const insights = buildDashboardInsights(
+    [
+      {
+        id: "income-source:salary",
+        accountId: "",
+        title: "Salário",
+        category: "Salário",
+        amountCents: 400000,
+        occurredAt: "2026-10-04T12:00:00.000Z",
+        registeredAt: "2026-10-04T12:00:00.000Z",
+        recurrenceRule: "monthly",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 9, 4),
+  );
+
+  assert.equal(insights.monthlyIncomeCents, 400000);
+  assert.equal(insights.weeklyCashflow[0].incomeCents, 400000);
 });

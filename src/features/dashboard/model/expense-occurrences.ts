@@ -7,9 +7,13 @@ export type ExpenseOccurrence = {
   title: string;
   amountCents: number;
   dateKey: string;
+  paymentStatus?: Transaction["paymentStatus"];
 };
 
-type Expense = Pick<Transaction, "amountCents" | "id" | "occurredAt" | "recurrenceRule" | "title">;
+type Expense = Pick<
+  Transaction,
+  "amountCents" | "id" | "occurredAt" | "paymentStatus" | "recurrenceRule" | "title"
+>;
 
 export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): ExpenseOccurrence[] {
   if (expense.amountCents >= 0) return [];
@@ -40,6 +44,7 @@ export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): Ex
     title: expense.title,
     amountCents: expense.amountCents,
     dateKey: toDateKey(date),
+    ...(expense.paymentStatus ? { paymentStatus: expense.paymentStatus } : {}),
   }));
 }
 
@@ -85,6 +90,7 @@ function getFirstOccurrenceOnOrAfter(expense: Expense, reference: Date): Expense
     title: expense.title,
     amountCents: expense.amountCents,
     dateKey: toDateKey(occurrence),
+    ...(expense.paymentStatus ? { paymentStatus: expense.paymentStatus } : {}),
   };
 }
 

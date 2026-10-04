@@ -9,6 +9,8 @@ import {
 import { useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Modal,
   Pressable,
   RefreshControl,
@@ -174,7 +176,11 @@ export function IncomeSourcesView() {
         transparent
         visible={drawerVisible}
       >
-        <View style={styles.drawerBackdrop}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
+          style={styles.drawerBackdrop}
+        >
           <Pressable
             accessibilityLabel="Fechar fonte de renda"
             onPress={() => {
@@ -210,7 +216,7 @@ export function IncomeSourcesView() {
               />
             )}
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
       <BalanceResetConfirmationModal
         target={resetTarget}
@@ -326,7 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    maxHeight: "80%",
+    maxHeight: "90%",
     overflow: "hidden",
   },
 });
