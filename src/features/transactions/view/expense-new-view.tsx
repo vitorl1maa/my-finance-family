@@ -266,7 +266,7 @@ export function ExpenseNewView({
       {saveError ? <Text style={styles.formError}>{saveError}</Text> : null}
       <Pressable
         disabled={isSaving || categoriesLoading}
-        onPress={handleSubmit(onSubmit)}
+        onPress={() => void handleSubmit(onSubmit)()}
         style={[styles.primary, (isSaving || categoriesLoading) && styles.disabled]}
       >
         <Text style={styles.primaryText}>
