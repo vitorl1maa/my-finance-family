@@ -12,7 +12,7 @@ export type ExpenseOccurrence = {
 
 type Expense = Pick<
   Transaction,
-  "amountCents" | "id" | "occurredAt" | "paymentStatus" | "recurrenceRule" | "title"
+  "amountCents" | "id" | "occurredAt" | "paidAt" | "paymentStatus" | "recurrenceRule" | "title"
 >;
 
 export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): ExpenseOccurrence[] {
@@ -44,7 +44,7 @@ export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): Ex
     title: expense.title,
     amountCents: expense.amountCents,
     dateKey: toDateKey(date),
-    ...(expense.paymentStatus ? { paymentStatus: expense.paymentStatus } : {}),
+    paymentStatus: getOccurrencePaymentStatus(expense, date),
   }));
 }
 
@@ -62,7 +62,10 @@ export function getNextExpenseOccurrence(
   return occurrences[0];
 }
 
-function getFirstOccurrenceOnOrAfter(expense: Expense, reference: Date): ExpenseOccurrence | undefined {
+function getFirstOccurrenceOnOrAfter(
+  expense: Expense,
+  reference: Date,
+): ExpenseOccurrence | undefined {
   const baseDate = atNoon(new Date(expense.occurredAt));
   const rule = expense.recurrenceRule ?? "none";
   let occurrence: Date | undefined;
@@ -71,7 +74,10 @@ function getFirstOccurrenceOnOrAfter(expense: Expense, reference: Date): Expense
     const firstMonth = isBefore(reference, baseDate) ? baseDate : reference;
     occurrence = getMonthlyOccurrence(baseDate, firstMonth);
     if (isBefore(occurrence, reference)) {
-      occurrence = getMonthlyOccurrence(baseDate, new Date(reference.getFullYear(), reference.getMonth() + 1, 1));
+      occurrence = getMonthlyOccurrence(
+        baseDate,
+        new Date(reference.getFullYear(), reference.getMonth() + 1, 1),
+      );
     }
   } else if (rule === "every-15-days") {
     if (isBefore(reference, baseDate)) occurrence = baseDate;
@@ -90,12 +96,28 @@ function getFirstOccurrenceOnOrAfter(expense: Expense, reference: Date): Expense
     title: expense.title,
     amountCents: expense.amountCents,
     dateKey: toDateKey(occurrence),
-    ...(expense.paymentStatus ? { paymentStatus: expense.paymentStatus } : {}),
+    paymentStatus: getOccurrencePaymentStatus(expense, occurrence),
   };
 }
 
+function getOccurrencePaymentStatus(
+  expense: Expense,
+  occurrence: Date,
+): Transaction["paymentStatus"] {
+  if (expense.paymentStatus !== "paid" || !expense.paidAt) return "pending";
+
+  const paidAt = new Date(expense.paidAt);
+  return paidAt.getFullYear() === occurrence.getFullYear() &&
+    paidAt.getMonth() === occurrence.getMonth()
+    ? "paid"
+    : "pending";
+}
+
 function getMonthlyOccurrence(baseDate: Date, month: Date): Date {
-  const day = Math.min(baseDate.getDate(), new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate());
+  const day = Math.min(
+    baseDate.getDate(),
+    new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate(),
+  );
   return new Date(month.getFullYear(), month.getMonth(), day, 12);
 }
 
