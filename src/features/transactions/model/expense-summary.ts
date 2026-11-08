@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { addMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 
@@ -21,4 +21,26 @@ export function getExpenseTotalForMonth(
       ? total + Math.abs(transaction.amountCents)
       : total;
   }, 0);
+}
+
+export function getExpensePercentageComparedToNextMonth(
+  transactions: Transaction[],
+  referenceDate: Date = new Date(),
+): number | null {
+  const currentMonthTotal = getExpenseTotalForMonth(transactions, referenceDate);
+  const nextMonthTotal = getExpenseTotalForMonth(transactions, addMonths(referenceDate, 1));
+
+  if (nextMonthTotal === 0) return null;
+
+  return ((currentMonthTotal - nextMonthTotal) / nextMonthTotal) * 100;
+}
+
+export function getExpenseSavingsComparedToPreviousMonth(
+  transactions: Transaction[],
+  referenceDate: Date = new Date(),
+): number | null {
+  const previousMonthTotal = getExpenseTotalForMonth(transactions, addMonths(referenceDate, -1));
+  if (previousMonthTotal === 0) return null;
+
+  return previousMonthTotal - getExpenseTotalForMonth(transactions, referenceDate);
 }

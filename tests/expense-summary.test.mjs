@@ -3,11 +3,45 @@ import test from "node:test";
 
 import {
   getExpenseMonthLabel,
+  getExpensePercentageComparedToNextMonth,
+  getExpenseSavingsComparedToPreviousMonth,
   getExpenseTotalForMonth,
 } from "../src/features/transactions/model/expense-summary.ts";
 
 test("formats the expense month label in uppercase", () => {
   assert.equal(getExpenseMonthLabel(new Date(2026, 9, 1)), "SUAS DESPESAS DE OUTUBRO");
+});
+
+test("calculates savings against the previous month in cents", () => {
+  const savings = getExpenseSavingsComparedToPreviousMonth(
+    [
+      {
+        id: "october-expense",
+        accountId: "main-account",
+        title: "Outubro",
+        category: "Casa",
+        amountCents: -130000,
+        occurredAt: "2026-10-10T12:00:00.000Z",
+        paidAt: "2026-10-10T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+      {
+        id: "november-expense",
+        accountId: "main-account",
+        title: "Novembro",
+        category: "Casa",
+        amountCents: -90000,
+        occurredAt: "2026-11-10T12:00:00.000Z",
+        paidAt: "2026-11-10T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 10, 1),
+  );
+
+  assert.equal(savings, 40000);
 });
 
 test("totals only expenses debited in the reference month", () => {
@@ -60,4 +94,36 @@ test("totals only expenses debited in the reference month", () => {
   );
 
   assert.equal(total, 324000);
+});
+
+test("calculates the expense percentage compared to the next month", () => {
+  const percentage = getExpensePercentageComparedToNextMonth(
+    [
+      {
+        id: "november-expense",
+        accountId: "main-account",
+        title: "Novembro",
+        category: "Casa",
+        amountCents: -8000,
+        occurredAt: "2026-11-10T12:00:00.000Z",
+        paidAt: "2026-11-10T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+      {
+        id: "december-expense",
+        accountId: "main-account",
+        title: "Dezembro",
+        category: "Casa",
+        amountCents: -10000,
+        occurredAt: "2026-12-10T12:00:00.000Z",
+        paidAt: "2026-12-10T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 10, 1),
+  );
+
+  assert.equal(percentage, -20);
 });
