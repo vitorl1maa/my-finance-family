@@ -5,6 +5,7 @@ export const incomeSourceSchema = z.object({
   name: z.string().trim().min(1),
   kind: z.enum(["salary", "investment", "other"]),
   amountCents: z.number().int().positive(),
+  registeredAt: z.string(),
   updatedAt: z.string(),
   creatorId: z.string().optional(),
   creatorName: z.string().optional(),

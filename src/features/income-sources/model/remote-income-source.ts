@@ -5,6 +5,7 @@ export type RemoteIncomeSourceRow = {
   name: string;
   kind: IncomeSource["kind"];
   amount_cents: number;
+  created_at?: string;
   updated_at: string;
   created_by?: string | null;
   creator_name?: string | null;
@@ -18,6 +19,7 @@ export function mapRemoteIncomeSource(row: RemoteIncomeSourceRow): IncomeSource 
     name: row.name,
     kind: row.kind,
     amountCents: row.amount_cents,
+    registeredAt: row.created_at ?? row.updated_at,
     updatedAt: row.updated_at,
     syncStatus: "synced",
   };

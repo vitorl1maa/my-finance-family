@@ -131,6 +131,7 @@ export function useIncomeSourcesViewModel() {
         name: name.trim(),
         kind,
         amountCents,
+        registeredAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         creatorId: session?.user.id,
         creatorName: getCreatorName(session?.user.user_metadata, session?.user.email),
@@ -206,8 +207,7 @@ export function useIncomeSourcesViewModel() {
       // must not make the available wallet negative; the saved balance stays untouched.
       const nextWalletBalance = Math.max(
         0,
-        walletBalanceCents +
-          getIncomeSourceWalletDelta(previousSource?.amountCents, undefined),
+        walletBalanceCents + getIncomeSourceWalletDelta(previousSource?.amountCents, undefined),
       );
       await saveWalletSettings(db, {
         balanceCents: nextWalletBalance,

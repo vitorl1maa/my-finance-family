@@ -13,6 +13,7 @@ type IncomeSourceRow = {
   name: string;
   kind: IncomeSource["kind"];
   amount_cents: number;
+  registered_at?: string;
   updated_at: string;
   sync_status: IncomeSource["syncStatus"];
   creator_id?: string;
@@ -23,7 +24,7 @@ type IncomeSourceRow = {
 
 export async function listIncomeSources(db: SQLiteDatabase): Promise<IncomeSource[]> {
   const rows = await db.getAllAsync<IncomeSourceRow>(
-    `SELECT id, name, kind, amount_cents, updated_at, sync_status,
+    `SELECT id, name, kind, amount_cents, registered_at, updated_at, sync_status,
        creator_id, creator_name, creator_avatar_url, creator_avatar_seed
      FROM income_sources
      ORDER BY name ASC`,
@@ -35,13 +36,14 @@ export async function listIncomeSources(db: SQLiteDatabase): Promise<IncomeSourc
 export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource): Promise<void> {
   await db.runAsync(
     `INSERT OR REPLACE INTO income_sources
-      (id, name, kind, amount_cents, updated_at, sync_status,
+      (id, name, kind, amount_cents, registered_at, updated_at, sync_status,
        creator_id, creator_name, creator_avatar_url, creator_avatar_seed)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     source.id,
     source.name,
     source.kind,
     source.amountCents,
+    source.registeredAt,
     source.updatedAt,
     source.syncStatus,
     source.creatorId ?? null,
@@ -96,6 +98,7 @@ function toIncomeSource(row: IncomeSourceRow): IncomeSource {
     name: row.name,
     kind: row.kind,
     amountCents: row.amount_cents,
+    registeredAt: row.registered_at ?? row.updated_at,
     updatedAt: row.updated_at,
     syncStatus: row.sync_status,
   };
