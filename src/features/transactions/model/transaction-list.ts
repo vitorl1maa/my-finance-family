@@ -11,6 +11,8 @@ export type TransactionDayGroup = {
   transactions: Transaction[];
 };
 
+export type TransactionFilters = { authorId?: string; month: Date; query: string };
+
 export function mergeIncomeSourcesIntoTransactions(
   transactions: Transaction[],
   incomeSources: IncomeSource[],
@@ -24,8 +26,8 @@ export function mergeIncomeSourcesIntoTransactions(
         title: source.name,
         category: incomeSourceKindLabel(source.kind),
         amountCents: source.amountCents,
-        occurredAt: source.updatedAt,
-        registeredAt: source.updatedAt,
+        occurredAt: source.registeredAt,
+        registeredAt: source.registeredAt,
         recurrenceRule: "monthly",
         syncStatus: source.syncStatus,
       };
@@ -48,6 +50,20 @@ export function filterTransactions(transactions: Transaction[], query: string): 
     const category = transaction.category.toLocaleLowerCase("pt-BR");
 
     return title.includes(normalizedQuery) || category.includes(normalizedQuery);
+  });
+}
+
+export function filterTransactionsForPeriod(
+  transactions: Transaction[],
+  filters: TransactionFilters,
+): Transaction[] {
+  return filterTransactions(transactions, filters.query).filter((transaction) => {
+    const date = getTransactionListDate(transaction);
+    return (
+      date.getFullYear() === filters.month.getFullYear() &&
+      date.getMonth() === filters.month.getMonth() &&
+      (!filters.authorId || transaction.creatorId === filters.authorId)
+    );
   });
 }
 
