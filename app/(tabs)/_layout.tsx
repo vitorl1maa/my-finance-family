@@ -1,13 +1,5 @@
 import { Tabs } from "expo-router";
-import {
-  BanknoteArrowDown,
-  Home,
-  PiggyBank,
-  TrendingUp,
-  UsersRound,
-} from "lucide-react-native";
-import type { ComponentProps } from "react";
-
+import { BanknoteArrowDown, Home, PiggyBank, TrendingUp, UsersRound } from "lucide-react-native";
 import { FloatingBottomTabs } from "@/src/shared/components/base/floating-bottom-tabs";
 import { colors } from "@/src/shared/theme/colors";
 
@@ -23,9 +15,7 @@ export default function TabLayout() {
           borderTopColor: colors.border,
         },
       }}
-      tabBar={(props) => (
-        <FloatingBottomTabs {...(props as unknown as ComponentProps<typeof FloatingBottomTabs>)} />
-      )}
+      tabBar={(props) => <FloatingBottomTabs {...props} />}
     >
       <Tabs.Screen
         name="index"

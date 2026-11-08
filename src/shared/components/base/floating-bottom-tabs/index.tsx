@@ -5,7 +5,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/src/shared/theme/colors";
 import { fonts } from "@/src/shared/theme/fonts";
 
-export function FloatingBottomTabs({ state, descriptors, navigation }: BottomTabBarProps) {
+type FloatingBottomTabsProps = Pick<BottomTabBarProps, "state" | "descriptors"> & {
+  navigateToTab: (routeKey: string) => void;
+};
+
+export function FloatingBottomTabs({ state, descriptors, navigateToTab }: FloatingBottomTabsProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -14,44 +18,41 @@ export function FloatingBottomTabs({ state, descriptors, navigation }: BottomTab
       style={[styles.container, { bottom: Math.max(insets.bottom, 12) }]}
     >
       <View style={styles.bar}>
-        {state.routes.filter((route) => route.name !== "goals").map((route) => {
-          const { options } = descriptors[route.key];
-          const focused = state.routes[state.index]?.key === route.key;
-          const label =
-            typeof options.tabBarLabel === "string"
-              ? options.tabBarLabel
-              : (options.title ?? route.name);
-          const icon = options.tabBarIcon?.({
-            focused,
-            color: focused ? colors.text : colors.mutedLight,
-            size: 21,
-          });
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
+        {state.routes
+          .filter((route: (typeof state.routes)[number]) => route.name !== "goals")
+          .map((route: (typeof state.routes)[number]) => {
+            const { options } = descriptors[route.key];
+            const focused = state.routes[state.index]?.key === route.key;
+            const label =
+              typeof options.tabBarLabel === "string"
+                ? options.tabBarLabel
+                : (options.title ?? route.name);
+            const icon = options.tabBarIcon?.({
+              focused,
+              color: focused ? colors.text : colors.mutedLight,
+              size: 21,
             });
-            if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
-          };
 
-          return (
-            <Pressable
-              accessibilityLabel={label}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: focused }}
-              key={route.key}
-              onPress={onPress}
-              style={styles.item}
-            >
-              {icon}
-              <Text style={[styles.label, focused ? styles.labelActive : styles.labelInactive]}>
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
+            const onPress = () => {
+              if (!focused) navigateToTab(route.key);
+            };
+
+            return (
+              <Pressable
+                accessibilityLabel={label}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: focused }}
+                key={route.key}
+                onPress={onPress}
+                style={styles.item}
+              >
+                {icon}
+                <Text style={[styles.label, focused ? styles.labelActive : styles.labelInactive]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
       </View>
     </View>
   );
