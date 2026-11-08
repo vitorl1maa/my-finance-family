@@ -44,6 +44,7 @@ export function useDashboardViewModel(selectedDate: Date = new Date()) {
 
   return {
     accounts: accounts.accounts,
+    transactions: allTransactions,
     goals: goals.goals,
     greeting: getDashboardGreeting(),
     insights,

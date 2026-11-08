@@ -47,6 +47,7 @@ export function DashboardView(_: DashboardViewProps) {
     reload,
     piggyBankBalanceCents,
     totalBalanceCents,
+    transactions,
     userName,
   } = useDashboardViewModel(selectedDate);
   const isPiggyBankEmpty = shouldShowEmptyPiggyBankBanner(
@@ -110,7 +111,7 @@ export function DashboardView(_: DashboardViewProps) {
             }
           >
             <BalancePager
-              incomeCents={incomeSources.reduce((total, source) => total + source.amountCents, 0)}
+              incomeCents={insights.monthlyIncomeCents}
               monthlyExpenseCents={insights.monthlyExpenseCents}
               piggyBankBalanceCents={piggyBankBalanceCents}
               walletBalanceCents={totalBalanceCents}
@@ -119,7 +120,7 @@ export function DashboardView(_: DashboardViewProps) {
             {isPiggyBankEmpty ? (
               <EmptyWalletBanner onPress={() => router.push("/(tabs)/cofrinho")} />
             ) : null}
-            <CashflowChart data={insights.weeklyCashflow} />
+            <CashflowChart transactions={transactions} />
             <SpendingBreakdown categories={insights.expenseByCategory} />
 
             <SectionHeader

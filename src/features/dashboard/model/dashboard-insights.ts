@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import {
   type ExpenseOccurrence,
@@ -22,6 +24,13 @@ type WeeklyCashflow = {
   expenseCents: number;
 };
 
+export type MonthlyCashflow = {
+  label: string;
+  month: Date;
+  incomeCents: number;
+  expenseCents: number;
+};
+
 export type DashboardInsights = {
   monthlyIncomeCents: number;
   monthlyExpenseCents: number;
@@ -32,6 +41,37 @@ export type DashboardInsights = {
   scheduledExpenses: ExpenseOccurrence[];
   nextExpense?: ExpenseOccurrence;
 };
+
+export function buildMonthlyCashflow(
+  transactions: Transaction[],
+  endDate: Date = new Date(),
+  months = 6,
+): MonthlyCashflow[] {
+  const start = new Date(endDate.getFullYear(), endDate.getMonth() - months + 1, 1);
+  const result = Array.from({ length: months }, (_, index) => {
+    const month = new Date(start.getFullYear(), start.getMonth() + index, 1);
+    return {
+      label: format(month, "MMM", { locale: ptBR }),
+      month,
+      incomeCents: 0,
+      expenseCents: 0,
+    };
+  });
+
+  for (const transaction of transactions) {
+    const dateValue = transaction.amountCents < 0 ? transaction.paidAt : transaction.occurredAt;
+    if (!dateValue || (transaction.amountCents < 0 && transaction.paymentStatus !== "paid"))
+      continue;
+    const date = new Date(dateValue);
+    const index =
+      (date.getFullYear() - start.getFullYear()) * 12 + date.getMonth() - start.getMonth();
+    if (index < 0 || index >= months) continue;
+    if (transaction.amountCents >= 0) result[index].incomeCents += transaction.amountCents;
+    else result[index].expenseCents += Math.abs(transaction.amountCents);
+  }
+
+  return result;
+}
 
 const weekdayLabels = ["S", "T", "Q", "Q", "S", "S", "D"];
 

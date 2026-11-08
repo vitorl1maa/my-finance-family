@@ -128,3 +128,54 @@ test("includes income sources in the weekly cashflow", () => {
   assert.equal(insights.monthlyIncomeCents, 400000);
   assert.equal(insights.weeklyCashflow[0].incomeCents, 400000);
 });
+
+test("keeps the banner metrics limited to the selected month", () => {
+  const insights = buildDashboardInsights(
+    [
+      {
+        id: "previous-income",
+        accountId: "main-account",
+        title: "Salário anterior",
+        category: "Salário",
+        amountCents: 400000,
+        occurredAt: "2026-09-04T12:00:00.000Z",
+        syncStatus: "synced",
+      },
+      {
+        id: "current-income",
+        accountId: "main-account",
+        title: "Salário atual",
+        category: "Salário",
+        amountCents: 550000,
+        occurredAt: "2026-10-04T12:00:00.000Z",
+        syncStatus: "synced",
+      },
+      {
+        id: "previous-expense",
+        accountId: "main-account",
+        title: "Despesa anterior",
+        category: "Casa",
+        amountCents: -90000,
+        occurredAt: "2026-09-20T12:00:00.000Z",
+        paidAt: "2026-09-20T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+      {
+        id: "current-expense",
+        accountId: "main-account",
+        title: "Despesa atual",
+        category: "Casa",
+        amountCents: -120000,
+        occurredAt: "2026-10-20T12:00:00.000Z",
+        paidAt: "2026-10-20T12:00:00.000Z",
+        paymentStatus: "paid",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 9, 1),
+  );
+
+  assert.equal(insights.monthlyIncomeCents, 550000);
+  assert.equal(insights.monthlyExpenseCents, 120000);
+});
