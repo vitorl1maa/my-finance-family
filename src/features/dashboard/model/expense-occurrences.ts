@@ -12,7 +12,7 @@ export type ExpenseOccurrence = {
 
 type Expense = Pick<
   Transaction,
-  "amountCents" | "id" | "occurredAt" | "paidAt" | "paymentStatus" | "recurrenceRule" | "title"
+  | "amountCents" | "id" | "occurredAt" | "paidAt" | "paymentStatus" | "recurrenceRule" | "title" | "installmentCount"
 >;
 
 export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): ExpenseOccurrence[] {
@@ -26,7 +26,10 @@ export function getExpenseOccurrencesForMonth(expense: Expense, month: Date): Ex
 
   if (rule === "monthly") {
     if (!isBefore(monthEnd, baseDate)) {
-      occurrences.push(getMonthlyOccurrence(baseDate, monthStart));
+      const occurrence = getMonthlyOccurrence(baseDate, monthStart);
+      const monthDistance =
+        (occurrence.getFullYear() - baseDate.getFullYear()) * 12 + occurrence.getMonth() - baseDate.getMonth();
+      if (!expense.installmentCount || monthDistance < expense.installmentCount) occurrences.push(occurrence);
     }
   } else if (rule === "every-15-days") {
     let occurrence = baseDate;

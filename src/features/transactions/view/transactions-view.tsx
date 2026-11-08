@@ -31,6 +31,7 @@ import type { FamilyMember } from "@/src/features/family/model/family-invitation
 import { listFamilyMembers } from "@/src/features/family/repository/family-invitations-remote-repository";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import { TransactionDetailModal } from "@/src/features/transactions/components/transaction-detail-modal";
+import { getCreditCardInstallmentLabel } from "@/src/features/transactions/model/credit-card-billing";
 import { filterExpenses } from "@/src/features/transactions/model/expense-list";
 import {
   getExpenseMonthLabel,
@@ -360,6 +361,12 @@ const ExpenseCard = memo(function ExpenseCard({
   onPress: () => void;
 }) {
   const paymentLabel = getPaymentMethodLabel(expense.paymentMethod);
+  const installmentLabel = getCreditCardInstallmentLabel(
+    expense.purchaseDate,
+    expense.installmentCount,
+    expense.amountCents,
+    expense.occurredAt,
+  );
   const paid = expense.paymentStatus === "paid";
   const swipeableRef = useRef<SwipeableMethods | null>(null);
   const actions = createExpenseSwipeActions(() => swipeableRef.current?.close(), onEdit, onDelete);
@@ -398,7 +405,8 @@ const ExpenseCard = memo(function ExpenseCard({
             <View style={styles.detailLine}>
               <Banknote color={colors.text} size={15} />
               <Text style={styles.detailText}>
-                {paymentLabel ? `Pagamento: ${paymentLabel}` : `Despesa · ${expense.category}`}
+                {installmentLabel ??
+                  (paymentLabel ? `Pagamento: ${paymentLabel}` : `Despesa · ${expense.category}`)}
               </Text>
             </View>
             <View style={styles.detailLine}>

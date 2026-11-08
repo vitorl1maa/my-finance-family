@@ -14,6 +14,8 @@ type TransactionRow = {
   registered_at?: string;
   recurrence_rule?: string;
   payment_method?: Transaction["paymentMethod"];
+  purchase_date?: string;
+  installment_count?: number;
   payment_status?: Transaction["paymentStatus"];
   paid_at?: string;
   sync_operation?: Transaction["syncOperation"];
@@ -26,7 +28,7 @@ type TransactionRow = {
 
 export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[]> {
   const rows = await db.getAllAsync<TransactionRow>(
-    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, registered_at, recurrence_rule, payment_method, payment_status, paid_at, sync_operation, sync_status,
+    `SELECT id, account_id, family_id, title, category, category_id, amount_cents, occurred_at, registered_at, recurrence_rule, payment_method, purchase_date, installment_count, payment_status, paid_at, sync_operation, sync_status,
        creator_id, creator_name, creator_avatar_url, creator_avatar_seed
      FROM transactions
      ORDER BY registered_at DESC`,
@@ -45,6 +47,8 @@ export async function listTransactions(db: SQLiteDatabase): Promise<Transaction[
       registeredAt: row.registered_at ?? row.occurred_at,
       recurrenceRule: row.recurrence_rule,
       paymentMethod: row.payment_method,
+      purchaseDate: row.purchase_date,
+      installmentCount: row.installment_count,
       paymentStatus: row.payment_status ?? "pending",
       syncOperation: row.sync_operation,
       syncStatus: row.sync_status,
@@ -66,9 +70,9 @@ export async function upsertTransactions(
     await db.runAsync(
       `INSERT INTO transactions (
         id, account_id, family_id, title, category, category_id, amount_cents, occurred_at,
-        registered_at, recurrence_rule, payment_method, payment_status, paid_at, sync_operation, sync_status
+        registered_at, recurrence_rule, payment_method, purchase_date, installment_count, payment_status, paid_at, sync_operation, sync_status
         , creator_id, creator_name, creator_avatar_url, creator_avatar_seed
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         account_id = excluded.account_id,
         family_id = excluded.family_id,
@@ -80,6 +84,8 @@ export async function upsertTransactions(
         registered_at = excluded.registered_at,
         recurrence_rule = excluded.recurrence_rule,
         payment_method = excluded.payment_method,
+        purchase_date = excluded.purchase_date,
+        installment_count = excluded.installment_count,
         payment_status = excluded.payment_status,
         paid_at = excluded.paid_at,
         sync_operation = excluded.sync_operation,
@@ -99,6 +105,8 @@ export async function upsertTransactions(
       transaction.registeredAt ?? transaction.occurredAt,
       transaction.recurrenceRule ?? "none",
       transaction.paymentMethod ?? null,
+      transaction.purchaseDate ?? null,
+      transaction.installmentCount ?? null,
       transaction.paymentStatus ?? "pending",
       transaction.paidAt ?? null,
       transaction.syncOperation ?? null,
@@ -109,6 +117,16 @@ export async function upsertTransactions(
       transaction.creatorAvatarSeed ?? null,
     );
   }
+}
+
+export async function reconcileSyncedTransactions(
+  db: SQLiteDatabase,
+  remoteTransactions: Transaction[],
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync("DELETE FROM transactions WHERE sync_status = 'synced'");
+    await upsertTransactions(db, remoteTransactions);
+  });
 }
 
 export async function replaceTransaction(

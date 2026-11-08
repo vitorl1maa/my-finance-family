@@ -1,7 +1,7 @@
 import { ArrowRight, CreditCard, FileText, Repeat2, Tags, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { CategoryPicker } from "@/src/features/transactions/components/category-picker";
 import {
@@ -9,6 +9,7 @@ import {
   type RecurrenceRule,
   recurrenceLabel,
 } from "@/src/features/transactions/components/expense-recurrence-picker";
+import { getCreditCardInstallments } from "@/src/features/transactions/model/credit-card-billing";
 import { toExpenseIso } from "@/src/features/transactions/model/expense-date";
 import type { Transaction } from "@/src/features/transactions/model/transaction";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
@@ -68,11 +69,16 @@ export function ExpenseNewView({
   const [selectedRecurrence, setSelectedRecurrence] = useState<RecurrenceRule>(
     (initialTransaction?.recurrenceRule as RecurrenceRule) ?? "none",
   );
+  const [installmentCount, setInstallmentCount] = useState(
+    initialTransaction?.installmentCount ?? 1,
+  );
+  const [installmentPickerVisible, setInstallmentPickerVisible] = useState(false);
   const {
     control,
     formState: { errors },
     handleSubmit,
     setValue,
+    watch,
   } = useForm<ExpenseForm>({
     defaultValues: {
       title: initialTransaction?.title ?? "",
@@ -84,6 +90,12 @@ export function ExpenseNewView({
       paymentMethod: initialTransaction?.paymentMethod ?? "pix",
     },
   });
+  const paymentMethod = watch("paymentMethod");
+  const amountValue = watch("amount");
+  const cardPreview =
+    paymentMethod === "credit_card" && parseBrlInputToCents(amountValue) > 0
+      ? getCreditCardInstallments(selectedDate, parseBrlInputToCents(amountValue), installmentCount)
+      : [];
   useEffect(() => {
     if (
       categories.length > 0 &&
@@ -99,25 +111,42 @@ export function ExpenseNewView({
     if (!category) return;
 
     try {
+      const cardInstallments =
+        paymentMethod === "credit_card"
+          ? getCreditCardInstallments(selectedDate, parseBrlInputToCents(amount), installmentCount)
+          : undefined;
+      const firstInstallment = cardInstallments?.[0];
       const saved = initialTransaction
         ? await updateExpense({
             ...initialTransaction,
             title: title.trim(),
             categoryId,
             category: category.name,
-            amountCents: -Math.abs(parseBrlInputToCents(amount)),
-            occurredAt: toExpenseIso(selectedDate),
-            recurrenceRule: selectedRecurrence,
+            amountCents: -Math.abs(firstInstallment?.amountCents ?? parseBrlInputToCents(amount)),
+            occurredAt: firstInstallment
+              ? firstInstallment.dueDate.toISOString()
+              : toExpenseIso(selectedDate),
+            recurrenceRule:
+              cardInstallments && installmentCount > 1 ? "monthly" : selectedRecurrence,
             paymentMethod,
+            purchaseDate: cardInstallments ? toExpenseIso(selectedDate) : undefined,
+            installmentCount: cardInstallments ? installmentCount : undefined,
           })
         : await createExpense({
             title,
             categoryId,
             categoryName: category.name,
-            amount,
-            occurredAt: toExpenseIso(selectedDate),
-            recurrenceRule: selectedRecurrence,
+            amount: firstInstallment
+              ? formatCurrencyFromCents(firstInstallment.amountCents)
+              : amount,
+            occurredAt: firstInstallment
+              ? firstInstallment.dueDate.toISOString()
+              : toExpenseIso(selectedDate),
+            recurrenceRule:
+              cardInstallments && installmentCount > 1 ? "monthly" : selectedRecurrence,
             paymentMethod,
+            purchaseDate: cardInstallments ? toExpenseIso(selectedDate) : undefined,
+            installmentCount: cardInstallments ? installmentCount : undefined,
           });
       if (saved !== false) onBack();
     } catch {
@@ -253,11 +282,21 @@ export function ExpenseNewView({
             <Field
               compact
               icon={<Repeat2 color={colors.muted} size={17} />}
-              label="Recorrência"
+              label={paymentMethod === "credit_card" ? "Parcelamento" : "Recorrência"}
               placeholder="Selecione"
-              value={value}
+              value={
+                paymentMethod === "credit_card"
+                  ? installmentCount === 1
+                    ? "À vista"
+                    : `${installmentCount} parcelas`
+                  : value
+              }
               onChangeText={() => undefined}
-              onPress={() => setRecurrencePickerVisible(true)}
+              onPress={() =>
+                paymentMethod === "credit_card"
+                  ? setInstallmentPickerVisible(true)
+                  : setRecurrencePickerVisible(true)
+              }
               selector
             />
           )}
@@ -319,6 +358,70 @@ export function ExpenseNewView({
         rule={selectedRecurrence}
         visible={recurrencePickerVisible}
       />
+      <Modal
+        animationType="slide"
+        transparent
+        visible={installmentPickerVisible}
+        onRequestClose={() => setInstallmentPickerVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.installmentSheet}>
+            <View style={styles.sheetHeader}>
+              <View>
+                <Text style={styles.sheetTitle}>Parcelamento</Text>
+                <Text style={styles.headerSubtitle}>Escolha de 1 a 12 parcelas</Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Fechar seleção de parcelamento"
+                hitSlop={8}
+                onPress={() => setInstallmentPickerVisible(false)}
+                style={styles.sheetClose}
+              >
+                <X color={colors.text} size={18} />
+              </Pressable>
+            </View>
+            <View style={styles.installmentGrid}>
+              {Array.from({ length: 12 }, (_, index) => index + 1).map((count) => (
+                <Pressable
+                  key={count}
+                  accessibilityRole="button"
+                  onPress={() => {
+                    setInstallmentCount(count);
+                    setInstallmentPickerVisible(false);
+                  }}
+                  style={[
+                    styles.installmentOption,
+                    installmentCount === count && styles.installmentOptionSelected,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.installmentOptionText,
+                      installmentCount === count && styles.installmentOptionTextSelected,
+                    ]}
+                  >
+                    {count === 1 ? "À vista" : `${count}x`}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {cardPreview.length > 0 ? (
+              <View style={styles.cardPreview}>
+                <Text style={styles.cardPreviewTitle}>
+                  {installmentCount === 1
+                    ? "Compra à vista no cartão"
+                    : `${installmentCount} parcelas de ${formatCurrencyFromCents(
+                        cardPreview[0].amountCents,
+                      )}`}
+                </Text>
+                <Text style={styles.cardPreviewText}>
+                  Primeira cobrança em {cardPreview[0].dueDate.toLocaleDateString("pt-BR")}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -415,6 +518,51 @@ const styles = StyleSheet.create({
   paymentMethodSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
   paymentMethodText: { color: colors.muted, fontFamily: fonts.bold, fontSize: 12 },
   paymentMethodTextSelected: { color: colors.text },
+  cardPreview: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 12,
+    gap: 4,
+    marginTop: 10,
+    padding: 12,
+  },
+  cardPreviewTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
+  cardPreviewText: { color: colors.muted, fontSize: 11 },
+  modalBackdrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.32)",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  installmentSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    gap: 16,
+    padding: 20,
+    paddingBottom: 32,
+  },
+  sheetHeader: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  sheetTitle: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 21 },
+  sheetClose: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  installmentGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  installmentOption: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    width: "30%",
+  },
+  installmentOptionSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
+  installmentOptionText: { color: colors.muted, fontFamily: fonts.bold, fontSize: 13 },
+  installmentOptionTextSelected: { color: colors.text },
   field: {
     alignItems: "center",
     borderColor: colors.border,

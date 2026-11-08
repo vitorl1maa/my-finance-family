@@ -53,6 +53,16 @@ export async function saveIncomeSource(db: SQLiteDatabase, source: IncomeSource)
   );
 }
 
+export async function reconcileSyncedIncomeSources(
+  db: SQLiteDatabase,
+  remoteSources: IncomeSource[],
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync("DELETE FROM income_sources WHERE sync_status = 'synced'");
+    for (const source of remoteSources) await saveIncomeSource(db, source);
+  });
+}
+
 export async function deleteIncomeSource(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync("DELETE FROM income_sources WHERE id = ?", id);
 }

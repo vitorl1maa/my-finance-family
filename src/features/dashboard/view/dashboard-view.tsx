@@ -2,7 +2,7 @@ import { format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
 import { Bell, TrendingUp } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   RefreshControl,
@@ -22,6 +22,7 @@ import { CashflowChart } from "@/src/features/dashboard/components/cashflow-char
 import { EmptyWalletBanner } from "@/src/features/dashboard/components/empty-piggy-bank-banner";
 import { SpendingBreakdown } from "@/src/features/dashboard/components/spending-breakdown";
 import { WeeklyCalendar } from "@/src/features/dashboard/components/weekly-calendar";
+import { hasExpensesOnDate } from "@/src/features/dashboard/model/dashboard-insights";
 import { shouldShowEmptyPiggyBankBanner } from "@/src/features/dashboard/model/dashboard-state";
 import { useDashboardViewModel } from "@/src/features/dashboard/view-model/use-dashboard-view-model";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
@@ -36,6 +37,7 @@ export function DashboardView(_: DashboardViewProps) {
   const router = useRouter();
   const session = useAuthStore((state) => state.session);
   const [calendarExpanded, setCalendarExpanded] = useState(false);
+  const [calendarTopHeight, setCalendarTopHeight] = useState(108);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const {
     greeting,
@@ -55,6 +57,12 @@ export function DashboardView(_: DashboardViewProps) {
     incomeSources.length,
   );
   const avatarMetadata = session?.user.user_metadata as ProfileAvatarMetadata | undefined;
+
+  useEffect(() => {
+    const dateKey = format(selectedDate, "yyyy-MM-dd");
+    const nextHeight = hasExpensesOnDate(insights.scheduledExpenses, dateKey) ? 340 : 108;
+    setCalendarTopHeight((height) => (height === nextHeight ? height : nextHeight));
+  }, [insights.scheduledExpenses, selectedDate]);
 
   return (
     <View style={styles.container}>
@@ -85,6 +93,7 @@ export function DashboardView(_: DashboardViewProps) {
         minTopHeight={108}
         onHeightChange={(height) => setCalendarExpanded(height > 200)}
         snapPoints={[108, 230, 340]}
+        topHeight={calendarTopHeight}
         style={styles.splitView}
       >
         <SplitView.Top style={styles.calendarPane}>

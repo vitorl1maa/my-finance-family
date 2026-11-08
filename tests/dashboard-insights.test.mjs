@@ -3,8 +3,11 @@ import test from "node:test";
 
 import {
   buildDashboardInsights,
+  buildMonthlyCashflow,
   getCalendarWeeks,
+  getSelectedDayExpenseSummary,
   getWeekDays,
+  hasExpensesOnDate,
 } from "../src/features/dashboard/model/dashboard-insights.ts";
 
 test("builds a Monday-first week for the selected date", () => {
@@ -27,6 +30,88 @@ test("builds complete month weeks while keeping the selected day", () => {
   assert.equal(weeks[2][2].isSelected, true);
   assert.equal(weeks[2][2].isCurrentMonth, true);
   assert.equal(weeks[0][0].isCurrentMonth, false);
+});
+
+test("summarizes the selected day's paid and pending expenses", () => {
+  const summary = getSelectedDayExpenseSummary([
+    {
+      transactionId: "paid",
+      title: "Internet",
+      amountCents: -8000,
+      dateKey: "2026-11-20",
+      paymentStatus: "paid",
+    },
+    {
+      transactionId: "pending",
+      title: "Boxe",
+      amountCents: -13500,
+      dateKey: "2026-11-20",
+      paymentStatus: "pending",
+    },
+  ]);
+
+  assert.deepEqual(summary, { totalCents: 21500, paidCount: 1, pendingCount: 1 });
+});
+
+test("identifies when a selected calendar day has scheduled expenses", () => {
+  const expenses = [
+    {
+      transactionId: "internet",
+      title: "Internet",
+      amountCents: -8000,
+      dateKey: "2026-11-20",
+      paymentStatus: "paid",
+    },
+  ];
+
+  assert.equal(hasExpensesOnDate(expenses, "2026-11-20"), true);
+  assert.equal(hasExpensesOnDate(expenses, "2026-11-21"), false);
+});
+
+test("includes recurring expenses planned for a future month in monthly cashflow", () => {
+  const [december] = buildMonthlyCashflow(
+    [
+      {
+        id: "rent",
+        accountId: "main-account",
+        title: "Aluguel",
+        category: "Casa",
+        amountCents: -180000,
+        occurredAt: "2026-11-05T12:00:00.000Z",
+        paidAt: "2026-11-05T12:00:00.000Z",
+        paymentStatus: "paid",
+        recurrenceRule: "monthly",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 11, 20),
+    1,
+  );
+
+  assert.equal(december?.expenseCents, 180000);
+});
+
+test("includes a recurring expense in the default monthly expense view before payment", () => {
+  const insights = buildDashboardInsights(
+    [
+      {
+        id: "rent",
+        accountId: "main-account",
+        title: "Aluguel",
+        category: "Casa",
+        amountCents: -180000,
+        occurredAt: "2026-11-05T12:00:00.000Z",
+        paidAt: "2026-11-05T12:00:00.000Z",
+        paymentStatus: "paid",
+        recurrenceRule: "monthly",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 11, 1),
+  );
+
+  assert.equal(insights.monthlyExpenseCents, 180000);
+  assert.deepEqual(insights.expenseByCategory, [{ category: "Casa", amountCents: 180000 }]);
 });
 
 test("summarizes monthly cash flow, categories and financial health", () => {
@@ -76,7 +161,7 @@ test("summarizes monthly cash flow, categories and financial health", () => {
   );
 });
 
-test("counts paid expenses in their payment month and ignores pending expenses", () => {
+test("counts scheduled expenses in their occurrence month", () => {
   const insights = buildDashboardInsights(
     [
       {
@@ -104,7 +189,7 @@ test("counts paid expenses in their payment month and ignores pending expenses",
     new Date(2026, 9, 1),
   );
 
-  assert.equal(insights.monthlyExpenseCents, 10000);
+  assert.equal(insights.monthlyExpenseCents, 5000);
 });
 
 test("includes income sources in the weekly cashflow", () => {

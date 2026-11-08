@@ -1,13 +1,21 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type React from "react";
 import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  type LayoutChangeEvent,
   PanResponder,
+  type StyleProp,
   StyleSheet,
   Text,
-  View,
-  type LayoutChangeEvent,
-  type StyleProp,
   type TextStyle,
+  View,
   type ViewStyle,
 } from "react-native";
 
@@ -19,6 +27,7 @@ type SplitViewRootProps = {
   gap?: number;
   onHeightChange?: (height: number) => void;
   snapPoints: number[];
+  topHeight?: number;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -30,7 +39,10 @@ type SplitViewHandleProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-type SplitViewContextValue = { height: number; panHandlers: ReturnType<typeof PanResponder.create>["panHandlers"] };
+type SplitViewContextValue = {
+  height: number;
+  panHandlers: ReturnType<typeof PanResponder.create>["panHandlers"];
+};
 
 const SplitViewContext = createContext<SplitViewContextValue | null>(null);
 
@@ -40,7 +52,10 @@ function clamp(value: number, min: number, max: number): number {
 
 function getSnapPoint(height: number, velocity: number, points: number[]): number {
   if (Math.abs(velocity) > 0.75) {
-    const directed = velocity > 0 ? points.find((point) => point > height) : [...points].reverse().find((point) => point < height);
+    const directed =
+      velocity > 0
+        ? points.find((point) => point > height)
+        : [...points].reverse().find((point) => point < height);
     if (directed !== undefined) return directed;
   }
 
@@ -57,6 +72,7 @@ function Root({
   gap = 20,
   onHeightChange,
   snapPoints,
+  topHeight,
   style,
 }: SplitViewRootProps) {
   const [containerHeight, setContainerHeight] = useState(0);
@@ -74,6 +90,11 @@ function Root({
     onHeightChangeRef.current?.(nextHeight);
   }, []);
 
+  useEffect(() => {
+    if (topHeight === undefined) return;
+    setTopHeight(clamp(topHeight, minTopHeight, maxTopHeight));
+  }, [maxTopHeight, minTopHeight, setTopHeight, topHeight]);
+
   const panResponder = useMemo(
     () =>
       PanResponder.create({
@@ -89,8 +110,14 @@ function Root({
           setTopHeight(clamp(startHeight.current + gesture.dy, min, max));
         },
         onPanResponderRelease: (_, gesture) => {
-          const { maxTopHeight: max, minTopHeight: min, snapPoints: configuredPoints } = interaction.current;
-          const points = configuredPoints.filter((point) => point >= min && point <= max).sort((left, right) => left - right);
+          const {
+            maxTopHeight: max,
+            minTopHeight: min,
+            snapPoints: configuredPoints,
+          } = interaction.current;
+          const points = configuredPoints
+            .filter((point) => point >= min && point <= max)
+            .sort((left, right) => left - right);
           const current = clamp(startHeight.current + gesture.dy, min, max);
           setTopHeight(getSnapPoint(current, gesture.vy, points.length > 0 ? points : [min]));
         },
@@ -107,7 +134,9 @@ function Root({
 
   return (
     <SplitViewContext.Provider value={{ height, panHandlers: panResponder.panHandlers }}>
-      <View onLayout={onLayout} style={[styles.root, style]}>{children}</View>
+      <View onLayout={onLayout} style={[styles.root, style]}>
+        {children}
+      </View>
     </SplitViewContext.Provider>
   );
 }

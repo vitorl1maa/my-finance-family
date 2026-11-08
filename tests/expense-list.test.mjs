@@ -41,6 +41,28 @@ test("uses the selected previous month when filtering", () => {
   );
 });
 
+test("projects a recurring expense into the selected future month as pending", () => {
+  const projected = filterExpensesForMonth(
+    [
+      {
+        id: "rent",
+        amountCents: -180000,
+        occurredAt: "2026-11-05T12:00:00.000Z",
+        registeredAt: "2026-11-01T12:00:00.000Z",
+        recurrenceRule: "monthly",
+        paymentStatus: "paid",
+        paidAt: "2026-11-05T12:00:00.000Z",
+      },
+    ],
+    new Date(2026, 11, 1),
+  );
+
+  assert.equal(projected.length, 1);
+  assert.equal(projected[0]?.id, "rent");
+  assert.equal(projected[0]?.paymentStatus, "pending");
+  assert.match(projected[0]?.occurredAt ?? "", /^2026-12-05/);
+});
+
 test("filters the selected month by payment status and author", () => {
   const items = [
     { ...expenses[0], creatorId: "ana", paymentStatus: "paid" },

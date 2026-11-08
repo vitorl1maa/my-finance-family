@@ -44,7 +44,7 @@ test("calculates savings against the previous month in cents", () => {
   assert.equal(savings, 40000);
 });
 
-test("totals only expenses debited in the reference month", () => {
+test("totals expenses scheduled for the reference month", () => {
   const total = getExpenseTotalForMonth(
     [
       {
@@ -93,7 +93,29 @@ test("totals only expenses debited in the reference month", () => {
     new Date(2026, 9, 1),
   );
 
-  assert.equal(total, 324000);
+  assert.equal(total, 225000);
+});
+
+test("includes a recurring expense planned for the selected month", () => {
+  const total = getExpenseTotalForMonth(
+    [
+      {
+        id: "rent",
+        accountId: "main-account",
+        title: "Aluguel",
+        category: "Casa",
+        amountCents: -180000,
+        occurredAt: "2026-11-05T12:00:00.000Z",
+        paidAt: "2026-11-05T12:00:00.000Z",
+        paymentStatus: "paid",
+        recurrenceRule: "monthly",
+        syncStatus: "synced",
+      },
+    ],
+    new Date(2026, 11, 1),
+  );
+
+  assert.equal(total, 180000);
 });
 
 test("calculates the expense percentage compared to the next month", () => {

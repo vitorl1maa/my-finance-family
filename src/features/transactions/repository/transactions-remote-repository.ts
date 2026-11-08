@@ -19,6 +19,8 @@ export async function createRemoteExpense(payload: CreateExpensePayload): Promis
     expense_occurred_at: payload.occurredAt,
     expense_recurrence_rule: payload.recurrenceRule,
     expense_payment_method: payload.paymentMethod,
+    expense_purchase_date: payload.purchaseDate ?? null,
+    expense_installment_count: payload.installmentCount ?? null,
   });
 
   if (error) throw error;
@@ -57,6 +59,8 @@ export async function updateRemoteExpense(transaction: Transaction): Promise<Tra
     expense_occurred_at: transaction.occurredAt,
     expense_recurrence_rule: transaction.recurrenceRule ?? "none",
     expense_payment_method: transaction.paymentMethod,
+    expense_purchase_date: transaction.purchaseDate ?? null,
+    expense_installment_count: transaction.installmentCount ?? null,
   });
   if (error) throw error;
   const result = Array.isArray(data) ? data[0] : data;

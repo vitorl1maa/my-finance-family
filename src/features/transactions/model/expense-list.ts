@@ -1,4 +1,6 @@
 import type { Transaction } from "@/src/features/transactions/model/transaction";
+// @ts-expect-error Node's native TypeScript test runner requires the source extension here.
+import { getExpenseOccurrencesForMonth } from "../../dashboard/model/expense-occurrences.ts";
 
 export type ExpenseFilters = {
   authorId?: string;
@@ -7,17 +9,26 @@ export type ExpenseFilters = {
   query: string;
 };
 
-export function filterExpensesForMonth<
-  T extends Pick<Transaction, "amountCents" | "occurredAt" | "registeredAt">,
->(transactions: T[], month: Date): T[] {
-  return transactions.filter((transaction) => {
-    const date = new Date(transaction.registeredAt ?? transaction.occurredAt);
-    return (
-      transaction.amountCents < 0 &&
-      date.getFullYear() === month.getFullYear() &&
-      date.getMonth() === month.getMonth()
-    );
-  });
+type ExpenseProjection = Pick<
+  Transaction,
+  "amountCents" | "id" | "occurredAt" | "paidAt" | "paymentStatus" | "recurrenceRule" | "title"
+>;
+
+export function filterExpensesForMonth<T extends ExpenseProjection>(
+  transactions: T[],
+  month: Date,
+): T[] {
+  return transactions.flatMap((transaction) =>
+    getExpenseOccurrencesForMonth(transaction, month).map((occurrence) => {
+      const isPaid = occurrence.paymentStatus === "paid";
+      return {
+        ...transaction,
+        occurredAt: `${occurrence.dateKey}T12:00:00.000Z`,
+        paidAt: isPaid ? transaction.paidAt : undefined,
+        paymentStatus: occurrence.paymentStatus,
+      } as T;
+    }),
+  );
 }
 
 export function filterExpenses(

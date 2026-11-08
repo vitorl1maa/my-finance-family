@@ -6,18 +6,35 @@ import {
   Funnel,
   Gamepad2,
   House,
+  Pencil,
   Search,
   ShoppingCart,
   Stethoscope,
+  Trash2,
   TrendingUp,
   Utensils,
   WalletCards,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import ReanimatedSwipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import type { FamilyMember } from "@/src/features/family/model/family-invitation";
 import { listFamilyMembers } from "@/src/features/family/repository/family-invitations-remote-repository";
+import type { IncomeSource } from "@/src/features/income-sources/model/income-source";
+import { IncomeSourceNewView } from "@/src/features/income-sources/view/income-source-new-view";
 import { useIncomeSourcesViewModel } from "@/src/features/income-sources/view-model/use-income-sources-view-model";
 import { TransactionCreatorAvatar } from "@/src/features/transactions/components/transaction-creator-avatar";
 import { TransactionDetailModal } from "@/src/features/transactions/components/transaction-detail-modal";
@@ -31,6 +48,7 @@ import {
   groupTransactionsByDay,
   mergeIncomeSourcesIntoTransactions,
 } from "@/src/features/transactions/model/transaction-list";
+import { ExpenseNewView } from "@/src/features/transactions/view/expense-new-view";
 import { useTransactionsViewModel } from "@/src/features/transactions/view-model/use-transactions-view-model";
 import { AnimatedCurrency } from "@/src/shared/components/animated-currency";
 import { GooeySearchTabs } from "@/src/shared/components/base/molecules/gooey-search-tabs";
@@ -47,6 +65,10 @@ export function AllTransactionsView() {
   const [draftAuthorId, setDraftAuthorId] = useState<string>();
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [expenseToEdit, setExpenseToEdit] = useState<Transaction>();
+  const [sourceToEdit, setSourceToEdit] = useState<IncomeSource>();
+  const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const viewModel = useTransactionsViewModel();
   const incomeSources = useIncomeSourcesViewModel();
   const transactions = useMemo(
@@ -70,6 +92,30 @@ export function AllTransactionsView() {
     setDraftMonth(month);
     setDraftAuthorId(authorId);
     setFilterVisible(true);
+  };
+  const closeEditor = () => {
+    setEditorVisible(false);
+    setExpenseToEdit(undefined);
+    setSourceToEdit(undefined);
+  };
+  const openEditor = (transaction: Transaction) => {
+    const source = getIncomeSourceForTransaction(transaction, incomeSources.sources);
+    if (source) {
+      setSourceToEdit(source);
+      setExpenseToEdit(undefined);
+    } else {
+      setExpenseToEdit(transaction);
+      setSourceToEdit(undefined);
+    }
+    setEditorVisible(true);
+  };
+  const removeTransaction = async (transaction: Transaction) => {
+    const source = getIncomeSourceForTransaction(transaction, incomeSources.sources);
+    if (source) {
+      await incomeSources.removeSource(source.id);
+      return;
+    }
+    await viewModel.removeExpense(transaction.id);
   };
 
   return (
@@ -115,36 +161,22 @@ export function AllTransactionsView() {
           <View key={group.id} style={styles.group}>
             <Text style={styles.day}>{group.label}</Text>
             {group.transactions.map((transaction) => (
-              <Pressable
+              <TransactionRow
                 key={transaction.id}
+                onClose={(swipeable) => {
+                  if (openSwipeableRef.current === swipeable) openSwipeableRef.current = null;
+                }}
+                onDelete={() => void removeTransaction(transaction)}
+                onEdit={() => openEditor(transaction)}
+                onOpen={(swipeable) => {
+                  if (openSwipeableRef.current && openSwipeableRef.current !== swipeable) {
+                    openSwipeableRef.current.close();
+                  }
+                  openSwipeableRef.current = swipeable;
+                }}
                 onPress={() => setSelectedTransaction(transaction)}
-                style={styles.transaction}
-              >
-                <View style={styles.icon}>
-                  {transaction.amountCents < 0 ? (
-                    <ExpenseTransactionIcon category={transaction.category} />
-                  ) : (
-                    <WalletCards color={colors.muted} size={20} />
-                  )}
-                </View>
-                <View style={styles.info}>
-                  <Text style={styles.name}>{transaction.title}</Text>
-                  <Text style={styles.meta}>
-                    {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
-                    {transaction.amountCents < 0 && getPaymentMethodLabel(transaction.paymentMethod)
-                      ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
-                      : ""}
-                  </Text>
-                </View>
-                <AnimatedCurrency
-                  style={[
-                    styles.amount,
-                    transaction.amountCents < 0 ? styles.expense : styles.income,
-                  ]}
-                  valueInCents={transaction.amountCents}
-                />
-                <TransactionCreatorAvatar transaction={transaction} />
-              </Pressable>
+                transaction={transaction}
+              />
             ))}
           </View>
         ))
@@ -153,6 +185,33 @@ export function AllTransactionsView() {
         transaction={selectedTransaction}
         onClose={() => setSelectedTransaction(undefined)}
       />
+      <Modal animationType="slide" onRequestClose={closeEditor} transparent visible={editorVisible}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
+          style={styles.editorBackdrop}
+        >
+          <Pressable
+            accessibilityLabel="Fechar edição"
+            onPress={closeEditor}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={styles.editorDrawer}>
+            {expenseToEdit ? (
+              <ExpenseNewView initialTransaction={expenseToEdit} onBack={closeEditor} />
+            ) : sourceToEdit ? (
+              <IncomeSourceNewView
+                initialSource={sourceToEdit}
+                onBack={closeEditor}
+                onDelete={incomeSources.removeSource}
+                onSave={(name, amountCents, kind) =>
+                  incomeSources.updateSource({ ...sourceToEdit, name, amountCents, kind })
+                }
+              />
+            ) : null}
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
       <Modal
         animationType="slide"
         onRequestClose={() => setFilterVisible(false)}
@@ -281,6 +340,107 @@ function TransactionActions({
   );
 }
 
+function TransactionRow({
+  onClose,
+  onDelete,
+  onEdit,
+  onOpen,
+  onPress,
+  transaction,
+}: {
+  onClose: (swipeable: SwipeableMethods) => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  onOpen: (swipeable: SwipeableMethods) => void;
+  onPress: () => void;
+  transaction: Transaction;
+}) {
+  const swipeableRef = useRef<SwipeableMethods | null>(null);
+
+  return (
+    <ReanimatedSwipeable
+      containerStyle={styles.swipeable}
+      friction={2}
+      leftThreshold={44}
+      onSwipeableClose={() => {
+        if (swipeableRef.current) onClose(swipeableRef.current);
+      }}
+      onSwipeableWillOpen={() => {
+        if (swipeableRef.current) onOpen(swipeableRef.current);
+      }}
+      overshootLeft={false}
+      overshootRight={false}
+      ref={swipeableRef}
+      renderLeftActions={() => (
+        <TransactionSwipeAction icon={Trash2} label="Excluir" onPress={onDelete} tone="delete" />
+      )}
+      renderRightActions={() => (
+        <TransactionSwipeAction icon={Pencil} label="Editar" onPress={onEdit} tone="edit" />
+      )}
+      rightThreshold={44}
+    >
+      <Pressable onPress={onPress} style={styles.transaction}>
+        <View style={styles.icon}>
+          {transaction.amountCents < 0 ? (
+            <ExpenseTransactionIcon category={transaction.category} />
+          ) : (
+            <WalletCards color={colors.muted} size={20} />
+          )}
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.name}>{transaction.title}</Text>
+          <Text style={styles.meta}>
+            {transaction.amountCents < 0 ? "Despesa" : "Receita"} · {transaction.category}
+            {transaction.amountCents < 0 && getPaymentMethodLabel(transaction.paymentMethod)
+              ? ` · ${getPaymentMethodLabel(transaction.paymentMethod)}`
+              : ""}
+          </Text>
+        </View>
+        <AnimatedCurrency
+          style={[styles.amount, transaction.amountCents < 0 ? styles.expense : styles.income]}
+          valueInCents={transaction.amountCents}
+        />
+        <TransactionCreatorAvatar transaction={transaction} />
+      </Pressable>
+    </ReanimatedSwipeable>
+  );
+}
+
+function TransactionSwipeAction({
+  icon: Icon,
+  label,
+  onPress,
+  tone,
+}: {
+  icon: typeof Pencil;
+  label: string;
+  onPress: () => void;
+  tone: "delete" | "edit";
+}) {
+  const isDelete = tone === "delete";
+
+  return (
+    <Pressable
+      accessibilityLabel={`${label} transação`}
+      onPress={onPress}
+      style={[styles.swipeAction, isDelete ? styles.deleteAction : styles.editAction]}
+    >
+      <Icon color={isDelete ? colors.background : colors.text} size={18} strokeWidth={2.25} />
+    </Pressable>
+  );
+}
+
+function getIncomeSourceForTransaction(
+  transaction: Transaction,
+  sources: IncomeSource[],
+): IncomeSource | undefined {
+  const sourceId = transaction.id.startsWith("income-source:")
+    ? transaction.id.slice("income-source:".length)
+    : undefined;
+
+  return sourceId ? sources.find((source) => source.id === sourceId) : undefined;
+}
+
 function ExpenseTransactionIcon({ category }: { category: string }) {
   const Icon = {
     house: House,
@@ -322,7 +482,28 @@ const styles = StyleSheet.create({
   emptyText: { color: colors.muted, fontSize: 14, textAlign: "center" },
   group: { gap: 8, marginTop: 4 },
   day: { color: colors.mutedLight, fontFamily: fonts.bold, fontSize: 12 },
-  transaction: { alignItems: "center", flexDirection: "row", minHeight: 54 },
+  transaction: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    minHeight: 68,
+    paddingHorizontal: 12,
+  },
+  swipeable: { borderRadius: 18, overflow: "hidden" },
+  swipeAction: {
+    alignItems: "center",
+    alignSelf: "center",
+    borderRadius: 22,
+    height: 44,
+    justifyContent: "center",
+    marginHorizontal: 12,
+    width: 44,
+  },
+  deleteAction: { backgroundColor: colors.negative },
+  editAction: { backgroundColor: colors.surfaceMuted },
   icon: { width: 38 },
   info: { flex: 1, gap: 2 },
   name: { color: colors.text, fontFamily: fonts.bold, fontSize: 14 },
@@ -330,6 +511,14 @@ const styles = StyleSheet.create({
   amount: { fontFamily: fonts.bold, fontSize: 14 },
   expense: { color: colors.negative },
   income: { color: colors.positive },
+  editorBackdrop: { backgroundColor: "#00000055", flex: 1, justifyContent: "flex-end" },
+  editorDrawer: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: "92%",
+    overflow: "hidden",
+  },
   filterBackdrop: { backgroundColor: "#00000055", flex: 1, justifyContent: "flex-end" },
   filterSheet: {
     backgroundColor: colors.background,

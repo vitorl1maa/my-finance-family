@@ -1,14 +1,18 @@
-import { getMonthDeltaForSwipe } from "@/src/features/dashboard/model/calendar-swipe";
-import { getCalendarWeeks, getWeekDays } from "@/src/features/dashboard/model/dashboard-insights";
-import type { ExpenseOccurrence } from "@/src/features/dashboard/model/expense-occurrences";
-import { colors } from "@/src/shared/theme/colors";
-import { fonts } from "@/src/shared/theme/fonts";
-import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 import { addMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BanknoteArrowDown, ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useMemo } from "react";
 import { PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { getMonthDeltaForSwipe } from "@/src/features/dashboard/model/calendar-swipe";
+import {
+  getCalendarWeeks,
+  getSelectedDayExpenseSummary,
+  getWeekDays,
+} from "@/src/features/dashboard/model/dashboard-insights";
+import type { ExpenseOccurrence } from "@/src/features/dashboard/model/expense-occurrences";
+import { colors } from "@/src/shared/theme/colors";
+import { fonts } from "@/src/shared/theme/fonts";
+import { formatCurrencyFromCents } from "@/src/shared/utils/money";
 
 type WeeklyCalendarProps = {
   selectedDate: Date;
@@ -31,6 +35,7 @@ export function WeeklyCalendar({
   const selectedExpenses = scheduledExpenses.filter(
     (expense) => expense.dateKey === format(selectedDate, "yyyy-MM-dd"),
   );
+  const selectedExpenseSummary = getSelectedDayExpenseSummary(selectedExpenses);
   const panResponder = useMemo(
     () =>
       PanResponder.create({
@@ -118,7 +123,13 @@ export function WeeklyCalendar({
                     </Text>
                     {isScheduledExpenseDay ? (
                       <BanknoteArrowDown
-                        color={isPaidExpenseDay ? colors.positive : day.isSelected ? colors.text : colors.darkPink}
+                        color={
+                          isPaidExpenseDay
+                            ? colors.positive
+                            : day.isSelected
+                              ? colors.text
+                              : colors.darkPink
+                        }
                         size={12}
                         strokeWidth={2.4}
                       />
@@ -130,33 +141,62 @@ export function WeeklyCalendar({
           </View>
         ))}
       </View>
-      {nextExpense || selectedExpenses.length > 0 ? (
-        <View style={styles.nextExpenseSection}>
-          {nextExpense ? <View style={styles.legend}></View> : null}
+      {selectedExpenses.length > 0 ? (
+        <View style={styles.selectedExpensesCard}>
+          <View style={styles.selectedExpensesHeader}>
+            <Text style={styles.selectedExpensesHeading}>
+              Lançamentos do dia {selectedDate.getDate()}
+            </Text>
+            <Text style={styles.selectedExpensesTotal}>
+              Total:{" "}
+              <Text style={styles.selectedExpensesTotalAmount}>
+                {formatCurrencyFromCents(selectedExpenseSummary.totalCents)}
+              </Text>
+            </Text>
+          </View>
           {selectedExpenses.map((expense) => (
             <View
               key={`${expense.transactionId}-${expense.dateKey}`}
               style={styles.selectedExpense}
             >
-              <View style={styles.selectedExpenseInfo}>
-                <BanknoteArrowDown
-                  color={expense.paymentStatus === "paid" ? colors.positive : colors.darkPink}
-                  size={15}
-                  strokeWidth={2.4}
-                />
-                <Text style={styles.selectedExpenseTitle}>
-                  {expense.title}
-                  {expense.paymentStatus === "paid" ? " · Pago" : ""}
-                </Text>
-              </View>
-              <Text
+              <View
                 style={[
-                  styles.selectedExpenseAmount,
-                  expense.paymentStatus === "paid" && styles.paidExpenseText,
+                  styles.selectedExpenseIcon,
+                  expense.paymentStatus === "paid"
+                    ? styles.selectedExpenseIconPaid
+                    : styles.selectedExpenseIconPending,
                 ]}
               >
-                - {formatCurrencyFromCents(Math.abs(expense.amountCents))}
-              </Text>
+                <BanknoteArrowDown
+                  color={expense.paymentStatus === "paid" ? colors.positive : colors.darkPink}
+                  size={14}
+                  strokeWidth={2.4}
+                />
+              </View>
+              <View style={styles.selectedExpenseInfo}>
+                <Text style={styles.selectedExpenseTitle}>{expense.title}</Text>
+                <Text style={styles.selectedExpenseSubtitle}>Despesa programada</Text>
+              </View>
+              <View style={styles.selectedExpenseMeta}>
+                <Text
+                  style={[
+                    styles.selectedExpenseStatus,
+                    expense.paymentStatus === "paid"
+                      ? styles.selectedExpenseStatusPaid
+                      : styles.selectedExpenseStatusPending,
+                  ]}
+                >
+                  {expense.paymentStatus === "paid" ? "Pago" : "Pendente"}
+                </Text>
+                <Text
+                  style={[
+                    styles.selectedExpenseAmount,
+                    expense.paymentStatus === "paid" && styles.paidExpenseText,
+                  ]}
+                >
+                  -{formatCurrencyFromCents(Math.abs(expense.amountCents))}
+                </Text>
+              </View>
             </View>
           ))}
         </View>
@@ -202,22 +242,57 @@ const styles = StyleSheet.create({
   dateContent: { alignItems: "center", flexDirection: "row", gap: 2 },
   outsideMonthDate: { color: colors.mutedLight },
   selectedText: { color: colors.text, fontWeight: "900" },
-  nextExpenseSection: { gap: 6, marginTop: 10 },
-  nextExpense: { alignItems: "center", flexDirection: "row", gap: 6 },
-  nextExpenseText: { color: colors.muted, flex: 1, fontSize: 12 },
-  legend: { alignItems: "center", flexDirection: "row", gap: 4 },
-  legendText: { color: colors.muted, fontSize: 11 },
-  selectedExpense: {
+  selectedExpensesCard: {
+    backgroundColor: colors.background,
+    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 2,
+    marginTop: 12,
+    overflow: "hidden",
+  },
+  selectedExpensesHeader: {
     alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: 10,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  selectedExpenseInfo: { alignItems: "center", flex: 1, flexDirection: "row", gap: 6 },
+  selectedExpensesHeading: { color: colors.text, fontFamily: fonts.extraBold, fontSize: 13 },
+  selectedExpensesTotal: { color: colors.muted, fontFamily: fonts.bold, fontSize: 11 },
+  selectedExpensesTotalAmount: { color: colors.negative, fontFamily: fonts.extraBold },
+  selectedExpense: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 9,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  selectedExpenseIcon: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 30,
+    justifyContent: "center",
+    width: 30,
+  },
+  selectedExpenseIconPaid: { backgroundColor: "#E8F9EA" },
+  selectedExpenseIconPending: { backgroundColor: "#FFF0F4" },
+  selectedExpenseInfo: { flex: 1, gap: 1 },
   selectedExpenseTitle: { color: colors.text, fontFamily: fonts.bold, fontSize: 12 },
-  selectedExpenseAmount: { color: colors.negative, fontFamily: fonts.bold, fontSize: 12 },
+  selectedExpenseSubtitle: { color: colors.muted, fontFamily: fonts.regular, fontSize: 10 },
+  selectedExpenseMeta: { alignItems: "flex-end", gap: 4 },
+  selectedExpenseStatus: {
+    borderRadius: 99,
+    fontFamily: fonts.bold,
+    fontSize: 10,
+    overflow: "hidden",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  selectedExpenseStatusPaid: { backgroundColor: "#E8F9EA", color: colors.positive },
+  selectedExpenseStatusPending: { backgroundColor: "#FFF0D8", color: "#9A6300" },
+  selectedExpenseAmount: { color: colors.negative, fontFamily: fonts.extraBold, fontSize: 12 },
   paidExpenseText: { color: colors.positive },
 });

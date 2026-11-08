@@ -20,6 +20,7 @@ import {
 import {
   deleteTransaction,
   listTransactions,
+  reconcileSyncedTransactions,
   replaceTransaction,
   upsertTransactions,
 } from "@/src/features/transactions/repository/transactions-repository";
@@ -63,7 +64,11 @@ export function useTransactionsViewModel() {
 
       if (!session) return;
 
-      for (const transaction of localTransactions.filter(
+      const remoteTransactions = await listRemoteTransactions();
+      await reconcileSyncedTransactions(db, remoteTransactions);
+      const transactionsAfterRemoteReconciliation = await listTransactions(db);
+
+      for (const transaction of transactionsAfterRemoteReconciliation.filter(
         (item) => item.syncStatus !== "synced" && item.amountCents < 0 && item.categoryId,
       )) {
         try {
@@ -79,8 +84,7 @@ export function useTransactionsViewModel() {
         }
       }
 
-      const remoteTransactions = await listRemoteTransactions();
-      await upsertTransactions(db, remoteTransactions);
+      await reconcileSyncedTransactions(db, await listRemoteTransactions());
       const remoteWallet = await getRemoteWalletSettings();
       if (remoteWallet) {
         await saveWalletSettings(db, {
@@ -135,6 +139,8 @@ export function useTransactionsViewModel() {
       occurredAt: string;
       recurrenceRule: string;
       paymentMethod: "credit_card" | "debit_card" | "pix" | "cash";
+      purchaseDate?: string;
+      installmentCount?: number;
     }) => {
       setIsSaving(true);
       setSaveError(null);
@@ -152,6 +158,8 @@ export function useTransactionsViewModel() {
           registeredAt: new Date().toISOString(),
           recurrenceRule: payload.recurrenceRule,
           paymentMethod: payload.paymentMethod,
+          purchaseDate: payload.purchaseDate,
+          installmentCount: payload.installmentCount,
           paymentStatus: "pending" as const,
           syncOperation: "create" as const,
           creatorId: session?.user.id,
@@ -230,14 +238,7 @@ export function useTransactionsViewModel() {
         );
       }
     },
-    [
-      db,
-      session,
-      setWalletBalance,
-      transactions,
-      updateTransaction,
-      walletBalanceCents,
-    ],
+    [db, session, setWalletBalance, transactions, updateTransaction, walletBalanceCents],
   );
 
   const removeExpense = useCallback(

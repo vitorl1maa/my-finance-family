@@ -17,6 +17,7 @@ import {
   deleteIncomeSource,
   getPiggyBankSettings,
   listIncomeSources,
+  reconcileSyncedIncomeSources,
   saveIncomeSource,
   savePiggyBankSettings,
 } from "@/src/features/income-sources/repository/income-sources-repository";
@@ -72,6 +73,10 @@ export function useIncomeSourcesViewModel() {
 
       if (!session) return;
 
+      const remoteSources = await listRemoteIncomeSources();
+      await reconcileSyncedIncomeSources(db, remoteSources);
+      loadedSources = await listIncomeSources(db);
+
       for (const source of loadedSources.filter((item) => item.syncStatus !== "synced")) {
         try {
           await saveIncomeSource(db, await upsertRemoteIncomeSource(source));
@@ -91,12 +96,12 @@ export function useIncomeSourcesViewModel() {
         }
       }
 
-      const [remoteSources, remoteSettings, remoteWallet] = await Promise.all([
+      const [latestRemoteSources, remoteSettings, remoteWallet] = await Promise.all([
         listRemoteIncomeSources(),
         getRemotePiggyBankSettings(),
         getRemoteWalletSettings(),
       ]);
-      await Promise.all(remoteSources.map((source) => saveIncomeSource(db, source)));
+      await reconcileSyncedIncomeSources(db, latestRemoteSources);
       if (remoteSettings) await savePiggyBankSettings(db, remoteSettings);
       if (remoteWallet) {
         await saveWalletSettings(db, {

@@ -12,6 +12,8 @@ export const transactionSchema = z.object({
   registeredAt: z.string().optional(),
   recurrenceRule: z.string().optional(),
   paymentMethod: z.enum(["credit_card", "debit_card", "pix", "cash"]).optional(),
+  purchaseDate: z.string().optional(),
+  installmentCount: z.number().int().positive().optional(),
   paymentStatus: z.enum(["pending", "paid"]).optional(),
   paidAt: z.string().optional(),
   syncOperation: z.enum(["create", "update", "mark_paid"]).optional(),

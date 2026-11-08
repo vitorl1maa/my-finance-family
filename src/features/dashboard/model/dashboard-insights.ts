@@ -31,6 +31,29 @@ export type MonthlyCashflow = {
   expenseCents: number;
 };
 
+export type SelectedDayExpenseSummary = {
+  totalCents: number;
+  paidCount: number;
+  pendingCount: number;
+};
+
+export function getSelectedDayExpenseSummary(
+  expenses: ExpenseOccurrence[],
+): SelectedDayExpenseSummary {
+  return expenses.reduce<SelectedDayExpenseSummary>(
+    (summary, expense) => ({
+      totalCents: summary.totalCents + Math.abs(expense.amountCents),
+      paidCount: summary.paidCount + (expense.paymentStatus === "paid" ? 1 : 0),
+      pendingCount: summary.pendingCount + (expense.paymentStatus === "paid" ? 0 : 1),
+    }),
+    { totalCents: 0, paidCount: 0, pendingCount: 0 },
+  );
+}
+
+export function hasExpensesOnDate(expenses: ExpenseOccurrence[], dateKey: string): boolean {
+  return expenses.some((expense) => expense.dateKey === dateKey);
+}
+
 export type DashboardInsights = {
   monthlyIncomeCents: number;
   monthlyExpenseCents: number;
@@ -59,9 +82,19 @@ export function buildMonthlyCashflow(
   });
 
   for (const transaction of transactions) {
-    const dateValue = transaction.amountCents < 0 ? transaction.paidAt : transaction.occurredAt;
-    if (!dateValue || (transaction.amountCents < 0 && transaction.paymentStatus !== "paid"))
+    if (transaction.amountCents < 0) {
+      result.forEach((month, index) => {
+        const expenseCents = getExpenseOccurrencesForMonth(transaction, month.month).reduce(
+          (total, expense) => total + Math.abs(expense.amountCents),
+          0,
+        );
+        result[index].expenseCents += expenseCents;
+      });
       continue;
+    }
+
+    const dateValue = transaction.occurredAt;
+    if (!dateValue) continue;
     const date = new Date(dateValue);
     const index =
       (date.getFullYear() - start.getFullYear()) * 12 + date.getMonth() - start.getMonth();
@@ -133,15 +166,17 @@ export function buildDashboardInsights(
   transactions: Transaction[],
   referenceDate: Date = new Date(),
 ): DashboardInsights {
-  const monthTransactions = transactions.filter((transaction) => {
-    if (transaction.amountCents < 0 && transaction.paymentStatus !== "paid") return false;
-
-    const referenceTransactionDate =
-      transaction.amountCents < 0 ? transaction.paidAt : transaction.occurredAt;
-    return referenceTransactionDate
-      ? isSameMonth(new Date(referenceTransactionDate), referenceDate)
-      : false;
-  });
+  const expenseTransactions = transactions.filter((transaction) => transaction.amountCents < 0);
+  const scheduledExpenses = expenseTransactions
+    .flatMap((expense) => getExpenseOccurrencesForMonth(expense, referenceDate))
+    .sort((left, right) => left.dateKey.localeCompare(right.dateKey));
+  const categoriesByTransactionId = new Map(
+    expenseTransactions.map((transaction) => [transaction.id, transaction.category]),
+  );
+  const monthIncomeTransactions = transactions.filter(
+    (transaction) =>
+      transaction.amountCents >= 0 && isSameMonth(new Date(transaction.occurredAt), referenceDate),
+  );
   const categoryTotals = new Map<string, number>();
   const weeklyTotals = Array.from({ length: 5 }, (_, index) => ({
     label: String(index * 7 + 1).padStart(2, "0"),
@@ -152,34 +187,29 @@ export function buildDashboardInsights(
   let monthlyIncomeCents = 0;
   let monthlyExpenseCents = 0;
 
-  for (const transaction of monthTransactions) {
+  for (const transaction of monthIncomeTransactions) {
     const amount = transaction.amountCents;
     const transactionDate = new Date(transaction.occurredAt);
     const weekIndex = Math.min(4, Math.floor((transactionDate.getDate() - 1) / 7));
 
-    if (amount >= 0) {
-      monthlyIncomeCents += amount;
-      weeklyTotals[weekIndex].incomeCents += amount;
-      continue;
-    }
+    monthlyIncomeCents += amount;
+    weeklyTotals[weekIndex].incomeCents += amount;
+  }
 
-    const expenseCents = Math.abs(amount);
+  for (const expense of scheduledExpenses) {
+    const occurrenceDate = new Date(`${expense.dateKey}T12:00:00`);
+    const weekIndex = Math.min(4, Math.floor((occurrenceDate.getDate() - 1) / 7));
+    const expenseCents = Math.abs(expense.amountCents);
+    const category = categoriesByTransactionId.get(expense.transactionId) ?? "Outros";
     monthlyExpenseCents += expenseCents;
     weeklyTotals[weekIndex].expenseCents += expenseCents;
-    categoryTotals.set(
-      transaction.category,
-      (categoryTotals.get(transaction.category) ?? 0) + expenseCents,
-    );
+    categoryTotals.set(category, (categoryTotals.get(category) ?? 0) + expenseCents);
   }
 
   const expenseByCategory = [...categoryTotals.entries()]
     .map(([category, amountCents]) => ({ category, amountCents }))
     .sort((left, right) => right.amountCents - left.amountCents);
   const healthStatus = getHealthStatus(monthlyIncomeCents, monthlyExpenseCents);
-  const expenseTransactions = transactions.filter((transaction) => transaction.amountCents < 0);
-  const scheduledExpenses = expenseTransactions
-    .flatMap((expense) => getExpenseOccurrencesForMonth(expense, referenceDate))
-    .sort((left, right) => left.dateKey.localeCompare(right.dateKey));
   const nextExpense = getNextExpenseOccurrence(expenseTransactions, referenceDate);
 
   return {
